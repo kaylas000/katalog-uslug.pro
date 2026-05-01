@@ -9,6 +9,47 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) mobileNav.classList.remove('open'); });
   }
 
+  /* Mobile services submenu */
+  const mobileServiceLabel = document.querySelector('.mobile-menu-label');
+  if (mobileServiceLabel) {
+    const stopHrefs = new Set(['analytics.html', 'contacts.html', 'moderation.html', 'blog.html', 'add-company.html']);
+    const serviceLinks = [];
+    let cursor = mobileServiceLabel.nextElementSibling;
+    while (cursor && cursor.tagName === 'A') {
+      const href = cursor.getAttribute('href') || '';
+      if (stopHrefs.has(href)) break;
+      serviceLinks.push(cursor);
+      cursor = cursor.nextElementSibling;
+    }
+
+    if (serviceLinks.length > 0) {
+      let collapsed = true;
+      mobileServiceLabel.classList.add('is-collapsed');
+      mobileServiceLabel.setAttribute('role', 'button');
+      mobileServiceLabel.setAttribute('tabindex', '0');
+      mobileServiceLabel.setAttribute('aria-expanded', 'false');
+
+      serviceLinks.forEach((link) => {
+        link.classList.add('mobile-service-link', 'is-hidden');
+      });
+
+      const setCollapsed = (state) => {
+        collapsed = state;
+        mobileServiceLabel.classList.toggle('is-collapsed', collapsed);
+        mobileServiceLabel.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        serviceLinks.forEach((link) => link.classList.toggle('is-hidden', collapsed));
+      };
+
+      mobileServiceLabel.addEventListener('click', () => setCollapsed(!collapsed));
+      mobileServiceLabel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setCollapsed(!collapsed);
+        }
+      });
+    }
+  }
+
   /* Desktop submenu */
   const submenuToggle = document.querySelector('.nav-submenu-toggle');
   const submenuRoot = document.querySelector('.has-submenu');

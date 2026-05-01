@@ -110,9 +110,12 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .mobile-nav.open .mobile-panel{transform:translateX(0)}
 .mobile-panel a{padding:12px 8px;border-radius:var(--radius-sm);font-size:15px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s}
 .mobile-panel a:hover,.mobile-panel a.active{background:var(--surface-2);color:var(--text)}
-.mobile-menu-label{margin-top:6px;padding:8px 8px 2px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2)}
+.mobile-menu-label{margin-top:6px;padding:8px 8px 2px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.mobile-menu-label::after{content:"▾";font-size:12px;opacity:.75;transition:transform .2s ease}
+.mobile-menu-label.is-collapsed::after{transform:rotate(-90deg)}
 .mobile-close{align-self:flex-end;padding:6px;margin-bottom:8px}
 .mobile-close svg{width:24px;height:24px}
+.mobile-service-link.is-hidden{display:none}
 
 @media(max-width:1100px){
   .header-actions .btn-ghost,
