@@ -267,7 +267,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .hero{padding:34px 14px 30px}
   .hero-actions .btn{width:100%}
   .section{padding:30px 14px}
-  .site-footer{margin-top:16px}
+  .footer-inner{padding-top:36px}
   .footer-bottom{flex-direction:column;text-align:center;gap:8px}
   .sidebar{position:static}
   .consultant{bottom:16px;right:16px}
@@ -290,7 +290,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .trust-grid{grid-template-columns:1fr}
   .btn-lg{padding:12px 20px;font-size:15px}
   .section{padding:24px 12px}
-  .site-footer{margin-top:20px}
+  .footer-inner{padding-top:34px}
   .filter-bar{padding:10px}
   .card-body{padding:12px}
   .card-footer{padding:10px 12px}
