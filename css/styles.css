@@ -49,6 +49,17 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .mb-32{margin-bottom:32px}
 .text-center{text-align:center}
 .w-100{width:100%}
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0;
+}
 
 /* ========== BUTTONS ========== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);font-weight:600;font-size:15px;transition:background .2s ease,transform .15s ease,box-shadow .2s ease,border-color .2s ease,color .2s ease}
@@ -202,89 +213,87 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .review-stars{color:var(--accent);font-size:14px;letter-spacing:1px}
 .review-text{font-size:14px;color:var(--text-2);line-height:1.6}
 
-/* ========== PORTFOLIO (VISUAL BLOCK) ========== */
+/* ========== ORG: портфолио-плашка под шапкой страницы организации ========== */
+.org-portfolio-band{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:10px 0 16px;
+}
+
+/* ========== PORTFOLIO (только плейсхолдеры под фото, без текста в блоке) ========== */
 .portfolio-panel{
+  position:relative;
+  width:100%;
+  --pv-mini:clamp(64px, 11vw, 108px);
+  --pv-slot-gap:2px;
   border:1px solid var(--border);
   border-radius:var(--radius);
-  background:var(--surface);
-  padding:12px;
-  --pv-mini:clamp(56px, 12vw, 92px);
-  --pv-gap:clamp(8px, 2vw, 12px);
-  --pv-big:calc(3 * var(--pv-mini) + 2 * var(--pv-gap));
+  overflow:hidden;
+  padding:0;
+  background:var(--border);
 }
+.portfolio-desk{display:block;margin:0;padding:0;width:100%}
+.portfolio-desk-grid{
+  display:grid;
+  width:100%;
+  grid-template-columns:minmax(0, 1fr) var(--pv-mini);
+  grid-template-rows:repeat(3, var(--pv-mini));
+  gap:var(--pv-slot-gap);
+  background:var(--border);
+}
+.portfolio-desk-rail{display:contents}
 .portfolio-pixel{
   flex-shrink:0;
   margin:0;
   padding:0;
   appearance:none;
-  border-radius:10px;
-  border:2px dashed rgba(47,75,106,.26);
+  border-radius:0;
+  border:none;
   background:linear-gradient(145deg,#e9eef6,#dfe7f3);
   box-sizing:border-box;
+  box-shadow:inset 0 0 0 2px rgba(47,75,106,.08);
 }
 button.portfolio-pixel{cursor:pointer}
-button.portfolio-pixel:hover{border-color:rgba(47,75,106,.42);background:linear-gradient(145deg,#e5ebf6,#d9e2f4)}
+button.portfolio-pixel:hover{background:linear-gradient(145deg,#e3eaf5,#d5e1f4)}
 .portfolio-pixel:focus-visible{
   outline:2px solid var(--primary);
-  outline-offset:2px;
+  outline-offset:-2px;
 }
 .portfolio-pixel.is-current{
-  border-color:var(--primary);
-  box-shadow:0 0 0 2px rgba(47,75,106,.14);
+  box-shadow:inset 0 0 0 2px rgba(47,75,106,.22);
 }
 
-/* Desktop: SEO слева и справа от заглушек — одна горизонтальная строка (без перехода в колонку) */
-.portfolio-desk{display:block;margin:0;padding:0;width:100%}
-.portfolio-desk-layout{
-  display:flex;
-  flex-direction:row;
-  flex-wrap:nowrap;
-  align-items:flex-start;
-  justify-content:center;
-  gap:clamp(12px, 2.5vw, 22px);
+.portfolio-desk-grid > .portfolio-pixel-hero{
+  grid-column:1;
+  grid-row:1 / -1;
   width:100%;
-}
-.portfolio-seo-aside{
-  flex:1 1 0;
+  height:100%;
   min-width:0;
+  min-height:0;
 }
-.portfolio-seo-aside p{
-  margin:0;
-  font-size:12px;
-  line-height:1.5;
-  color:var(--text-2);
-}
-.portfolio-seo-aside strong{color:var(--text);font-weight:600}
-.portfolio-seo-aside--left{order:1;padding-right:clamp(0px, 1vw, 6px)}
-.portfolio-seo-aside--right{order:3;padding-left:clamp(0px, 1vw, 6px)}
-.portfolio-desk-inner{
-  order:2;
-  flex:0 0 auto;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  gap:var(--pv-gap);
-}
-.portfolio-pixel-hero{width:min(100%, var(--pv-big));aspect-ratio:1/1}
-.portfolio-desk-rail{display:flex;flex-direction:column;gap:var(--pv-gap)}
-.portfolio-pixel-mini{width:var(--pv-mini);height:var(--pv-mini)}
+.portfolio-desk-grid > .portfolio-pixel-mini:nth-child(2){grid-column:2;grid-row:1}
+.portfolio-desk-grid > .portfolio-pixel-mini:nth-child(3){grid-column:2;grid-row:2}
+.portfolio-desk-grid > .portfolio-pixel-mini:nth-child(4){grid-column:2;grid-row:3}
+.portfolio-pixel-mini{width:100%;height:100%;min-height:0}
 .portfolio-mob{display:none}
 
-/* Mobile: горизонтальный слайдер из квадратов */
+/* Mobile: только слайдер */
 @media(max-width:768px){
-  .portfolio-panel{padding:10px}
+  .portfolio-panel{background:var(--surface);padding:8px 0}
   .portfolio-desk{display:none}
   .portfolio-mob{display:block;margin:0;padding:0}
+  .portfolio-pixel{border-radius:8px}
+  .portfolio-pixel-slide{border-radius:8px}
   .portfolio-mob-strip{
     display:flex;
-    gap:var(--pv-gap);
+    gap:10px;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
     scroll-padding-inline:12px;
     touch-action:pan-x;
     -webkit-overflow-scrolling:touch;
     padding-inline:12px;
-    padding-bottom:4px;
+    padding-bottom:2px;
   }
   .portfolio-mob-strip::-webkit-scrollbar{height:6px}
   .portfolio-mob-strip::-webkit-scrollbar-thumb{background:rgba(47,75,106,.28);border-radius:8px}
@@ -301,7 +310,7 @@ button.portfolio-pixel:hover{border-color:rgba(47,75,106,.42);background:linear-
     align-items:center;
     justify-content:center;
     gap:12px;
-    margin-top:8px;
+    margin-top:6px;
   }
   .portfolio-mob-indicator{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums;min-width:48px;text-align:center}
   .portfolio-mob-nav{
