@@ -50,6 +50,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* Portfolio placeholders */
+  document.querySelectorAll('[data-portfolio]').forEach((root) => {
+    const mainTitle = root.querySelector('[data-portfolio-main-title]');
+    const mainDesc = root.querySelector('[data-portfolio-main-desc]');
+    const mainBadge = root.querySelector('[data-portfolio-main-badge]');
+    const thumbs = Array.from(root.querySelectorAll('.portfolio-thumb'));
+    const prevBtn = root.querySelector('[data-portfolio-prev]');
+    const nextBtn = root.querySelector('[data-portfolio-next]');
+    if (!mainTitle || !mainDesc || !mainBadge || thumbs.length === 0) return;
+
+    let idx = 0;
+    const setIndex = (nextIndex) => {
+      idx = (nextIndex + thumbs.length) % thumbs.length;
+      thumbs.forEach((btn, i) => btn.classList.toggle('is-active', i === idx));
+      const active = thumbs[idx];
+      mainTitle.textContent = active.getAttribute('data-title') || 'Проект';
+      mainDesc.textContent = active.getAttribute('data-desc') || 'Описание проекта.';
+      mainBadge.textContent = `Кейс ${idx + 1} из ${thumbs.length}`;
+      active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    };
+
+    thumbs.forEach((btn, i) => {
+      btn.addEventListener('click', () => setIndex(i));
+    });
+    prevBtn?.addEventListener('click', () => setIndex(idx - 1));
+    nextBtn?.addEventListener('click', () => setIndex(idx + 1));
+
+    // Light swipe support for mobile
+    let startX = 0;
+    let startY = 0;
+    const mainBox = root.querySelector('.portfolio-main');
+    mainBox?.addEventListener('touchstart', (e) => {
+      startX = e.changedTouches[0].clientX;
+      startY = e.changedTouches[0].clientY;
+    }, { passive: true });
+    mainBox?.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        setIndex(dx < 0 ? idx + 1 : idx - 1);
+      }
+    }, { passive: true });
+
+    setIndex(0);
+  });
+
   /* Desktop submenu */
   const submenuToggle = document.querySelector('.nav-submenu-toggle');
   const submenuRoot = document.querySelector('.has-submenu');
