@@ -156,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 96);
     }, { passive: true });
 
-    setIdx(0, { scrollMob: true });
+    /* При загрузке не дергать scrollIntoView — иначе «прыжок» и лишнее пустое место в потоке */
+    setIdx(0, { scrollMob: false });
   });
 
   /* Desktop submenu */
