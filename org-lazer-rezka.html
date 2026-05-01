@@ -90,50 +90,27 @@
 
         <div class="content-block mt-32" data-portfolio>
           <h2>Портфолио</h2>
-          <div class="portfolio-main">
-            <div class="portfolio-photo-slot" aria-hidden="true"></div>
-            <span class="portfolio-badge" data-portfolio-main-badge>Кейс 1 из 4</span>
-            <div>
-              <div class="portfolio-title" data-portfolio-main-title>Промышленные кронштейны для производственной линии</div>
-              <p class="portfolio-desc" data-portfolio-main-desc>Серия деталей с точной геометрией и последующей порошковой покраской. Подготовка и выпуск без переналадки внешних подрядчиков.</p>
+          <div class="portfolio-panel">
+            <div class="portfolio-desk">
+              <div class="portfolio-desk-inner">
+                <div class="portfolio-pixel portfolio-pixel-hero" data-portfolio-hero aria-hidden="true"></div>
+                <div class="portfolio-desk-rail" data-portfolio-desk-side></div>
+              </div>
             </div>
-            <div class="portfolio-controls">
-              <a href="#" class="btn btn-outline btn-sm">Открыть кейс</a>
-              <div class="portfolio-nav">
-                <button class="portfolio-nav-btn" data-portfolio-prev aria-label="Предыдущий кейс">‹</button>
-                <button class="portfolio-nav-btn" data-portfolio-next aria-label="Следующий кейс">›</button>
+            <div class="portfolio-mob">
+              <div class="portfolio-mob-strip" data-portfolio-mob-strip></div>
+              <div class="portfolio-mob-controls">
+                <button type="button" class="portfolio-mob-nav" data-portfolio-mob-prev aria-label="Предыдущее фото">‹</button>
+                <span class="portfolio-mob-indicator" data-portfolio-mob-indicator>1/4</span>
+                <button type="button" class="portfolio-mob-nav" data-portfolio-mob-next aria-label="Следующее фото">›</button>
               </div>
             </div>
           </div>
-          <div class="portfolio-thumbs" role="tablist" aria-label="Кейсы портфолио">
-            <button type="button" class="portfolio-thumb is-active" data-title="Промышленные кронштейны для производственной линии" data-desc="Серия деталей с точной геометрией и последующей порошковой покраской. Подготовка и выпуск без переналадки внешних подрядчиков.">
-              <span class="portfolio-thumb-fig" aria-hidden="true"></span>
-              <span class="portfolio-thumb-body">
-                <strong>Кейс 01</strong>
-                <span>Промышленные детали</span>
-              </span>
-            </button>
-            <button type="button" class="portfolio-thumb" data-title="Декоративные панели из нержавейки для интерьера" data-desc="Тонкая лазерная резка рисунка, контроль края и подготовка к монтажу на объекте ресторана.">
-              <span class="portfolio-thumb-fig" aria-hidden="true"></span>
-              <span class="portfolio-thumb-body">
-                <strong>Кейс 02</strong>
-                <span>Панели из нержавейки</span>
-              </span>
-            </button>
-            <button type="button" class="portfolio-thumb" data-title="Комплект корпусов для уличных шкафов" data-desc="Резка, гибка, сварка и антикоррозийная обработка в одном производственном цикле.">
-              <span class="portfolio-thumb-fig" aria-hidden="true"></span>
-              <span class="portfolio-thumb-body">
-                <strong>Кейс 03</strong>
-                <span>Корпуса и гибка</span>
-              </span>
-            </button>
-            <button type="button" class="portfolio-thumb" data-title="Срочный заказ для рекламных конструкций" data-desc="Изготовление партии в ускоренном режиме с доставкой по Москве и проверкой допусков до отгрузки.">
-              <span class="portfolio-thumb-fig" aria-hidden="true"></span>
-              <span class="portfolio-thumb-body">
-                <strong>Кейс 04</strong>
-                <span>Срочный выпуск</span>
-              </span>
-            </button>
+          <div data-portfolio-source hidden>
+            <button type="button" data-slide-caption="Фото примера — промышленные кронштейны"></button>
+            <button type="button" data-slide-caption="Фото примера — панели из нержавейки"></button>
+            <button type="button" data-slide-caption="Фото примера — корпуса и гибка"></button>
+            <button type="button" data-slide-caption="Фото примера — срочный выпуск"></button>
           </div>
         </div>
 

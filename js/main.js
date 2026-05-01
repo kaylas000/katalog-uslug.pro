@@ -50,50 +50,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* Portfolio placeholders */
+  /* Portfolio: desktop = 1 квадрат + 3 мини; mobile = квадратный слайдер */
   document.querySelectorAll('[data-portfolio]').forEach((root) => {
-    const mainTitle = root.querySelector('[data-portfolio-main-title]');
-    const mainDesc = root.querySelector('[data-portfolio-main-desc]');
-    const mainBadge = root.querySelector('[data-portfolio-main-badge]');
-    const thumbs = Array.from(root.querySelectorAll('.portfolio-thumb'));
-    const prevBtn = root.querySelector('[data-portfolio-prev]');
-    const nextBtn = root.querySelector('[data-portfolio-next]');
-    if (!mainTitle || !mainDesc || !mainBadge || thumbs.length === 0) return;
+    const source = root.querySelector('[data-portfolio-source]');
+    const hero = root.querySelector('[data-portfolio-hero]');
+    const deskSide = root.querySelector('[data-portfolio-desk-side]');
+    const mobStrip = root.querySelector('[data-portfolio-mob-strip]');
+    const mobPrev = root.querySelector('[data-portfolio-mob-prev]');
+    const mobNext = root.querySelector('[data-portfolio-mob-next]');
+    const mobIndicator = root.querySelector('[data-portfolio-mob-indicator]');
+    if (!source || !hero || !deskSide || !mobStrip) return;
+
+    const meta = Array.from(source.querySelectorAll('button[type="button"]'));
+    if (meta.length === 0) return;
+    const n = meta.length;
+    const captions = meta.map((btn, i) => btn.getAttribute('data-slide-caption') || `Слайд ${i + 1}`);
+
+    mobStrip.innerHTML = '';
+    const mobSlides = meta.map((_btn, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'portfolio-pixel portfolio-pixel-slide';
+      b.dataset.slideIndex = String(i);
+      b.setAttribute('aria-label', captions[i]);
+      b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
+      mobStrip.appendChild(b);
+      return b;
+    });
 
     let idx = 0;
-    const setIndex = (nextIndex) => {
-      idx = (nextIndex + thumbs.length) % thumbs.length;
-      thumbs.forEach((btn, i) => btn.classList.toggle('is-active', i === idx));
-      const active = thumbs[idx];
-      mainTitle.textContent = active.getAttribute('data-title') || 'Проект';
-      mainDesc.textContent = active.getAttribute('data-desc') || 'Описание проекта.';
-      mainBadge.textContent = `Кейс ${idx + 1} из ${thumbs.length}`;
-      active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    let suppressScrollEmit = false;
+    let scrollTimer = null;
+
+    const rebuildDesktopRail = () => {
+      deskSide.innerHTML = '';
+      for (let i = 0; i < n; i += 1) {
+        if (i === idx) continue;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'portfolio-pixel portfolio-pixel-mini';
+        b.dataset.slideTarget = String(i);
+        b.setAttribute('aria-label', captions[i]);
+        b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
+        deskSide.appendChild(b);
+      }
     };
 
-    thumbs.forEach((btn, i) => {
-      btn.addEventListener('click', () => setIndex(i));
-    });
-    prevBtn?.addEventListener('click', () => setIndex(idx - 1));
-    nextBtn?.addEventListener('click', () => setIndex(idx + 1));
+    const syncMobScroll = () => {
+      const slide = mobSlides[idx];
+      if (!slide) return;
+      suppressScrollEmit = true;
+      slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      window.setTimeout(() => { suppressScrollEmit = false; }, 420);
+    };
 
-    // Light swipe support for mobile
-    let startX = 0;
-    let startY = 0;
-    const mainBox = root.querySelector('.portfolio-main');
-    mainBox?.addEventListener('touchstart', (e) => {
-      startX = e.changedTouches[0].clientX;
-      startY = e.changedTouches[0].clientY;
-    }, { passive: true });
-    mainBox?.addEventListener('touchend', (e) => {
-      const dx = e.changedTouches[0].clientX - startX;
-      const dy = e.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-        setIndex(dx < 0 ? idx + 1 : idx - 1);
-      }
+    const setIdx = (next, opts = {}) => {
+      idx = ((next % n) + n) % n;
+      rebuildDesktopRail();
+      mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
+      if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
+      if (opts.scrollMob) syncMobScroll();
+    };
+
+    mobPrev?.addEventListener('click', () => setIdx(idx - 1, { scrollMob: true }));
+    mobNext?.addEventListener('click', () => setIdx(idx + 1, { scrollMob: true }));
+
+    mobStrip.addEventListener('scroll', () => {
+      if (suppressScrollEmit) return;
+      if (scrollTimer) window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        const stripMid = mobStrip.getBoundingClientRect().left + mobStrip.clientWidth / 2;
+        let best = 0;
+        let bestDist = Infinity;
+        mobSlides.forEach((el, i) => {
+          const r = el.getBoundingClientRect();
+          const mid = r.left + r.width / 2;
+          const d = Math.abs(mid - stripMid);
+          if (d < bestDist) {
+            bestDist = d;
+            best = i;
+          }
+        });
+        if (best !== idx) {
+          idx = best;
+          rebuildDesktopRail();
+          mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
+          if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
+        }
+      }, 96);
     }, { passive: true });
 
-    setIndex(0);
+    setIdx(0, { scrollMob: true });
   });
 
   /* Desktop submenu */
