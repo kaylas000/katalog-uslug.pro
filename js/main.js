@@ -9,6 +9,23 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileNav.addEventListener('click', (e) => { if (e.target === mobileNav) mobileNav.classList.remove('open'); });
   }
 
+  /* Desktop submenu */
+  const submenuToggle = document.querySelector('.nav-submenu-toggle');
+  const submenuRoot = document.querySelector('.has-submenu');
+  if (submenuToggle && submenuRoot) {
+    submenuToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      submenuRoot.classList.toggle('open');
+      submenuToggle.setAttribute('aria-expanded', submenuRoot.classList.contains('open') ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!submenuRoot.contains(e.target)) {
+        submenuRoot.classList.remove('open');
+        submenuToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   /* Consultant widget */
   const consultBtn = document.querySelector('.consultant-btn');
   const consultPanel = document.querySelector('.consultant-panel');
@@ -92,4 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
+  const servicePages = [
+    'metalworking.html', 'autoservice.html', 'care.html', 'sportwear.html',
+    'org-lazer-rezka.html', 'org-svk-avto.html', 'org-sidelki.html', 'org-club-ring.html'
+  ];
+  if (servicePages.includes(currentPath)) {
+    document.querySelector('.has-submenu')?.classList.add('open');
+    document.querySelector('.nav-submenu-toggle')?.setAttribute('aria-expanded', 'true');
+  }
 });

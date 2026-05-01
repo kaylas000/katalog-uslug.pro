@@ -87,6 +87,16 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .nav-desktop a{padding:8px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s;white-space:nowrap}
 .nav-desktop a:hover,.nav-desktop a.active{background:var(--surface-2);color:var(--text)}
 .header-actions{display:flex;align-items:center;gap:10px}
+.nav-item{position:relative}
+.nav-link{padding:8px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s;white-space:nowrap}
+.nav-link:hover,.nav-item.open .nav-link{background:var(--surface-2);color:var(--text)}
+.nav-submenu-toggle{display:inline-flex;align-items:center;gap:6px}
+.nav-submenu-toggle::after{content:"▾";font-size:11px;opacity:.7}
+.submenu{position:absolute;left:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:8px;display:none;z-index:120}
+.submenu a{display:block}
+.has-submenu:hover .submenu,.has-submenu.open .submenu{display:block}
+.btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface-2)}
 
 .burger{display:none;flex-direction:column;gap:5px;padding:6px}
 .burger span{display:block;width:24px;height:2px;background:var(--text);border-radius:2px;transition:transform .2s,opacity .2s}
@@ -98,6 +108,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .mobile-nav.open .mobile-panel{transform:translateX(0)}
 .mobile-panel a{padding:12px 8px;border-radius:var(--radius-sm);font-size:15px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s}
 .mobile-panel a:hover,.mobile-panel a.active{background:var(--surface-2);color:var(--text)}
+.mobile-menu-label{margin-top:6px;padding:8px 8px 2px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-2)}
 .mobile-close{align-self:flex-end;padding:6px;margin-bottom:8px}
 .mobile-close svg{width:24px;height:24px}
 
