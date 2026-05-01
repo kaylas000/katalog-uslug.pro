@@ -203,10 +203,36 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .review-text{font-size:14px;color:var(--text-2);line-height:1.6}
 
 /* ========== PORTFOLIO PLACEHOLDERS ========== */
+/* Большая верхняя зона — место под фото (пока текстовая заглушка); под ней — подпись к кейсу. */
+.portfolio-photo-slot{
+  border-radius:10px;
+  border:2px dashed rgba(47,75,106,.28);
+  background:linear-gradient(180deg,#e8eef6 0%,#dfe8f4 100%);
+  min-height:160px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:16px;
+  text-align:center;
+}
+.portfolio-photo-stub-text{
+  font-size:15px;
+  font-weight:800;
+  color:var(--primary);
+  letter-spacing:.02em;
+}
+.portfolio-photo-stub-sub{
+  font-size:12px;
+  color:var(--text-2);
+  max-width:28ch;
+  line-height:1.35;
+}
 .portfolio-main{
   border:1px solid var(--border);
   border-radius:var(--radius);
-  background:linear-gradient(140deg,#f3f7fc 0%,#e9eff7 100%);
+  background:var(--surface);
   min-height:230px;
   padding:18px;
   display:flex;
@@ -269,13 +295,36 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   gap:10px;
 }
 .portfolio-thumb{
+  font:inherit;
+  cursor:pointer;
   text-align:left;
   border:1px solid var(--border);
   border-radius:10px;
   padding:10px;
   background:#fff;
   min-height:72px;
+  display:grid;
+  grid-template-columns:52px 1fr;
+  gap:10px;
+  align-items:center;
 }
+.portfolio-thumb-fig{
+  width:52px;
+  height:52px;
+  border-radius:8px;
+  border:1px dashed rgba(47,75,106,.22);
+  background:linear-gradient(145deg,#e9eff7,#dfe7f3);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:800;
+  color:var(--text-2);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  flex-shrink:0;
+}
+.portfolio-thumb-body{min-width:0}
 .portfolio-thumb strong{
   display:block;
   font-size:13px;
@@ -291,6 +340,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .portfolio-thumb.is-active{
   border-color:var(--primary);
   box-shadow:0 0 0 2px rgba(47,75,106,.12);
+}
+.portfolio-thumb:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
 }
 
 /* ========== RATING TOKENS ========== */
@@ -392,6 +445,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .card-footer .btn{width:auto;padding:8px 12px;font-size:14px;margin-left:auto}
   .card-footer .tag{align-self:center}
   .portfolio-main{min-height:205px;padding:14px}
+  .portfolio-photo-slot{min-height:136px;padding:12px}
+  .portfolio-photo-stub-text{font-size:14px}
   .portfolio-title{font-size:18px}
   .portfolio-thumbs{
     display:flex;
