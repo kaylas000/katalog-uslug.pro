@@ -19,7 +19,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   --surface:#FFFFFF;
   --surface-2:#F5F7FA;
   --text:#1E2B3A;
-  --text-2:#6F8196;
+  --text-2:#4B617A;
   --border:#D6DCE5;
   --shadow:0 4px 24px rgba(30,43,58,0.08);
   --shadow-sm:0 2px 8px rgba(30,43,58,0.06);
@@ -89,11 +89,12 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .nav-desktop a:hover,.nav-desktop a.active{background:var(--surface-2);color:var(--text)}
 .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .nav-item{position:relative}
+.has-submenu{padding-bottom:4px;margin-bottom:-4px}
 .nav-link{padding:8px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s;white-space:nowrap}
 .nav-link:hover,.nav-item.open .nav-link{background:var(--surface-2);color:var(--text)}
 .nav-submenu-toggle{display:inline-flex;align-items:center;gap:6px}
 .nav-submenu-toggle::after{content:"▾";font-size:11px;opacity:.7}
-.submenu{position:absolute;left:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:8px;display:none;z-index:120}
+.submenu{position:absolute;left:0;top:calc(100% + 2px);min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:8px;display:none;z-index:120}
 .submenu a{display:block}
 .has-submenu:hover .submenu,.has-submenu.open .submenu{display:block}
 .btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--border)}

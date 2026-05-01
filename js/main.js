@@ -13,15 +13,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const submenuToggle = document.querySelector('.nav-submenu-toggle');
   const submenuRoot = document.querySelector('.has-submenu');
   if (submenuToggle && submenuRoot) {
+    let submenuCloseTimer = null;
+    const openSubmenu = () => {
+      if (submenuCloseTimer) clearTimeout(submenuCloseTimer);
+      submenuRoot.classList.add('open');
+      submenuToggle.setAttribute('aria-expanded', 'true');
+    };
+    const closeSubmenu = () => {
+      submenuRoot.classList.remove('open');
+      submenuToggle.setAttribute('aria-expanded', 'false');
+    };
+    const delayedClose = () => {
+      if (submenuCloseTimer) clearTimeout(submenuCloseTimer);
+      submenuCloseTimer = setTimeout(closeSubmenu, 180);
+    };
+
+    submenuRoot.addEventListener('mouseenter', openSubmenu);
+    submenuRoot.addEventListener('mouseleave', delayedClose);
+
     submenuToggle.addEventListener('click', (e) => {
       e.preventDefault();
-      submenuRoot.classList.toggle('open');
-      submenuToggle.setAttribute('aria-expanded', submenuRoot.classList.contains('open') ? 'true' : 'false');
+      if (submenuRoot.classList.contains('open')) {
+        closeSubmenu();
+      } else {
+        openSubmenu();
+      }
     });
     document.addEventListener('click', (e) => {
       if (!submenuRoot.contains(e.target)) {
-        submenuRoot.classList.remove('open');
-        submenuToggle.setAttribute('aria-expanded', 'false');
+        closeSubmenu();
       }
     });
   }
