@@ -112,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const syncMobScroll = () => {
       const slide = mobSlides[idx];
-      if (!slide) return;
+      /* На мобилке лента скрыта CSS — не вызывать scrollIntoView по скрытому ряду */
+      if (!slide || mobStrip.clientHeight < 2) return;
       suppressScrollEmit = true;
       slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       window.setTimeout(() => { suppressScrollEmit = false; }, 420);
@@ -131,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobNext?.addEventListener('click', () => setIdx(idx + 1, { scrollMob: true }));
 
     mobStrip.addEventListener('scroll', () => {
+      if (mobStrip.clientHeight < 2) return;
       if (suppressScrollEmit) return;
       if (scrollTimer) window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(() => {

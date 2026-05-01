@@ -1,4 +1,4 @@
-/* deploy: org-dom-order 2026-02-03 — порядок блоков как в HTML (герой → лента → контакты) */
+/* deploy: org-mobile-premium 2026-02-04 — без полоски-ленты на мобилке, рамка блока как у карточек */
 /* ========== RESET & BASE ========== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
@@ -302,26 +302,26 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
     flex-direction:column;
     flex-wrap:nowrap;
     align-items:stretch;
-    padding:12px 0;
-    gap:12px;
+    padding:14px 14px 16px;
+    gap:10px;
     margin-bottom:28px;
     overflow-x:hidden;
     max-width:100%;
     min-width:0;
-    border:none;
-    border-radius:16px;
-    box-shadow:0 20px 56px rgba(8, 18, 36, 0.48);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:var(--radius);
+    box-shadow:0 12px 40px rgba(18, 32, 52, 0.22), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .org-showcase--layout > .org-showcase-card--hero{
     flex:0 0 auto;
     width:100%;
     max-width:100%;
     min-width:0;
-    max-height:min(380px, 92vw);
+    max-height:min(360px, 88vw);
     box-sizing:border-box;
   }
   .org-showcase-card--hero > .portfolio-pixel-hero{
-    max-height:min(348px, calc(92vw - 32px));
+    max-height:min(328px, calc(88vw - 40px));
     width:auto;
   }
   .org-showcase-minis{display:none !important;}
@@ -396,37 +396,19 @@ button.portfolio-pixel:hover{background:linear-gradient(145deg,#e3eaf5,#d5e1f4)}
 .org-showcase-mob .portfolio-mob{display:block;margin:0;padding:0}
 .org-showcase-mob .portfolio-pixel-slide{border-radius:8px}
 
-/* Мобильный слайдер внутри org-showcase (≤900px) */
+/* Мобильный блок фото: без нижней полоски-миниатюр (она давала «тонкое окно» и скроллбар); только счётчик и стрелки */
 @media(max-width:900px){
   .org-showcase-mob .portfolio-mob-strip{
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    overflow-y:visible;
-    scroll-snap-type:x mandatory;
-    scroll-padding-inline:max(10px, env(safe-area-inset-left));
-    /* pan-x одних блокирует вертикальный скролл страницы при касании ленты */
-    touch-action:pan-x pan-y;
-    overscroll-behavior-x:contain;
-    -webkit-overflow-scrolling:touch;
-    padding-inline:0;
-    padding-bottom:4px;
-  }
-  .org-showcase-mob .portfolio-mob-strip::-webkit-scrollbar{height:6px}
-  .org-showcase-mob .portfolio-mob-strip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.35);border-radius:8px}
-  .org-showcase-mob .portfolio-pixel-slide{
-    flex:0 0 clamp(240px, min(88vw, calc(100vw - 2 * var(--page-pad) - 24px)), 360px);
-    width:clamp(240px, min(88vw, calc(100vw - 2 * var(--page-pad) - 24px)), 360px);
-    max-width:100%;
-    aspect-ratio:1/1;
-    scroll-snap-align:center;
+    display:none !important;
   }
   .org-showcase-mob .portfolio-mob-controls{
     display:flex;
     align-items:center;
     justify-content:center;
     gap:14px;
-    margin-top:6px;
+    margin-top:0;
+    padding-top:12px;
+    border-top:1px solid rgba(255,255,255,0.14);
   }
   .org-showcase-mob .portfolio-mob-indicator{font-size:13px;color:rgba(255,255,255,.92);font-variant-numeric:tabular-nums;min-width:52px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.2)}
   .org-showcase-mob .portfolio-mob-nav{
