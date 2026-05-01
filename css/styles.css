@@ -196,10 +196,11 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .org-portfolio-slot{width:100%;margin-bottom:0}
 .org-portfolio-wrap{width:100%}
 .org-showcase.org-showcase--layout{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(168px, clamp(172px, 22vw, 228px)) 320px;
-  gap:14px;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
   align-items:stretch;
+  gap:14px;
   width:100%;
   padding:16px;
   box-sizing:border-box;
@@ -208,11 +209,24 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   border:1px solid var(--border);
   border-radius:var(--radius);
 }
-.org-showcase--layout > .org-showcase-card--hero,
-.org-showcase--layout > .org-showcase-minis,
-.org-showcase--layout > .org-showcase-aside{
+.org-showcase--layout > .org-showcase-card--hero{
+  flex:1 1 0;
   min-width:0;
   min-height:0;
+}
+.org-showcase--layout > .org-showcase-minis{
+  flex:0 0 auto;
+  width:clamp(168px, 20vw, 224px);
+  min-height:0;
+  align-self:stretch;
+}
+.org-showcase--layout > .org-showcase-aside{
+  flex:0 0 320px;
+  width:320px;
+  max-width:100%;
+  min-width:0;
+  align-self:stretch;
+  box-sizing:border-box;
 }
 .org-showcase-card--hero{
   background:var(--surface);
@@ -220,85 +234,67 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   border-radius:var(--radius);
   padding:12px;
   box-sizing:border-box;
-  container-name:org-hero;
-  container-type:size;
-  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
 }
 .org-showcase-card--hero > .portfolio-pixel-hero{
-  flex:0 0 auto;
   display:block;
   border-radius:8px;
   aspect-ratio:1;
-  width:auto;
-  height:auto;
   max-width:100%;
   max-height:100%;
-}
-/* Квадрат не больше сторон карточки: min(ширина, высота) ячейки */
-@container org-hero (min-width: 40px){
-  .org-showcase-card--hero > .portfolio-pixel-hero{
-    width:min(100cqw, 100cqh);
-    height:auto;
-    max-width:none;
-    max-height:none;
-  }
+  width:auto;
+  height:auto;
 }
 .org-showcase-minis{
   display:flex;
   flex-direction:column;
-  gap:12px;
-  height:100%;
+  gap:10px;
   box-sizing:border-box;
 }
 .org-showcase-card--mini{
+  flex:1 1 0;
+  min-height:0;
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:8px;
   box-sizing:border-box;
-  flex:1 1 0;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  container-name:org-mini;
-  container-type:size;
-  min-height:0;
 }
 .org-showcase-card--mini > .portfolio-pixel-mini{
-  flex:0 0 auto;
   display:block;
   border-radius:8px;
   aspect-ratio:1;
-  margin:0 auto;
-  width:auto;
-  height:auto;
   max-width:100%;
   max-height:100%;
+  width:auto;
+  height:auto;
 }
-@container org-mini (min-height: 20px){
-  .org-showcase-card--mini > .portfolio-pixel-mini{
-    width:min(100cqw, 100cqh);
-    height:auto;
-    max-width:none;
-    max-height:none;
-  }
-}
-.org-showcase-aside{display:flex;flex-direction:column;gap:14px;min-height:0;height:100%}
-.org-showcase-aside .sidebar-card{margin:0;flex:1 1 0;min-height:0;display:flex;flex-direction:column}
-.org-showcase-mob{display:none;grid-column:1 / -1;margin:0;padding:0;width:100%}
+.org-showcase-aside{display:flex;flex-direction:column;gap:16px;justify-content:flex-start;height:100%;box-sizing:border-box}
+.org-showcase-aside .sidebar-card{margin:0;flex:0 0 auto}
+.org-showcase-mob{display:none;flex:0 0 100%;width:100%;max-width:100%;margin:0;padding:0;box-sizing:border-box}
 @media(max-width:900px){
   .org-showcase.org-showcase--layout{
-    grid-template-columns:1fr;
+    flex-wrap:wrap;
     padding:14px;
     gap:14px;
   }
+  .org-showcase--layout > .org-showcase-card--hero{
+    flex:1 1 100%;
+    width:100%;
+  }
   .org-showcase-minis{display:none !important;}
-  .org-showcase-aside{position:static}
+  .org-showcase--layout > .org-showcase-aside{
+    flex:1 1 100%;
+    width:100%;
+  }
+  .org-showcase-aside .sidebar-card{max-width:none}
   .org-showcase-mob{display:block;}
 }
 
