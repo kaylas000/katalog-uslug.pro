@@ -263,10 +263,26 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:768px){
   .nav-desktop{display:none}
   .burger{display:flex}
-  .header-inner{height:56px;gap:8px}
-  .header-actions .btn{display:none}
-  .logo{font-size:17px;max-width:calc(100vw - 112px);overflow:hidden;text-overflow:ellipsis}
-  .logo-icon{display:none}
+  .header-inner{height:56px;gap:6px}
+  .header-actions .btn-primary{display:none}
+  .header-actions .btn-ghost,
+  .header-actions .btn-outline{
+    display:inline-flex;
+    padding:6px 10px;
+    font-size:12px;
+    line-height:1;
+  }
+  .logo{
+    font-size:0;
+    max-width:none;
+    overflow:visible;
+    letter-spacing:0;
+  }
+  .logo-icon{
+    display:block;
+    width:30px;
+    height:30px;
+  }
   .hero{padding:34px 8px 30px}
   .hero-actions .btn{width:100%}
   .section{padding:30px 8px}
