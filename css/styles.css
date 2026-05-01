@@ -233,41 +233,38 @@ button.portfolio-pixel:hover{border-color:rgba(47,75,106,.42);background:linear-
   box-shadow:0 0 0 2px rgba(47,75,106,.14);
 }
 
-/* Desktop: один квадрат + три квадратных миниатюры столбиком */
+/* Desktop: текст SEO слева/справа от заглушек; по центру — квадрат + три миниатюры */
 .portfolio-desk{display:block;margin:0;padding:0}
+.portfolio-desk-layout{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+  gap:clamp(12px, 2.5vw, 22px);
+  align-items:center;
+}
+.portfolio-seo-aside p{
+  margin:0;
+  font-size:12px;
+  line-height:1.5;
+  color:var(--text-2);
+}
+.portfolio-seo-aside strong{color:var(--text);font-weight:600}
+.portfolio-seo-aside--left{padding-right:clamp(0px, 1vw, 6px)}
+.portfolio-seo-aside--right{padding-left:clamp(0px, 1vw, 6px)}
 .portfolio-desk-inner{
   display:flex;
   justify-content:center;
   align-items:flex-start;
   gap:var(--pv-gap);
+  justify-self:center;
 }
 .portfolio-pixel-hero{width:min(100%, var(--pv-big));aspect-ratio:1/1}
 .portfolio-desk-rail{display:flex;flex-direction:column;gap:var(--pv-gap)}
 .portfolio-pixel-mini{width:var(--pv-mini);height:var(--pv-mini)}
 .portfolio-mob{display:none}
 
-/* Текст для SEO: только десктоп (на мобильном скрыт — остаётся слайдер) */
-.portfolio-seo{
-  margin-top:12px;
-  padding-top:12px;
-  border-top:1px solid var(--border);
-  max-width:72ch;
-  margin-left:auto;
-  margin-right:auto;
-}
-.portfolio-seo p{
-  font-size:13px;
-  line-height:1.55;
-  color:var(--text-2);
-  margin:0 0 8px;
-}
-.portfolio-seo p:last-child{margin-bottom:0}
-.portfolio-seo strong{color:var(--text);font-weight:600}
-
 /* Mobile: горизонтальный слайдер из квадратов */
 @media(max-width:768px){
   .portfolio-panel{padding:10px}
-  .portfolio-seo{display:none !important}
   .portfolio-desk{display:none}
   .portfolio-mob{display:block;margin:0;padding:0}
   .portfolio-mob-strip{
