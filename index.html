@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>katalog-uslug.pro — Платформа услуг для бизнеса</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="8" width="84" height="84" rx="16" fill="none" stroke="#2F4B6A" stroke-width="8"/>
+          <circle cx="42" cy="42" r="18" fill="none" stroke="#2F4B6A" stroke-width="7"/>
+          <line x1="55" y1="55" x2="78" y2="78" stroke="#2F4B6A" stroke-width="7" stroke-linecap="round"/>
+          <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+        katalog-uslug.pro
+      </a>
+      <nav class="nav-desktop">
+        <a href="index.html">Главная</a>
+        <a href="metalworking.html">Металлообработка</a>
+        <a href="autoservice.html">Автосервис</a>
+        <a href="care.html">Патронаж</a>
+        <a href="sportwear.html">Спортодежда</a>
+        <a href="blog.html">Статьи</a>
+      </nav>
+      <div class="header-actions">
+        <a href="add-company.html" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <button class="burger" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav">
+    <div class="mobile-panel">
+      <button class="mobile-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <a href="index.html">Главная</a>
+      <a href="metalworking.html">Металлообработка</a>
+      <a href="autoservice.html">Автосервис</a>
+      <a href="care.html">Патронаж и сиделки</a>
+      <a href="sportwear.html">Спортивная одежда</a>
+      <a href="analytics.html">Аналитика</a>
+      <a href="blog.html">Статьи и новости</a>
+      <a href="add-company.html">Добавить организацию</a>
+      <a href="moderation.html">Модерация</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Найдите проверенного подрядчика для бизнеса</h1>
+      <p>Каталог организаций с проверкой данных, прозрачным рейтингом и прямым контактом. Без посредников и скрытых комиссий.</p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-accent btn-lg">Найти услугу <span class="arrow">→</span></a>
+        <a href="add-company.html" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.55)">Добавить организацию</a>
+        <a href="analytics.html" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.55)">Открыть аналитику</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="section" id="catalog">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Каталог организаций</h2>
+        <p class="section-sub">Фильтруйте по направлению, городу и рейтингу</p>
+      </div>
+      <div class="filter-bar mb-24">
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Поиск по услуге или названию…">
+        </div>
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          <select>
+            <option>Все категории</option>
+            <option>Металлообработка</option>
+            <option>Автосервис</option>
+            <option>Патронаж и сиделки</option>
+            <option>Спортивная одежда</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <select>
+            <option>Все города</option>
+            <option>Москва</option>
+            <option>Санкт-Петербург</option>
+            <option>Екатеринбург</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <select>
+            <option>Любой рейтинг</option>
+            <option>4.5 и выше</option>
+            <option>4.0 и выше</option>
+            <option>3.5 и выше</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" data-filter-apply>Применить</button>
+      </div>
+
+      <div class="grid cards-4 gap-24">
+        <!-- Card 1 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="flex gap-8 flex-wrap mb-8">
+              <span class="tag">Металлообработка</span>
+              <span class="tag tag-green">Москва и МО</span>
+            </div>
+            <h3 class="card-title">Цех лазерной резки</h3>
+            <p class="card-sub">Лазерная резка, гибка, сварка, порошковая покраска</p>
+            <p class="card-text">Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag tag-accent">★ 4.9 · 62 отзыва</span>
+            <a href="org-lazer-rezka.html" class="btn btn-sm btn-primary">Подробнее →</a>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="flex gap-8 flex-wrap mb-8">
+              <span class="tag">Автосервис</span>
+              <span class="tag tag-green">Москва</span>
+            </div>
+            <h3 class="card-title">СВК Авто</h3>
+            <p class="card-sub">Техническое обслуживание и ремонт автомобилей</p>
+            <p class="card-text">м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag tag-accent">★ 4.8 · 48 отзывов</span>
+            <a href="org-svk-avto.html" class="btn btn-sm btn-primary">Подробнее →</a>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="flex gap-8 flex-wrap mb-8">
+              <span class="tag">Патронаж</span>
+              <span class="tag tag-green">Москва</span>
+            </div>
+            <h3 class="card-title">Бережные сиделки</h3>
+            <p class="card-sub">Сиделки с проживанием, приходящие, в больницу</p>
+            <p class="card-text">Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag tag-accent">★ 5.0 · 110+ отзывов</span>
+            <a href="org-sidelki.html" class="btn btn-sm btn-primary">Подробнее →</a>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="flex gap-8 flex-wrap mb-8">
+              <span class="tag">Спортивная одежда</span>
+              <span class="tag tag-green">Россия</span>
+            </div>
+            <h3 class="card-title">CLUB RING</h3>
+            <p class="card-sub">Премиальная спортивная одежда</p>
+            <p class="card-text">Одежда для бокса, MMA, фитнеса и тренировок. Собственное производство. Доставка по всей России.</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag tag-accent">★ 4.7 · 35 отзывов</span>
+            <a href="org-club-ring.html" class="btn btn-sm btn-primary">Подробнее →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section bg-surface">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Как это работает</h2>
+        <p class="section-sub" style="margin-left:auto;margin-right:auto;">Четыре простых шага от поиска до сделки</p>
+      </div>
+      <div class="grid steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Выберите категорию</h3>
+          <p>Отфильтруйте организации по услуге, городу и рейтингу. Сравнивайте условия бок о бок.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Проверьте данные</h3>
+          <p>Каждая компания прошла модерацию. Рейтинг подтверждён токенами за реальные заказы.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Свяжитесь напрямую</h3>
+          <p>Телефон, email и сайт в открытом доступе. Никаких посредников и наценок.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Оставьте отзыв</h3>
+          <p>После заказа поделитесь опытом. Ваш отзыв влияет на рейтинг и помогает другим.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Почему доверяют</h2>
+        <p class="section-sub" style="margin-left:auto;margin-right:auto;">Прозрачность и проверка — в основе платформы</p>
+      </div>
+      <div class="grid trust-grid">
+        <div class="trust-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F4B6A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Модерация каждой организации
+          </h4>
+          <p>Перед публикацией мы проверяем ИНН, юридический адрес и контактные данные. Фейковые компании не проходят.</p>
+        </div>
+        <div class="trust-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F4B6A" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+            Проверка данных
+          </h4>
+          <p>Информация о компании актуализируется каждые 3 месяца. Неточности устраняются в течение 48 часов.</p>
+        </div>
+        <div class="trust-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F4B6A" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Подтверждённый рейтинг токенами
+          </h4>
+          <p>Рейтинг строится на реальных токенах за выполненные заказы, а не на «накрученных» звёздах. Честная метрика.</p>
+        </div>
+        <div class="trust-item">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F4B6A" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Прямой контакт
+          </h4>
+          <p>Вы общаетесь с исполнителем напрямую. Платформа не берёт комиссию и не участвует в переговорах.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section bg-surface">
+    <div class="container text-center">
+      <h2 class="section-title">Готовы начать?</h2>
+      <p class="section-sub" style="margin:10px auto 24px;">Добавьте компанию бесплатно или найдите подрядчика прямо сейчас</p>
+      <div class="flex" style="justify-content:center;gap:12px;flex-wrap:wrap;">
+        <a href="add-company.html" class="btn btn-primary btn-lg">Добавить организацию</a>
+        <a href="#catalog" class="btn btn-accent btn-lg">Найти услугу</a>
+        <a href="analytics.html" class="btn btn-outline btn-lg">Открыть аналитику</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>О платформе</h4>
+          <p>Каталог услуг для бизнеса с проверкой данных, прозрачным рейтингом и прямым контактом.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Категории</h4>
+          <a href="metalworking.html">Металлообработка</a>
+          <a href="autoservice.html">Автосервис</a>
+          <a href="care.html">Патронаж и сиделки</a>
+          <a href="sportwear.html">Спортивная одежда</a>
+        </div>
+        <div class="footer-col">
+          <h4>Инструменты</h4>
+          <a href="analytics.html">Аналитика рынка</a>
+          <a href="add-company.html">Добавить организацию</a>
+          <a href="moderation.html">Модерация</a>
+          <a href="blog.html">Статьи и новости</a>
+        </div>
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <p>Email: info@katalog-uslug.pro</p>
+          <p>Режим работы: ежедневно 09:00–20:00</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 katalog-uslug.pro</span>
+        <span>Платформа услуг для бизнеса</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Consultant widget -->
+  <div class="consultant">
+    <button class="consultant-btn" aria-label="Консультант">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <div class="consultant-panel">
+      <button class="consultant-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <h4>Чем могу помочь?</h4>
+      <button class="consultant-btn-sm" data-consult="pick-service">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Подобрать услугу
+      </button>
+      <button class="consultant-btn-sm" data-consult="filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        Объяснить фильтры
+      </button>
+      <button class="consultant-btn-sm" data-consult="compare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        Сравнить организации
+      </button>
+      <button class="consultant-btn-sm" data-consult="free-site">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Как получить сайт бесплатно
+      </button>
+      <div class="consultant-answer"></div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
