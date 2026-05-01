@@ -86,13 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
       deskSide.innerHTML = '';
       for (let i = 0; i < n; i += 1) {
         if (i === idx) continue;
+        const wrap = document.createElement('div');
+        wrap.className = 'org-showcase-card org-showcase-card--mini';
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'portfolio-pixel portfolio-pixel-mini';
         b.dataset.slideTarget = String(i);
         b.setAttribute('aria-label', captions[i]);
         b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
-        deskSide.appendChild(b);
+        wrap.appendChild(b);
+        deskSide.appendChild(wrap);
       }
     };
 

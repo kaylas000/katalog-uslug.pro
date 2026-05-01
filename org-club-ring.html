@@ -77,19 +77,53 @@
   </section>
 
   <section class="org-body">
-    <div class="container org-grid">
-      <div class="org-main">
+    <div class="container">
         <div class="org-portfolio-slot" aria-labelledby="org-portfolio-sr-heading">
           <h2 id="org-portfolio-sr-heading" class="sr-only">Портфолио организации</h2>
           <div data-portfolio class="org-portfolio-wrap">
-            <div class="portfolio-panel">
-              <div class="portfolio-desk">
-                <div class="portfolio-desk-grid">
-                  <div class="portfolio-pixel portfolio-pixel-hero" data-portfolio-hero aria-hidden="true"></div>
-                  <div class="portfolio-desk-rail" data-portfolio-desk-side></div>
-                </div>
+            <div class="org-showcase org-showcase--layout">
+              <div class="org-showcase-card org-showcase-card--hero">
+                <div class="portfolio-pixel portfolio-pixel-hero" data-portfolio-hero aria-hidden="true"></div>
               </div>
-              <div class="portfolio-mob">
+              <div class="org-showcase-minis" data-portfolio-desk-side></div>
+              <aside class="org-showcase-aside sidebar">
+                <div class="sidebar-card">
+                  <h3>Контакты</h3>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                    8 (800) 555-35-35
+                  </div>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                    info@club-ring.ru
+                  </div>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Россия, доставка по всей стране
+                  </div>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    Обработка заказов ежедневно
+                  </div>
+                  <a href="https://club-ring.ru" target="_blank" rel="noopener" class="btn btn-primary mt-16">Перейти на сайт →</a>
+                </div>
+                <div class="sidebar-card">
+                  <h3>Статус верификации</h3>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    ИНН проверен
+                  </div>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    Юридический адрес подтверждён
+                  </div>
+                  <div class="sidebar-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    Контакты актуальны
+                  </div>
+                </div>
+              </aside>
+              <div class="org-showcase-mob portfolio-mob">
                 <div class="portfolio-mob-strip" data-portfolio-mob-strip></div>
                 <div class="portfolio-mob-controls">
                   <button type="button" class="portfolio-mob-nav" data-portfolio-mob-prev aria-label="Предыдущее фото">‹</button>
@@ -106,6 +140,7 @@
             </div>
           </div>
         </div>
+      <div class="org-article">
         <div class="content-block">
           <h2>О компании</h2>
           <p>CLUB RING — российский бренд премиальной спортивной одежды для бокса, MMA, фитнеса и единоборств. Собственное производство, контроль качества на каждом этапе, доставка по всей России.</p>
@@ -171,45 +206,6 @@
           <a href="analytics.html" class="btn btn-outline btn-sm mt-16">Открыть аналитику рынка →</a>
         </div>
       </div>
-
-      <aside class="sidebar">
-        <div class="sidebar-card">
-          <h3>Контакты</h3>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-            8 (800) 555-35-35
-          </div>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
-            info@club-ring.ru
-          </div>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Россия, доставка по всей стране
-          </div>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            Обработка заказов ежедневно
-          </div>
-          <a href="https://club-ring.ru" target="_blank" rel="noopener" class="btn btn-primary mt-16">Перейти на сайт →</a>
-        </div>
-
-        <div class="sidebar-card">
-          <h3>Статус верификации</h3>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-            ИНН проверен
-          </div>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-            Юридический адрес подтверждён
-          </div>
-          <div class="sidebar-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-            Контакты актуальны
-          </div>
-        </div>
-      </aside>
     </div>
   </section>
 
