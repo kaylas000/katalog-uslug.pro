@@ -191,6 +191,9 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .org-body{padding:24px 18px}
 .org-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start}
 @media(max-width:900px){.org-grid{grid-template-columns:1fr}}
+/* Портфолио — в левой колонке сетки организации рядом с сайдбаром (контакты / верификация) */
+.org-portfolio-slot{width:100%;margin-bottom:28px}
+.org-portfolio-wrap{width:100%}
 
 .content-block h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .content-block ul{margin-top:10px;display:flex;flex-direction:column;gap:8px}
@@ -212,13 +215,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .review-author{font-weight:700;font-size:14px;color:var(--text)}
 .review-stars{color:var(--accent);font-size:14px;letter-spacing:1px}
 .review-text{font-size:14px;color:var(--text-2);line-height:1.6}
-
-/* ========== ORG: портфолио-плашка под шапкой страницы организации ========== */
-.org-portfolio-band{
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:10px 0 16px;
-}
 
 /* ========== PORTFOLIO (только плейсхолдеры под фото, без текста в блоке) ========== */
 .portfolio-panel{
