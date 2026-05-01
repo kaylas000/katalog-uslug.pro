@@ -271,13 +271,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .sidebar{position:static}
   .consultant{bottom:16px;right:16px}
   .filter-field{min-width:100%}
-  .card-footer{flex-direction:column;align-items:stretch}
-  .card-footer .btn{width:100%}
-  .card-footer .tag{align-self:flex-start}
+  .cards-4,.cards-3,.cards-2{grid-template-columns:1fr;justify-items:center;gap:16px}
+  .card{width:min(100%,380px)}
+  .card-footer{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .card-footer .btn{width:auto;padding:8px 12px;font-size:13px;margin-left:auto}
+  .card-footer .tag{align-self:center}
 }
 @media(max-width:480px){
   .container{padding:0 14px}
-  .cards-4,.cards-3,.cards-2{grid-template-columns:1fr}
+  .cards-4,.cards-3,.cards-2{grid-template-columns:1fr;justify-items:stretch}
+  .card{max-width:100%}
   .steps{grid-template-columns:1fr}
   .trust-grid{grid-template-columns:1fr}
   .btn-lg{padding:12px 20px;font-size:15px}
