@@ -213,12 +213,17 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   flex:1 1 0;
   min-width:0;
   min-height:0;
+  position:relative;
+  z-index:1;
 }
 .org-showcase--layout > .org-showcase-minis{
   flex:0 0 auto;
   width:clamp(168px, 20vw, 224px);
   min-height:0;
   align-self:stretch;
+  position:relative;
+  z-index:2;
+  pointer-events:auto;
 }
 .org-showcase--layout > .org-showcase-aside{
   flex:0 0 320px;
@@ -254,29 +259,25 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   gap:10px;
   box-sizing:border-box;
 }
-.org-showcase-card--mini{
+/* Мини-превью: сама карточка = <button>, кликабельная на всю площадь ячейки */
+.org-showcase-minis > button.org-showcase-card--mini{
   flex:1 1 0;
-  min-height:0;
-  background:var(--surface);
-  border:1px solid rgba(255,255,255,0.22);
-  border-radius:var(--radius);
-  padding:8px 14px;
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  min-height:92px;
+  width:100%;
+  margin:0;
   overflow:hidden;
-}
-.org-showcase-card--mini > .portfolio-pixel-mini{
+  border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,0.22);
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
   display:block;
-  border-radius:8px;
-  aspect-ratio:1;
-  flex:0 0 auto;
-  width:auto;
-  height:auto;
-  max-height:100%;
-  max-width:min(76%,154px);
-  margin-inline:auto;
+}
+.org-showcase-minis > button.org-showcase-card--mini:hover{
+  filter:brightness(1.03);
+}
+.org-showcase-minis > button.org-showcase-card--mini.portfolio-pixel:hover{
+  background:linear-gradient(145deg,#e3eaf5,#d5e1f4);
 }
 .org-showcase-aside{display:flex;flex-direction:column;gap:16px;justify-content:flex-start;height:100%;box-sizing:border-box}
 .org-showcase-aside .sidebar-card{margin:0;flex:0 0 auto}
