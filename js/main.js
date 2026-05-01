@@ -129,12 +129,4 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
-  const servicePages = [
-    'metalworking.html', 'autoservice.html', 'care.html', 'sportwear.html',
-    'org-lazer-rezka.html', 'org-svk-avto.html', 'org-sidelki.html', 'org-club-ring.html'
-  ];
-  if (servicePages.includes(currentPath)) {
-    document.querySelector('.has-submenu')?.classList.add('open');
-    document.querySelector('.nav-submenu-toggle')?.setAttribute('aria-expanded', 'true');
-  }
 });
