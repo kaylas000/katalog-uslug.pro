@@ -82,6 +82,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let suppressScrollEmit = false;
     let scrollTimer = null;
 
+    const syncHero = () => {
+      if (!hero) return;
+      hero.removeAttribute('aria-hidden');
+      hero.setAttribute('role', 'img');
+      hero.setAttribute('aria-label', captions[idx] || `Фото ${idx + 1}`);
+      hero.dataset.activeSlide = String(idx);
+      hero.classList.add('is-current');
+    };
+
     const rebuildDesktopRail = () => {
       deskSide.innerHTML = '';
       for (let i = 0; i < n; i += 1) {
@@ -109,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const setIdx = (next, opts = {}) => {
       idx = ((next % n) + n) % n;
+      syncHero();
       rebuildDesktopRail();
       mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
       if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
@@ -136,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (best !== idx) {
           idx = best;
+          syncHero();
           rebuildDesktopRail();
           mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
           if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
