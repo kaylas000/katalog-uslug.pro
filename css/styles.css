@@ -393,7 +393,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   box-shadow:inset 0 0 0 2px rgba(47,75,106,.08);
 }
 button.portfolio-pixel{cursor:pointer}
-button.portfolio-pixel:hover{background:linear-gradient(145deg,#e3eaf5,#d5e1f4)}
+/* Не перекрывать фото из портфолио (градиент-ховер снимает inline background-image) */
+button.portfolio-pixel:hover:not(.portfolio-pixel--photo){
+  background:linear-gradient(145deg,#e3eaf5,#d5e1f4);
+}
 .portfolio-pixel:focus-visible{
   outline:2px solid var(--primary);
   outline-offset:2px;

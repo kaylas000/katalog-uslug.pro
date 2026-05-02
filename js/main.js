@@ -75,16 +75,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyPortfolioBg = (el, url) => {
       if (!(el instanceof HTMLElement)) return;
       if (url) {
-        const esc = encodeURI(url);
-        el.style.backgroundImage = `url("${esc}")`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center';
-        el.style.backgroundRepeat = 'no-repeat';
+        const esc = encodeURI(url.trim());
+        el.classList.add('portfolio-pixel--photo');
+        /* !important — иначе шортхэнд `background:` и hover-кнопки перебивают фото в части браузеров */
+        el.style.setProperty('background-image', `url("${esc}")`, 'important');
+        el.style.setProperty('background-size', 'cover', 'important');
+        el.style.setProperty('background-position', 'center', 'important');
+        el.style.setProperty('background-repeat', 'no-repeat', 'important');
       } else {
-        el.style.backgroundImage = '';
-        el.style.backgroundSize = '';
-        el.style.backgroundPosition = '';
-        el.style.backgroundRepeat = '';
+        el.classList.remove('portfolio-pixel--photo');
+        el.style.removeProperty('background-image');
+        el.style.removeProperty('background-size');
+        el.style.removeProperty('background-position');
+        el.style.removeProperty('background-repeat');
       }
     };
 
