@@ -66,6 +66,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const n = meta.length;
     const captions = meta.map((btn, i) => btn.getAttribute('data-slide-caption') || `Слайд ${i + 1}`);
 
+    const slideSrc = (i) => {
+      const raw = meta[i]?.getAttribute?.('data-slide-src');
+      const t = raw?.trim();
+      return t || '';
+    };
+
+    const applyPortfolioBg = (el, url) => {
+      if (!(el instanceof HTMLElement)) return;
+      if (url) {
+        const esc = encodeURI(url);
+        el.style.backgroundImage = `url("${esc}")`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.style.backgroundRepeat = 'no-repeat';
+      } else {
+        el.style.backgroundImage = '';
+        el.style.backgroundSize = '';
+        el.style.backgroundPosition = '';
+        el.style.backgroundRepeat = '';
+      }
+    };
+
     mobStrip.innerHTML = '';
     const mobSlides = meta.map((_btn, i) => {
       const b = document.createElement('button');
@@ -75,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
       b.setAttribute('aria-label', captions[i]);
       b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
       mobStrip.appendChild(b);
+      applyPortfolioBg(b, slideSrc(i));
       return b;
     });
 
@@ -89,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hero.setAttribute('aria-label', captions[idx] || `Фото ${idx + 1}`);
       hero.dataset.activeSlide = String(idx);
       hero.classList.add('is-current');
+      applyPortfolioBg(hero, slideSrc(idx));
     };
 
     const rebuildDesktopRail = () => {
@@ -106,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
           e.preventDefault();
           setIdx(i, { scrollMob: true });
         });
+        applyPortfolioBg(b, slideSrc(i));
         deskSide.appendChild(b);
       }
     };
