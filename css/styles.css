@@ -249,14 +249,16 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   justify-content:center;
   overflow:hidden;
 }
+/* Пустой div без <img>: width:auto даёт ~0 в flex — фон «большой» карточки не виден, видна только подложка */
 .org-showcase-card--hero > .portfolio-pixel-hero{
   display:block;
   border-radius:8px;
   aspect-ratio:1;
+  width:100%;
   max-width:100%;
   max-height:100%;
-  width:auto;
-  height:auto;
+  min-width:0;
+  box-sizing:border-box;
 }
 .org-showcase-minis{
   display:flex;
@@ -281,7 +283,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .org-showcase-minis > button.org-showcase-card--mini:hover{
   filter:brightness(1.03);
 }
-.org-showcase-minis > button.org-showcase-card--mini.portfolio-pixel:hover{
+.org-showcase-minis > button.org-showcase-card--mini.portfolio-pixel:hover:not(.portfolio-pixel--photo){
   background:linear-gradient(145deg,#e3eaf5,#d5e1f4);
 }
 .org-showcase-aside{display:flex;flex-direction:column;gap:16px;justify-content:flex-start;min-height:0;box-sizing:border-box}
