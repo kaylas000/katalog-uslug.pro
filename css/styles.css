@@ -1,4 +1,4 @@
-/* deploy: org-mobile-premium 2026-02-04 — без полоски-ленты на мобилке, рамка блока как у карточек */
+/* deploy: org-hero-fix 2026-02-05 — моб. герой: явная ширина+aspect-ratio, иначе схлопывается в белую полосу */
 /* ========== RESET & BASE ========== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
@@ -317,12 +317,16 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
     width:100%;
     max-width:100%;
     min-width:0;
-    max-height:min(360px, 88vw);
     box-sizing:border-box;
   }
+  /* Плейсхолдер без <img>: нужны width 100% + aspect-ratio, иначе квадрат 0×0 — белая «полоса» */
   .org-showcase-card--hero > .portfolio-pixel-hero{
-    max-height:min(328px, calc(88vw - 40px));
-    width:auto;
+    display:block;
+    width:100%;
+    max-width:100%;
+    height:auto;
+    aspect-ratio:1/1;
+    max-height:min(420px, calc(100vw - 2 * var(--page-pad) - 80px));
   }
   .org-showcase-minis{display:none !important;}
   .org-showcase-mob{
