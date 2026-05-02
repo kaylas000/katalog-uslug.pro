@@ -356,6 +356,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 }
 
 .content-block h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.content-block-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 14px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.content-block-heading h2{font-size:20px;font-weight:700;color:var(--text);margin:0;padding:0;border:none}
+.content-block-heading .btn{flex-shrink:0}
+.reviews-stack{display:flex;flex-direction:column;gap:16px;margin-top:10px}
 .content-block ul{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .content-block li{font-size:15px;color:var(--text-2);padding-left:22px;position:relative}
 .content-block li::before{content:"";position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
