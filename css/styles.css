@@ -1,8 +1,21 @@
 /* deploy: org-hero-frame 2026-02-06 — моб.: без белой вложенной рамки; без оранжевой обводки у героя */
 /* ========== RESET & BASE ========== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#EEF2F6;color:#1E2B3A;line-height:1.55;min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden;padding-top:var(--header-height)}
+/* overflow-x только на body: двойной hidden на html+body ломает инерцию и первый свайп в части mobile Safari */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:#EEF2F6;
+  color:#1E2B3A;
+  line-height:1.55;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow-x:hidden;
+  overflow-x:clip;
+  padding-top:var(--header-height);
+  touch-action:pan-y pinch-zoom;
+}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;height:auto;display:block}
 ul,ol{list-style:none}
@@ -502,6 +515,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* ========== RESPONSIVE ========== */
 @media(max-width:768px){
+  html{scroll-behavior:auto}
+  body{min-height:100svh}
   :root{--header-height:56px}
   .nav-desktop{display:none}
   .burger{display:flex}
