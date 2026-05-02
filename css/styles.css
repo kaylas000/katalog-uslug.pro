@@ -97,9 +97,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 /* ========== HEADER ========== */
 .site-header{background:var(--surface);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100;box-shadow:var(--shadow-sm)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;height:64px;min-width:0}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--text);letter-spacing:-0.3px;white-space:nowrap;min-width:0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--text);letter-spacing:-0.3px;white-space:nowrap;min-width:0;text-decoration:none}
 .logo-icon{width:36px;height:36px;flex-shrink:0}
-.logo span{color:var(--primary)}
+.logo-mobile{display:none}
+.logo-mobile-accent{color:var(--primary)}
 .nav-desktop{display:flex;align-items:center;gap:8px}
 .nav-desktop a{padding:8px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-2);transition:background .2s,color .2s;white-space:nowrap}
 .nav-desktop a:hover,.nav-desktop a.active{background:#ebf2f9;color:var(--text)}
@@ -513,11 +514,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     font-size:12px;
     line-height:1;
   }
-  .logo{
-    font-size:0;
-    max-width:none;
-    overflow:visible;
-    letter-spacing:0;
+  .logo{gap:8px}
+  .logo-desktop{display:none}
+  .logo-mobile{
+    display:inline;
+    font-weight:800;
+    font-size:clamp(13px,3.85vw,15px);
+    line-height:1;
+    letter-spacing:-0.35px;
+    color:var(--text);
   }
   .logo-icon{
     display:block;
