@@ -1,6 +1,7 @@
 /**
  * Подставляет partials/site-header.html и partials/site-footer.html
- * во все корневые *.html (кроме partials). Сохраняет <head> и блок до <script>.
+ * во все *.html в корне проекта (новые страницы подхватываются автоматически).
+ * partials/ не в корне — не трогаем. Нужна типовая разметка: body, .mobile-nav, подвал, <script> внизу.
  * Запуск: npm run build:layout
  */
 import fs from 'fs';
@@ -22,22 +23,12 @@ function normalizeFileContent(s) {
 const HEADER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-header.html'), 'utf8'));
 const FOOTER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-footer.html'), 'utf8'));
 
-const HTML_FILES = [
-  'index.html',
-  'add-company.html',
-  'analytics.html',
-  'autoservice.html',
-  'blog.html',
-  'care.html',
-  'contacts.html',
-  'metalworking.html',
-  'moderation.html',
-  'sportwear.html',
-  'org-club-ring.html',
-  'org-lazer-rezka.html',
-  'org-sidelki.html',
-  'org-svk-avto.html',
-];
+function listRootHtmlFiles() {
+  return fs
+    .readdirSync(root)
+    .filter((name) => name.endsWith('.html'))
+    .sort((a, b) => a.localeCompare(b, 'ru'));
+}
 
 /** Конец блока <div class="mobile-nav">…</div> (сбалансировано по <div> / </div>) */
 function endOfMobileNavBlock(html, mobileNavOpenIndex) {
@@ -119,10 +110,27 @@ export function injectLayout(html) {
 export { normalizeFileContent };
 
 function runInject() {
-  for (const name of HTML_FILES) {
+  const names = listRootHtmlFiles();
+  if (names.length === 0) {
+    console.log('В корне нет *.html');
+    return;
+  }
+  for (const name of names) {
     const fp = path.join(root, name);
-    const raw = normalizeFileContent(fs.readFileSync(fp, 'utf8'));
-    const next = normalizeFileContent(injectLayout(raw));
+    let raw;
+    try {
+      raw = normalizeFileContent(fs.readFileSync(fp, 'utf8'));
+    } catch (e) {
+      console.log(`${name}: ошибка чтения (${e.message})`);
+      continue;
+    }
+    let next;
+    try {
+      next = normalizeFileContent(injectLayout(raw));
+    } catch (e) {
+      console.log(`${name}: пропуск — ${e.message}`);
+      continue;
+    }
     if (next === raw) {
       console.log(`${name}: без изменений`);
     } else {
