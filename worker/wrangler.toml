@@ -15,3 +15,5 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ALLOWED_ORIGIN = "https://katalog-uslug.pro"
+
+# trigger: Actions deploy check
