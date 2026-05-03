@@ -1,7 +1,12 @@
 /**
  * Подставляет partials/site-header.html и partials/site-footer.html
- * во все *.html в корне проекта (новые страницы подхватываются автоматически).
- * partials/ не в корне — не трогаем. Нужна типовая разметка: body, .mobile-nav, подвал, <script> внизу.
+ * во все *.html в корне проекта (список не нужен).
+ *
+ * Режимы:
+ * 1) Маркеры <!-- katalog:page-main --> … <!-- katalog:page-main-end --> — только контент между
+ *    маркерами; шапка, мобильное меню и подвал всегда из partials (шаблон: templates/page-blank.html).
+ * 2) Остальные страницы — как раньше: полная разметка с .mobile-nav и подвалом для замены на partials.
+ *
  * Запуск: npm run build:layout
  */
 import fs from 'fs';
@@ -22,6 +27,9 @@ function normalizeFileContent(s) {
 
 const HEADER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-header.html'), 'utf8'));
 const FOOTER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-footer.html'), 'utf8'));
+
+const MARK_PAGE_MAIN = '<!-- katalog:page-main -->';
+const MARK_PAGE_MAIN_END = '<!-- katalog:page-main-end -->';
 
 function listRootHtmlFiles() {
   return fs
@@ -88,7 +96,56 @@ function tightenAfterMobileNav(html) {
   return fixed + tail;
 }
 
-export function injectLayout(html) {
+/** Новые страницы: копируйте templates/page-blank.html — правите только между маркерами. */
+function injectLayoutContentOnly(html) {
+  const bodyMatch = html.match(/<body[^>]*>/i);
+  if (!bodyMatch) throw new Error('Нет <body>');
+  const bodyOpenEnd = bodyMatch.index + bodyMatch[0].length;
+  /** Искать только после <body>: иначе при повторном build совпадение «съедало» бы шапку между body и маркером */
+  const ms = html.indexOf(MARK_PAGE_MAIN, bodyOpenEnd);
+  if (ms === -1) throw new Error(`Нет маркера ${MARK_PAGE_MAIN} после <body>`);
+
+  const bodyClose = html.toLowerCase().lastIndexOf('</body>');
+  if (bodyClose === -1) throw new Error('Нет </body>');
+  /** Последний end-маркер перед </body> — иначе indexOf с середины документа мог «цеплять» вхождение внутри partials/вставленного футера */
+  const me = html.lastIndexOf(MARK_PAGE_MAIN_END, bodyClose);
+  if (me === -1) throw new Error(`Нет маркера ${MARK_PAGE_MAIN_END} перед </body>`);
+  if (me <= ms) throw new Error('Маркер конца раньше начала (page-main-end перед page-main)');
+
+  const inner = html.slice(ms + MARK_PAGE_MAIN.length, me);
+  const afterEndMark = me + MARK_PAGE_MAIN_END.length;
+
+  /** После маркера может быть только скрипт (черновик) или уже вставленный подвал — ищем первый <script перед </body> */
+  const tailAfterEnd = html.slice(afterEndMark, bodyClose);
+  const scriptRel = tailAfterEnd.search(/<script\b/i);
+  if (scriptRel === -1) {
+    throw new Error(
+      'После <!-- katalog:page-main-end --> до </body> нужен хотя бы один <script> (см. templates/page-blank.html)'
+    );
+  }
+  const scriptsRegion = tailAfterEnd.slice(scriptRel).replace(/^\uFEFF/, '');
+
+  const headThroughBody = html.slice(0, bodyOpenEnd);
+  const restClosing = html.slice(bodyClose);
+  const footerBlock = FOOTER_PARTIAL.replace(/\s+$/, '') + '\n\n  ';
+
+  let out =
+    headThroughBody +
+    '\n\n' +
+    HEADER_PARTIAL +
+    '\n' +
+    MARK_PAGE_MAIN +
+    inner +
+    MARK_PAGE_MAIN_END +
+    '\n\n' +
+    footerBlock +
+    scriptsRegion +
+    restClosing;
+  out = tightenAfterMobileNav(out);
+  return out;
+}
+
+function injectLayoutLegacy(html) {
   const hStart = findHeaderSliceStart(html);
   const mobIdx = html.indexOf('<div class="mobile-nav">', hStart);
   if (mobIdx === -1) throw new Error('Нет .mobile-nav');
@@ -105,6 +162,13 @@ export function injectLayout(html) {
     html.slice(0, hStart) + HEADER_PARTIAL + html.slice(hEnd, fStart) + footerBlock + restScript;
   out = tightenAfterMobileNav(out);
   return out;
+}
+
+export function injectLayout(html) {
+  if (html.includes(MARK_PAGE_MAIN) && html.includes(MARK_PAGE_MAIN_END)) {
+    return injectLayoutContentOnly(html);
+  }
+  return injectLayoutLegacy(html);
 }
 
 export { normalizeFileContent };
