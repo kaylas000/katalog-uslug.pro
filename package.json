@@ -1,0 +1,8 @@
+{
+  "name": "katalog-uslug.pro",
+  "private": true,
+  "description": "Статический каталог услуг; шапка/подвал собираются из partials",
+  "scripts": {
+    "build:layout": "node scripts/inject-layout.mjs"
+  }
+}
