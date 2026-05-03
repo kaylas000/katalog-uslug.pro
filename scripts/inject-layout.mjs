@@ -1,6 +1,6 @@
 /**
  * Подставляет partials/site-header.html и partials/site-footer.html
- * во все страницы: корень, c/ и org/ (по одной подпапке на страницу), прочие slug/index.html (не partials/templates/config).
+ * во все страницы: корень, c/, org/, r/ (по одной подпапке на страницу), прочие slug/index.html (не partials/templates/config).
  *
  * Режимы:
  * 1) Маркеры <!-- katalog:page-main --> … <!-- katalog:page-main-end --> — только контент между
@@ -31,13 +31,23 @@ const FOOTER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 
 const MARK_PAGE_MAIN = '<!-- katalog:page-main -->';
 const MARK_PAGE_MAIN_END = '<!-- katalog:page-main-end -->';
 
-const LAYOUT_SKIP_DIRS = new Set(['partials', 'templates', 'scripts', 'css', 'js', 'node_modules', '.git', 'config']);
+const LAYOUT_SKIP_DIRS = new Set([
+  'partials',
+  'templates',
+  'scripts',
+  'css',
+  'js',
+  'node_modules',
+  '.git',
+  'config',
+  'data',
+]);
 
 function isRedirectStub(html) {
   return /http-equiv\s*=\s*["']refresh["']/i.test(html) && /url\s*=/i.test(html);
 }
 
-/** Корень, `c/slug/`, `org/slug/`, остальные одноуровневые `slug/index.html` */
+/** Корень, `c/slug/`, `org/slug/`, `r/slug/`, остальные одноуровневые `slug/index.html` */
 function listLayoutHtmlFiles() {
   const out = [];
   function add(fp) {
@@ -66,10 +76,17 @@ function listLayoutHtmlFiles() {
       add(path.join(orgRoot, ent.name, 'index.html'));
     }
   }
+  const rRoot = path.join(root, 'r');
+  if (fs.existsSync(rRoot)) {
+    for (const ent of fs.readdirSync(rRoot, { withFileTypes: true })) {
+      if (!ent.isDirectory()) continue;
+      add(path.join(rRoot, ent.name, 'index.html'));
+    }
+  }
   for (const ent of fs.readdirSync(root, { withFileTypes: true })) {
     if (!ent.isDirectory()) continue;
     if (ent.name.startsWith('.') || LAYOUT_SKIP_DIRS.has(ent.name)) continue;
-    if (ent.name === 'c' || ent.name === 'org') continue;
+    if (ent.name === 'c' || ent.name === 'org' || ent.name === 'r') continue;
     add(path.join(root, ent.name, 'index.html'));
   }
   return out.sort((a, b) => path.relative(root, a).localeCompare(path.relative(root, b), 'ru'));

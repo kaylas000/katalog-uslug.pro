@@ -187,6 +187,28 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .filter-field input,.filter-field select{background:transparent;border:none;outline:none;width:100%;font-size:14px;color:var(--text)}
 .filter-field select{cursor:pointer;appearance:none;-webkit-appearance:none}
 
+.region-seo-nav{font-size:13px;color:var(--text-2);line-height:1.5;margin-top:12px;max-width:720px}
+.region-seo-nav a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
+.region-seo-nav a:hover{color:var(--primary-dark)}
+.region-seo-sep{opacity:0.45;text-decoration:none}
+
+.catalog-empty{grid-column:1/-1;padding:28px 20px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+.catalog-empty-title{font-weight:700;font-size:17px;color:var(--text);margin-bottom:8px}
+.catalog-empty-text{font-size:14px;color:var(--text-2);line-height:1.55;max-width:480px;margin:0 auto}
+.catalog-empty-text a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
+
+.regions-index-list{
+  list-style:none;
+  margin-top:24px;
+  columns:3;
+  column-gap:28px;
+  font-size:14px;
+  line-height:1.85;
+}
+.regions-index-list a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
+@media (max-width:900px){.regions-index-list{columns:2}}
+@media (max-width:560px){.regions-index-list{columns:1}}
+
 /* ========== GRIDS ========== */
 .cards-4{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 .cards-3{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}

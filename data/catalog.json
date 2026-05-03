@@ -1,0 +1,54 @@
+[
+  {
+    "id": "lazer-rezka",
+    "title": "Цех лазерной резки",
+    "subtitle": "Лазерная резка, гибка, сварка, порошковая покраска",
+    "text": "Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.",
+    "categorySlug": "metalworking",
+    "categoryLabel": "Металлообработка",
+    "regionSlug": "moskva",
+    "regionLabel": "Москва и МО",
+    "rating": 4.9,
+    "reviews": 62,
+    "url": "/org/lazer-rezka/"
+  },
+  {
+    "id": "svk-avto",
+    "title": "СВК Авто",
+    "subtitle": "Техническое обслуживание и ремонт автомобилей",
+    "text": "м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.",
+    "categorySlug": "autoservice",
+    "categoryLabel": "Автосервис",
+    "regionSlug": "moskva",
+    "regionLabel": "Москва",
+    "rating": 4.8,
+    "reviews": 48,
+    "url": "/org/svk-avto/"
+  },
+  {
+    "id": "sidelki",
+    "title": "Бережные сиделки",
+    "subtitle": "Сиделки с проживанием, приходящие, в больницу",
+    "text": "Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.",
+    "categorySlug": "care",
+    "categoryLabel": "Патронаж",
+    "regionSlug": "moskva",
+    "regionLabel": "Москва",
+    "rating": 5.0,
+    "reviews": 110,
+    "url": "/org/sidelki/"
+  },
+  {
+    "id": "club-ring",
+    "title": "CLUB RING",
+    "subtitle": "Премиальная спортивная одежда",
+    "text": "Одежда для бокса, MMA, фитнеса и тренировок. Собственное производство. Доставка по всей России.",
+    "categorySlug": "sportwear",
+    "categoryLabel": "Спортивная одежда",
+    "regionSlug": "rossiya",
+    "regionLabel": "Россия",
+    "rating": 4.7,
+    "reviews": 35,
+    "url": "/org/club-ring/"
+  }
+]

@@ -269,12 +269,198 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* Filter bar stub: show toast on apply */
-  const filterApply = document.querySelector('[data-filter-apply]');
-  if (filterApply) {
-    filterApply.addEventListener('click', () => {
-      showToast('Фильтр применён (заглушка)');
-    });
+  /* Каталог на главной и /r/…/: фильтры сразу по региону, категории, рейтингу и строке поиска */
+  initCatalogFilters();
+
+  function initCatalogFilters() {
+    const section = document.querySelector('[data-catalog-section]');
+    const host = document.getElementById('catalog-cards-host');
+    const filterApply = document.querySelector('[data-filter-apply]');
+    const selRegion = document.getElementById('filter-region');
+    const selCategory = document.getElementById('filter-category');
+    const selRating = document.getElementById('filter-rating');
+    const searchInput = document.getElementById('filter-search');
+    if (!section || !host) return;
+
+    const pageRegion = (section.getAttribute('data-page-region') || '').trim();
+
+    const EMPTY_BLOCK = `<div class="catalog-empty" role="status">
+          <p class="catalog-empty-title">Ничего не найдено</p>
+          <p class="catalog-empty-text">Попробуйте другой регион, категорию или запрос. <a href="/regions/">Все субъекты РФ</a>.</p>
+        </div>`;
+
+    function reviewsLabelRu(n) {
+      const x = Number(n) || 0;
+      const mod10 = x % 10;
+      const mod100 = x % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${x} отзыв`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${x} отзыва`;
+      return `${x} отзывов`;
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function cardHtml(item) {
+      const rating = typeof item.rating === 'number' ? item.rating.toFixed(1) : esc(item.rating);
+      const href = esc(item.url || '#');
+      const rs = esc(item.regionSlug || '');
+      const cs = esc(item.categorySlug || '');
+      return `<div class="card" data-region-slug="${rs}" data-category-slug="${cs}">
+          <div class="card-body">
+            <div class="flex gap-8 flex-wrap mb-8">
+              <span class="tag">${esc(item.categoryLabel)}</span>
+              <span class="tag tag-green">${esc(item.regionLabel)}</span>
+            </div>
+            <h3 class="card-title">${esc(item.title)}</h3>
+            <p class="card-sub">${esc(item.subtitle)}</p>
+            <p class="card-text">${esc(item.text)}</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>
+            <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
+          </div>
+        </div>`;
+    }
+
+    function renderCards(items) {
+      if (items.length === 0) {
+        host.innerHTML = EMPTY_BLOCK;
+        return;
+      }
+      host.innerHTML = items.map(cardHtml).join('\n');
+    }
+
+    function applyLocalFilters(catalog) {
+      let items = catalog.slice();
+      const regSel = (selRegion?.value || '').trim();
+      if (regSel) {
+        items = items.filter((i) => i.regionSlug === regSel);
+      } else if (pageRegion) {
+        items = items.filter((i) => i.regionSlug === pageRegion);
+      }
+      const cat = selCategory?.value || '';
+      if (cat) items = items.filter((i) => i.categorySlug === cat);
+      const minR = parseFloat(selRating?.value || '');
+      if (!Number.isNaN(minR) && minR > 0) {
+        items = items.filter((i) => (Number(i.rating) || 0) >= minR);
+      }
+      const q = (searchInput?.value || '').trim().toLowerCase();
+      if (q) {
+        items = items.filter((i) => {
+          const blob = [i.title, i.subtitle, i.text, i.categoryLabel, i.regionLabel]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          return blob.includes(q);
+        });
+      }
+      renderCards(items);
+    }
+
+    function syncFromQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('category');
+      if (selCategory && cat) {
+        const opt = Array.from(selCategory.options).some((o) => o.value === cat);
+        if (opt) selCategory.value = cat;
+      }
+    }
+
+    function bindAndRun(catalog) {
+      if (!Array.isArray(catalog)) return;
+      syncFromQueryParams();
+      if (pageRegion && selRegion) {
+        const hasOpt = Array.from(selRegion.options).some((o) => o.value === pageRegion);
+        if (hasOpt) selRegion.value = pageRegion;
+      }
+
+      let searchTimer = null;
+      const scheduleSearch = () => {
+        if (searchTimer) window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(() => applyLocalFilters(catalog), 220);
+      };
+
+      filterApply?.addEventListener('click', (e) => {
+        e.preventDefault();
+        applyLocalFilters(catalog);
+      });
+
+      selRegion?.addEventListener('change', () => applyLocalFilters(catalog));
+      selCategory?.addEventListener('change', () => applyLocalFilters(catalog));
+      selRating?.addEventListener('change', () => applyLocalFilters(catalog));
+      searchInput?.addEventListener('input', scheduleSearch);
+      searchInput?.addEventListener('change', () => applyLocalFilters(catalog));
+
+      applyLocalFilters(catalog);
+    }
+
+    function domOnlyFilter() {
+      const cards = host.querySelectorAll('.card');
+      if (cards.length === 0) return;
+      const regSel = (selRegion?.value || '').trim();
+      const cat = selCategory?.value || '';
+      const minR = parseFloat(selRating?.value || '');
+      const q = (searchInput?.value || '').trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((card) => {
+        const rs = (card.getAttribute('data-region-slug') || '').trim();
+        const cs = (card.getAttribute('data-category-slug') || '').trim();
+        const ratingEl = card.querySelector('.tag-accent');
+        const textBlob = card.textContent.toLowerCase();
+        let ok = true;
+        if (rs) {
+          if (regSel && rs !== regSel) ok = false;
+          else if (!regSel && pageRegion && rs !== pageRegion) ok = false;
+        }
+        if (ok && cat && cs && cs !== cat) ok = false;
+        if (ok && !Number.isNaN(minR) && minR > 0) {
+          const m = (ratingEl?.textContent || '').match(/★\s*([\d.,]+)/);
+          const val = m ? parseFloat(m[1].replace(',', '.')) : 0;
+          if (val < minR) ok = false;
+        }
+        if (ok && q && !textBlob.includes(q)) ok = false;
+        card.hidden = !ok;
+        if (ok) visible += 1;
+      });
+      host.querySelector('.catalog-empty--dom')?.remove();
+      if (visible === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'catalog-empty catalog-empty--dom';
+        empty.setAttribute('role', 'status');
+        empty.innerHTML =
+          '<p class="catalog-empty-title">Ничего не найдено</p><p class="catalog-empty-text">Проверьте фильтры. Если список не обновляется, обновите страницу — возможно, не загрузился файл каталога.</p>';
+        host.appendChild(empty);
+      }
+    }
+
+    fetch('/data/catalog.json', { cache: 'no-store' })
+      .then((r) => {
+        if (!r.ok) throw new Error('catalog');
+        return r.json();
+      })
+      .then((catalog) => bindAndRun(catalog))
+      .catch(() => {
+        if (!host.querySelector('.card')) return;
+        filterApply?.addEventListener('click', (e) => {
+          e.preventDefault();
+          domOnlyFilter();
+        });
+        selRegion?.addEventListener('change', domOnlyFilter);
+        selCategory?.addEventListener('change', domOnlyFilter);
+        selRating?.addEventListener('change', domOnlyFilter);
+        searchInput?.addEventListener('input', () => {
+          window.clearTimeout(domOnlyFilter._t);
+          domOnlyFilter._t = window.setTimeout(domOnlyFilter, 220);
+        });
+        domOnlyFilter();
+      });
   }
 
   /* Toast helper */
