@@ -1,0 +1,33 @@
+{
+  "$comment": "Отсюда собираются шапка и подвал (npm run build:partials). Новая категория — блок в categories; новый пункт меню — в desktopNavAfterCategories / mobileNavAfterCategories.",
+  "categories": [
+    { "slug": "metalworking", "label": "Металлообработка" },
+    { "slug": "autoservice", "label": "Автосервис" },
+    { "slug": "care", "label": "Патронаж и сиделки" },
+    { "slug": "sportwear", "label": "Спортивная одежда" }
+  ],
+  "desktopNavAfterCategories": [
+    { "href": "/analytics/", "label": "Аналитика" },
+    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/contacts/", "label": "Контакты" },
+    { "href": "/blog/", "label": "Статьи" }
+  ],
+  "mobileNavAfterCategories": [
+    { "href": "/analytics/", "label": "Аналитика" },
+    { "href": "/contacts/", "label": "Контакты" },
+    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/blog/", "label": "Статьи и новости" },
+    { "href": "/add/", "label": "Добавить организацию" }
+  ],
+  "addPrimaryCta": { "href": "/add/", "label": "Добавить организацию" },
+  "footerTools": [
+    { "href": "/analytics/", "label": "Аналитика рынка" },
+    { "href": "/add/", "label": "Добавить организацию" },
+    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/blog/", "label": "Статьи и новости" }
+  ],
+  "footerLegal": [
+    { "href": "/privacy/", "label": "Конфиденциальность" },
+    { "href": "/terms/", "label": "Условия использования" }
+  ]
+}

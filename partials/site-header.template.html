@@ -1,0 +1,46 @@
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="8" width="84" height="84" rx="16" fill="none" stroke="#2F4B6A" stroke-width="8"/>
+          <circle cx="42" cy="42" r="18" fill="none" stroke="#2F4B6A" stroke-width="7"/>
+          <line x1="55" y1="55" x2="78" y2="78" stroke="#2F4B6A" stroke-width="7" stroke-linecap="round"/>
+          <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-desktop">katalog-uslug.pro</span>
+        <span class="logo-mobile">Услуги&nbsp;<span class="logo-mobile-accent">Про</span></span>
+      </a>
+      <nav class="nav-desktop">
+        <a href="/">Главная</a>
+        <div class="nav-item has-submenu">
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
+          <div class="submenu">
+{{CATEGORIES_DESKTOP}}
+          </div>
+        </div>
+{{DESKTOP_NAV_AFTER}}
+      </nav>
+      <div class="header-actions">
+        <a href="{{ADD_HREF}}" class="btn btn-sm btn-primary">{{ADD_LABEL}}</a>
+        <a href="#" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
+        <button class="burger" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav">
+    <div class="mobile-panel">
+      <button class="mobile-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <a href="/">Главная</a>
+      <div class="mobile-menu-label">Услуги</div>
+{{CATEGORIES_MOBILE}}
+{{MOBILE_NAV_AFTER}}
+    </div>
+  </div>

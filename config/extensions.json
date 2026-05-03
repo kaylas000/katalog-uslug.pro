@@ -1,0 +1,4 @@
+{
+  "$comment": "Подключение новых скриптов без правки каждой страницы: добавьте URL в bodyScripts — inject подставит перед </body> при build:layout.",
+  "bodyScripts": []
+}

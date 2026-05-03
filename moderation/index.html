@@ -9,7 +9,8 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
@@ -27,10 +28,10 @@
         <div class="nav-item has-submenu">
           <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
           <div class="submenu">
-            <a href="/metalworking/">Металлообработка</a>
-            <a href="/autoservice/">Автосервис</a>
-            <a href="/care/">Патронаж и сиделки</a>
-            <a href="/sportwear/">Спортивная одежда</a>
+            <a href="/c/metalworking/">Металлообработка</a>
+            <a href="/c/autoservice/">Автосервис</a>
+            <a href="/c/care/">Патронаж и сиделки</a>
+            <a href="/c/sportwear/">Спортивная одежда</a>
           </div>
         </div>
         <a href="/analytics/">Аналитика</a>
@@ -39,7 +40,7 @@
         <a href="/blog/">Статьи</a>
       </nav>
       <div class="header-actions">
-        <a href="/add-company/" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
         <a href="#" class="btn btn-sm btn-ghost">Войти</a>
         <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
         <button class="burger" aria-label="Меню">
@@ -57,15 +58,15 @@
       </button>
       <a href="/">Главная</a>
       <div class="mobile-menu-label">Услуги</div>
-      <a href="/metalworking/">Металлообработка</a>
-      <a href="/autoservice/">Автосервис</a>
-      <a href="/care/">Патронаж и сиделки</a>
-      <a href="/sportwear/">Спортивная одежда</a>
+      <a href="/c/metalworking/">Металлообработка</a>
+      <a href="/c/autoservice/">Автосервис</a>
+      <a href="/c/care/">Патронаж и сиделки</a>
+      <a href="/c/sportwear/">Спортивная одежда</a>
       <a href="/analytics/">Аналитика</a>
       <a href="/contacts/">Контакты</a>
       <a href="/moderation/">Модерация</a>
       <a href="/blog/">Статьи и новости</a>
-      <a href="/add-company/">Добавить организацию</a>
+      <a href="/add/">Добавить организацию</a>
     </div>
   </div>
 
@@ -79,25 +80,28 @@
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
         <div class="footer-col">
           <h4>О платформе</h4>
           <p>Каталог услуг для бизнеса с проверкой данных, прозрачным рейтингом и прямым контактом.</p>
+          <p class="footer-legal-inline"><a href="/privacy/">Конфиденциальность</a> · <a href="/terms/">Условия использования</a></p>
         </div>
         <div class="footer-col">
           <h4>Категории</h4>
-          <a href="/metalworking/">Металлообработка</a>
-          <a href="/autoservice/">Автосервис</a>
-          <a href="/care/">Патронаж и сиделки</a>
-          <a href="/sportwear/">Спортивная одежда</a>
+          <a href="/categories/">Все категории</a>
+          <a href="/c/metalworking/">Металлообработка</a>
+          <a href="/c/autoservice/">Автосервис</a>
+          <a href="/c/care/">Патронаж и сиделки</a>
+          <a href="/c/sportwear/">Спортивная одежда</a>
         </div>
         <div class="footer-col">
           <h4>Инструменты</h4>
           <a href="/analytics/">Аналитика рынка</a>
-          <a href="/add-company/">Добавить организацию</a>
+          <a href="/add/">Добавить организацию</a>
           <a href="/moderation/">Модерация</a>
           <a href="/blog/">Статьи и новости</a>
         </div>

@@ -1,6 +1,6 @@
 /**
  * Подставляет partials/site-header.html и partials/site-footer.html
- * во все страницы: `index.html` в корне и `имя-страницы/index.html` в подпапках (не partials/templates).
+ * во все страницы: корень, c/ и org/ (по одной подпапке на страницу), прочие slug/index.html (не partials/templates/config).
  *
  * Режимы:
  * 1) Маркеры <!-- katalog:page-main --> … <!-- katalog:page-main-end --> — только контент между
@@ -31,24 +31,68 @@ const FOOTER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 
 const MARK_PAGE_MAIN = '<!-- katalog:page-main -->';
 const MARK_PAGE_MAIN_END = '<!-- katalog:page-main-end -->';
 
-const LAYOUT_SKIP_DIRS = new Set(['partials', 'templates', 'scripts', 'css', 'js', 'node_modules', '.git']);
+const LAYOUT_SKIP_DIRS = new Set(['partials', 'templates', 'scripts', 'css', 'js', 'node_modules', '.git', 'config']);
 
-/** Корень сайта + одна подпапка на страницу (`slug/index.html`), без служебных каталогов */
+function isRedirectStub(html) {
+  return /http-equiv\s*=\s*["']refresh["']/i.test(html) && /url\s*=/i.test(html);
+}
+
+/** Корень, `c/slug/`, `org/slug/`, остальные одноуровневые `slug/index.html` */
 function listLayoutHtmlFiles() {
   const out = [];
-  const rootIndex = path.join(root, 'index.html');
-  if (fs.existsSync(rootIndex)) {
-    out.push(rootIndex);
+  function add(fp) {
+    const norm = path.normalize(fp);
+    if (!fs.existsSync(norm)) return;
+    try {
+      const raw = fs.readFileSync(norm, 'utf8');
+      if (isRedirectStub(raw)) return;
+    } catch {
+      return;
+    }
+    out.push(norm);
+  }
+  add(path.join(root, 'index.html'));
+  const cRoot = path.join(root, 'c');
+  if (fs.existsSync(cRoot)) {
+    for (const ent of fs.readdirSync(cRoot, { withFileTypes: true })) {
+      if (!ent.isDirectory()) continue;
+      add(path.join(cRoot, ent.name, 'index.html'));
+    }
+  }
+  const orgRoot = path.join(root, 'org');
+  if (fs.existsSync(orgRoot)) {
+    for (const ent of fs.readdirSync(orgRoot, { withFileTypes: true })) {
+      if (!ent.isDirectory()) continue;
+      add(path.join(orgRoot, ent.name, 'index.html'));
+    }
   }
   for (const ent of fs.readdirSync(root, { withFileTypes: true })) {
     if (!ent.isDirectory()) continue;
     if (ent.name.startsWith('.') || LAYOUT_SKIP_DIRS.has(ent.name)) continue;
-    const idx = path.join(root, ent.name, 'index.html');
-    if (fs.existsSync(idx)) {
-      out.push(idx);
-    }
+    if (ent.name === 'c' || ent.name === 'org') continue;
+    add(path.join(root, ent.name, 'index.html'));
   }
   return out.sort((a, b) => path.relative(root, a).localeCompare(path.relative(root, b), 'ru'));
+}
+
+/** Подключение скриптов из config/extensions.json без правки каждой страницы */
+function appendExtensionScripts(html) {
+  const extPath = path.join(root, 'config', 'extensions.json');
+  if (!fs.existsSync(extPath)) return html;
+  let bodyScripts = [];
+  try {
+    const j = JSON.parse(fs.readFileSync(extPath, 'utf8'));
+    bodyScripts = Array.isArray(j.bodyScripts) ? j.bodyScripts : [];
+  } catch {
+    return html;
+  }
+  const list = bodyScripts.filter((s) => typeof s === 'string' && s.trim());
+  if (list.length === 0) return html;
+  const lower = html.toLowerCase();
+  const bodyClose = lower.lastIndexOf('</body>');
+  if (bodyClose === -1) return html;
+  const tags = list.map((s) => `\n  <script src="${s.trim()}" defer></script>`).join('');
+  return html.slice(0, bodyClose) + tags + html.slice(bodyClose);
 }
 
 /** Конец блока <div class="mobile-nav">…</div> (сбалансировано по <div> / </div>) */
@@ -203,7 +247,7 @@ function runInject() {
     }
     let next;
     try {
-      next = normalizeFileContent(injectLayout(raw));
+      next = normalizeFileContent(appendExtensionScripts(injectLayout(raw)));
     } catch (e) {
       console.log(`${name}: пропуск — ${e.message}`);
       continue;

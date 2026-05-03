@@ -154,6 +154,8 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 
 /* ========== FOOTER ========== */
 .site-footer{background:var(--primary);color:rgba(255,255,255,0.85);margin-top:auto}
+.footer-legal-inline{margin-top:10px;font-size:14px;line-height:1.5;opacity:.92}
+.footer-legal-inline a{text-decoration:underline}
 .footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px}
 .footer-col h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px}
 .footer-col a,.footer-col p{font-size:14px;line-height:1.7;color:rgba(255,255,255,0.7);display:block;transition:color .2s}

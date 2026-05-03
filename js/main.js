@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Mobile services submenu */
   const mobileServiceLabel = document.querySelector('.mobile-menu-label');
   if (mobileServiceLabel) {
-    const stopHrefs = new Set(['/analytics/', '/contacts/', '/moderation/', '/blog/', '/add-company/']);
+    const stopHrefs = new Set(['/analytics/', '/contacts/', '/moderation/', '/blog/', '/add/']);
     const serviceLinks = [];
     let cursor = mobileServiceLabel.nextElementSibling;
     while (cursor && cursor.tagName === 'A') {

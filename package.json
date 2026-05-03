@@ -3,6 +3,8 @@
   "private": true,
   "description": "Статический каталог услуг; шапка/подвал собираются из partials",
   "scripts": {
-    "build:layout": "node scripts/inject-layout.mjs"
+    "build:partials": "node scripts/generate-partials.mjs",
+    "build:layout": "node scripts/inject-layout.mjs",
+    "build:site": "node scripts/generate-partials.mjs && node scripts/inject-layout.mjs"
   }
 }
