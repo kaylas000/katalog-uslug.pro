@@ -1,6 +1,6 @@
 /**
  * Подставляет partials/site-header.html и partials/site-footer.html
- * во все *.html в корне проекта (список не нужен).
+ * во все страницы: `index.html` в корне и `имя-страницы/index.html` в подпапках (не partials/templates).
  *
  * Режимы:
  * 1) Маркеры <!-- katalog:page-main --> … <!-- katalog:page-main-end --> — только контент между
@@ -31,11 +31,24 @@ const FOOTER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 
 const MARK_PAGE_MAIN = '<!-- katalog:page-main -->';
 const MARK_PAGE_MAIN_END = '<!-- katalog:page-main-end -->';
 
-function listRootHtmlFiles() {
-  return fs
-    .readdirSync(root)
-    .filter((name) => name.endsWith('.html'))
-    .sort((a, b) => a.localeCompare(b, 'ru'));
+const LAYOUT_SKIP_DIRS = new Set(['partials', 'templates', 'scripts', 'css', 'js', 'node_modules', '.git']);
+
+/** Корень сайта + одна подпапка на страницу (`slug/index.html`), без служебных каталогов */
+function listLayoutHtmlFiles() {
+  const out = [];
+  const rootIndex = path.join(root, 'index.html');
+  if (fs.existsSync(rootIndex)) {
+    out.push(rootIndex);
+  }
+  for (const ent of fs.readdirSync(root, { withFileTypes: true })) {
+    if (!ent.isDirectory()) continue;
+    if (ent.name.startsWith('.') || LAYOUT_SKIP_DIRS.has(ent.name)) continue;
+    const idx = path.join(root, ent.name, 'index.html');
+    if (fs.existsSync(idx)) {
+      out.push(idx);
+    }
+  }
+  return out.sort((a, b) => path.relative(root, a).localeCompare(path.relative(root, b), 'ru'));
 }
 
 /** Конец блока <div class="mobile-nav">…</div> (сбалансировано по <div> / </div>) */
@@ -96,7 +109,7 @@ function tightenAfterMobileNav(html) {
   return fixed + tail;
 }
 
-/** Новые страницы: копируйте templates/page-blank.html — правите только между маркерами. */
+/** Новые страницы: `slug/index.html` из templates/page-blank.html — правите только между маркерами. */
 function injectLayoutContentOnly(html) {
   const bodyMatch = html.match(/<body[^>]*>/i);
   if (!bodyMatch) throw new Error('Нет <body>');
@@ -174,13 +187,13 @@ export function injectLayout(html) {
 export { normalizeFileContent };
 
 function runInject() {
-  const names = listRootHtmlFiles();
-  if (names.length === 0) {
-    console.log('В корне нет *.html');
+  const paths = listLayoutHtmlFiles();
+  if (paths.length === 0) {
+    console.log('Нет страниц index.html (корень или slug/index.html)');
     return;
   }
-  for (const name of names) {
-    const fp = path.join(root, name);
+  for (const fp of paths) {
+    const name = path.relative(root, fp);
     let raw;
     try {
       raw = normalizeFileContent(fs.readFileSync(fp, 'utf8'));

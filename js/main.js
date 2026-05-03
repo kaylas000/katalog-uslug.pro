@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Mobile services submenu */
   const mobileServiceLabel = document.querySelector('.mobile-menu-label');
   if (mobileServiceLabel) {
-    const stopHrefs = new Set(['analytics.html', 'contacts.html', 'moderation.html', 'blog.html', 'add-company.html']);
+    const stopHrefs = new Set(['/analytics/', '/contacts/', '/moderation/', '/blog/', '/add-company/']);
     const serviceLinks = [];
     let cursor = mobileServiceLabel.nextElementSibling;
     while (cursor && cursor.tagName === 'A') {
@@ -302,11 +302,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* Current nav highlight by URL */
-  const currentPath = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-desktop a, .mobile-panel a').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href && (href === currentPath || (currentPath === '' && href === 'index.html'))) {
+  /* Current nav highlight by URL (корень и /slug/ без .html) */
+  function normalizePathname(pathname) {
+    let p = pathname || '/';
+    if (p.endsWith('/index.html')) {
+      p = p.slice(0, -'/index.html'.length) || '/';
+    }
+    if (p !== '/' && p.endsWith('/')) p = p.replace(/\/+$/, '');
+    return p || '/';
+  }
+  const current = normalizePathname(location.pathname);
+  document.querySelectorAll('.nav-desktop a, .mobile-panel a').forEach((link) => {
+    const raw = link.getAttribute('href');
+    if (!raw || raw.startsWith('#')) return;
+    let linkPath;
+    try {
+      linkPath = normalizePathname(new URL(raw, location.href).pathname);
+    } catch {
+      return;
+    }
+    if (linkPath === current) {
       link.classList.add('active');
     }
   });
