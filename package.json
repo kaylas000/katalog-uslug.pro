@@ -3,6 +3,8 @@
   "private": true,
   "description": "Статический каталог услуг; шапка/подвал собираются из partials",
   "scripts": {
+    "worker:dev": "npm run dev --prefix worker",
+    "worker:deploy": "npm run deploy --prefix worker",
     "build:data": "node scripts/generate-regions-json.mjs && node scripts/build-from-data.mjs",
     "build:partials": "node scripts/generate-partials.mjs",
     "build:layout": "node scripts/inject-layout.mjs",
