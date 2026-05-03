@@ -1,4 +1,6 @@
-# Аккаунт Cloudflare подставляется из `wrangler login` (поле account_id можно не указывать).
+# account_id нужен для деплоя из GitHub Actions по API-токену (whoami может работать и без него).
+account_id = "3d735a66c4d587a9d810375620bd2543"
+
 # Hyperdrive: создайте конфиг и подставьте id:
 #   npx wrangler hyperdrive create katalog-uslug-db --connection-string="postgres://USER:PASS@HOST:5432/DBNAME"
 # Для локального wrangler dev добавьте local_connection_string (лучше в отдельном wrangler.local.toml в .gitignore).
