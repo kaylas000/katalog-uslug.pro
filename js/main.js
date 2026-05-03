@@ -68,8 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const slideSrc = (i) => {
       const raw = meta[i]?.getAttribute?.('data-slide-src');
-      const t = raw?.trim();
-      return t || '';
+      let t = raw?.trim() || '';
+      /* Страницы в подпапках: относительный images/… иначе указывает на slug/images/… */
+      if (t.startsWith('images/')) t = `/${t}`;
+      return t;
     };
 
     const applyPortfolioBg = (el, url) => {
