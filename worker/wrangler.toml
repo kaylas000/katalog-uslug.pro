@@ -1,6 +1,12 @@
 # account_id нужен для деплоя из GitHub Actions по API-токену (whoami может работать и без него).
 account_id = "3d735a66c4d587a9d810375620bd2543"
 
+# Публичный адрес вида https://<worker>.<ваш-поддомен>.workers.dev
+# Пока для аккаунта не зарегистрирован поддомен workers.dev, CI-деплой упадёт:
+# один раз откройте в браузере (под своим логином Cloudflare):
+# https://dash.cloudflare.com/3d735a66c4d587a9d810375620bd2543/workers/onboarding
+workers_dev = true
+
 # Hyperdrive: создайте конфиг и подставьте id:
 #   npx wrangler hyperdrive create katalog-uslug-db --connection-string="postgres://USER:PASS@HOST:5432/DBNAME"
 # Для локального wrangler dev добавьте local_connection_string (лучше в отдельном wrangler.local.toml в .gitignore).
