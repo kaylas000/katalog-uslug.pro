@@ -54,7 +54,7 @@ npm run build:site
 |-----|----------------|
 | **Прод** (Cloudflare) | В [Hyperdrive](https://developers.cloudflare.com/hyperdrive/) в панели Cloudflare указываете строку на текущую БД. В `worker/wrangler.toml` раскомментируйте `[[hyperdrive]]` и вставьте `id` конфига. Деплой как обычно. |
 | **Смена хоста БД** (Neon → свой сервер) | В том же конфиге Hyperdrive меняете origin / строку — **репозиторий не трогаете**. |
-| **Локально, пока нет Hyperdrive** | `worker/.dev.vars.example` → скопировать в `worker/.dev.vars`, заполнить `DATABASE_URL`. Команда: `npm run worker:dev`. |
+| **Локально, пока нет Hyperdrive** | Проще всего: в корне проекта скопировать `neon.local.example.txt` → `neon.local.txt`, вставить внутрь одну строку Connection string из Neon, выполнить `npm run neon:paste` — скрипт сам заполнит `worker/.dev.vars`. Затем `npm run worker:dev`. Либо вручную: `worker/.dev.vars.example` → `.dev.vars`. |
 | **Локально, как в проде** | `worker/wrangler.local.toml.example` → `worker/wrangler.local.toml`: тот же `id` Hyperdrive, что в проде, плюс `local_connection_string` на `127.0.0.1` или на Neon. Команда: `npm run worker:dev`. |
 
 **Миграции схемы:** любым клиентом `psql` (или GUI) выполнить SQL из `db/migrations/` по порядку номеров на ту БД, куда сейчас смотрит строка подключения.

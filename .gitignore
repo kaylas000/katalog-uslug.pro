@@ -1,3 +1,6 @@
 node_modules/
 *.log
 .DS_Store
+
+# Строка из Neon — только у тебя на диске, не в git
+neon.local.txt

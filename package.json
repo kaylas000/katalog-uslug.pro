@@ -3,6 +3,7 @@
   "private": true,
   "description": "Статический каталог услуг; шапка/подвал собираются из partials",
   "scripts": {
+    "neon:paste": "node scripts/apply-neon-paste.mjs",
     "worker:dev": "npm run dev --prefix worker",
     "worker:deploy": "npm run deploy --prefix worker",
     "build:data": "node scripts/generate-regions-json.mjs && node scripts/build-from-data.mjs",
