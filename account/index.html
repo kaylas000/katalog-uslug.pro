@@ -80,7 +80,7 @@
 <main class="section">
   <div class="container auth-layout">
     <h1 class="section-title" style="margin-bottom:8px;">Аккаунт</h1>
-    <p class="section-sub" style="margin-bottom:28px;">Вход по почте с подтверждением, по телефону (SMS), через Яндекс. Госуслуги — после подключения ЕСИА в настройках API.</p>
+    <p class="section-sub" style="margin-bottom:28px;">Регистрация — только почта и пароль; подтверждение во всплывающем окне (код на почту или в SMS на номер, который вы укажете там же). Вход по почте или Яндексу; по SMS — только если номер уже привязан к аккаунту. Госуслуги — после подключения ЕСИА.</p>
 
     <div id="auth-global-msg" class="auth-msg" style="display:none;margin-bottom:16px;" role="status"></div>
 
@@ -153,7 +153,6 @@
         <div class="auth-tabs" role="tablist">
           <button type="button" class="auth-tab is-active" data-auth-tab="login" role="tab">Почта</button>
           <button type="button" class="auth-tab" data-auth-tab="register" role="tab">Регистрация</button>
-          <button type="button" class="auth-tab" data-auth-tab="phone" role="tab">Телефон (SMS)</button>
         </div>
 
         <div id="auth-tab-login" data-auth-panel="login">
@@ -189,6 +188,27 @@
               <button type="submit" class="btn btn-primary">Подтвердить почту и войти</button>
             </form>
           </div>
+          <p class="card-text" style="margin-top:14px;margin-bottom:0;">
+            <button type="button" class="btn btn-link" id="link-toggle-phone-login" style="padding:0;height:auto;font:inherit;color:var(--accent);text-decoration:underline;">Войти по коду из SMS</button>
+            <span id="auth-phone-login-hint"> — если номер уже привязан к аккаунту.</span>
+          </p>
+          <div id="auth-phone-login-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <p class="card-sub" style="margin-top:0;">Код приходит на номер, привязанный к существующему аккаунту.</p>
+            <form id="form-phone-send" class="auth-form" style="margin-top:12px;">
+              <div class="auth-field">
+                <label for="phone-num">Телефон</label>
+                <input id="phone-num" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+              </div>
+              <button type="submit" class="btn btn-outline">Получить код</button>
+            </form>
+            <form id="form-phone-code" class="auth-form" style="margin-top:16px;display:none;">
+              <div class="auth-field">
+                <label for="phone-otp">Код из SMS</label>
+                <input id="phone-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+              </div>
+              <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+          </div>
         </div>
 
         <div id="auth-tab-register" data-auth-panel="register" style="display:none;">
@@ -202,25 +222,7 @@
               <input id="reg-password" type="password" required autocomplete="new-password">
             </div>
             <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-            <p class="card-text" style="font-size:13px;color:var(--text-2);margin:0;">Аккаунт появится только после подтверждения: откроется окно — код на почту или в SMS на указанный телефон.</p>
-          </form>
-        </div>
-
-        <div id="auth-tab-phone" data-auth-panel="phone" style="display:none;">
-          <p class="card-sub">Код приходит на номер, уже привязанный к аккаунту. Привязка — в кабинете ниже после входа по почте или Яндексу.</p>
-          <form id="form-phone-send" class="auth-form" style="margin-top:12px;">
-            <div class="auth-field">
-              <label for="phone-num">Телефон</label>
-              <input id="phone-num" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
-            </div>
-            <button type="submit" class="btn btn-outline">Получить код</button>
-          </form>
-          <form id="form-phone-code" class="auth-form" style="margin-top:16px;display:none;">
-            <div class="auth-field">
-              <label for="phone-otp">Код из SMS</label>
-              <input id="phone-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
-            </div>
-            <button type="submit" class="btn btn-primary">Войти</button>
+            <p class="card-text" style="font-size:13px;color:var(--text-2);margin:0;">После нажатия откроется окно: вы сами выберете, отправить код на почту или в SMS (номер вводится только в этом окне, для SMS).</p>
           </form>
         </div>
 
@@ -251,17 +253,27 @@
         <dialog id="dialog-reg-confirm" class="auth-reg-dialog" style="max-width:min(440px,96vw);border:1px solid var(--border);border-radius:12px;padding:0;">
           <div class="card-body" style="padding:22px;">
             <h2 class="card-title" style="font-size:19px;margin-top:0;">Подтвердите регистрацию</h2>
-            <p class="card-sub" id="dialog-reg-lead" style="margin-bottom:6px;">Аккаунт ещё не создан. Выберите, куда отправить код.</p>
+            <p class="card-sub" id="dialog-reg-lead" style="margin-bottom:6px;">Аккаунт ещё не создан. Выберите способ и нажмите «Отправить код».</p>
             <p class="card-text" id="dialog-reg-email-line" style="font-weight:500;margin-bottom:14px;"></p>
-            <div class="auth-field">
-              <label for="dialog-reg-phone">Телефон (для кода по SMS)</label>
-              <input id="dialog-reg-phone" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
-            </div>
             <div id="dialog-reg-step-send">
-              <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
-                <button type="button" class="btn btn-primary" id="dialog-reg-send-email">Отправить код на почту</button>
-                <button type="button" class="btn btn-outline" id="dialog-reg-send-sms">Отправить код в SMS</button>
+              <fieldset style="border:none;padding:0;margin:0 0 14px;">
+                <legend class="card-text" style="font-size:14px;margin-bottom:10px;">Куда отправить код</legend>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;">
+                  <input type="radio" name="dialog-reg-channel" id="dialog-reg-ch-email" value="email" checked>
+                  <span>На эту почту</span>
+                </label>
+                <label id="dialog-reg-ch-sms-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="radio" name="dialog-reg-channel" id="dialog-reg-ch-sms" value="sms">
+                  <span>В SMS на номер</span>
+                </label>
+              </fieldset>
+              <div id="dialog-reg-phone-wrap" style="display:none;margin-bottom:14px;">
+                <div class="auth-field">
+                  <label for="dialog-reg-phone">Номер телефона</label>
+                  <input id="dialog-reg-phone" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+                </div>
               </div>
+              <button type="button" class="btn btn-primary" id="dialog-reg-send-code">Отправить код</button>
             </div>
             <div id="dialog-reg-step-code" style="display:none;margin-top:16px;">
               <form id="form-dialog-reg-code" class="auth-form" style="margin:0;">
@@ -354,6 +366,6 @@
   </div>
 
   <script src="/js/main.js?v=20260506"></script>
-  <script src="/js/account.js?v=20260509" defer></script>
+  <script src="/js/account.js?v=20260510" defer></script>
 </body>
 </html>

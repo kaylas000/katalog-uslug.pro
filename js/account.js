@@ -163,11 +163,23 @@
       const back = el('dialog-reg-back');
       const resend = el('dialog-reg-resend');
       const otp = el('dialog-reg-otp');
+      const emailRad = el('dialog-reg-ch-email');
+      const smsRad = el('dialog-reg-ch-sms');
+      const phoneWrap = el('dialog-reg-phone-wrap');
+      if (emailRad) emailRad.checked = true;
+      if (smsRad) smsRad.checked = false;
+      if (phoneWrap) phoneWrap.style.display = 'none';
       if (stepSend) stepSend.style.display = 'block';
       if (stepCode) stepCode.style.display = 'none';
       if (back) back.style.display = 'none';
       if (resend) resend.style.display = 'none';
       if (otp) otp.value = '';
+    }
+
+    function syncRegDialogPhoneWrap() {
+      const sms = Boolean(el('dialog-reg-ch-sms')?.checked);
+      const wrap = el('dialog-reg-phone-wrap');
+      if (wrap) wrap.style.display = sms ? 'block' : 'none';
     }
 
     async function closeRegDialog() {
@@ -185,10 +197,18 @@
       const phoneIn = el('dialog-reg-phone');
       if (phoneIn) phoneIn.value = '';
       resetRegDialogPanels();
-      const btnSmsDlg = el('dialog-reg-send-sms');
-      if (btnSmsDlg) {
-        btnSmsDlg.style.display = cfg.registrationSms ? 'inline-flex' : 'none';
+      const smsLabel = el('dialog-reg-ch-sms-label');
+      const smsRad = el('dialog-reg-ch-sms');
+      if (smsLabel && smsRad) {
+        if (!cfg.registrationSms) {
+          smsLabel.style.display = 'none';
+          smsRad.checked = false;
+          el('dialog-reg-ch-email') && (el('dialog-reg-ch-email').checked = true);
+        } else {
+          smsLabel.style.display = '';
+        }
       }
+      syncRegDialogPhoneWrap();
       if (dlgReg && typeof dlgReg.showModal === 'function') {
         dlgReg.showModal();
       }
@@ -250,12 +270,36 @@
       return true;
     }
 
+    const wrapPhLogin = el('auth-phone-login-wrap');
+    const linkPhLogin = el('link-toggle-phone-login');
+    const hintPhLogin = el('auth-phone-login-hint');
+    function collapsePhoneLogin() {
+      if (wrapPhLogin) wrapPhLogin.style.display = 'none';
+      if (linkPhLogin) linkPhLogin.textContent = 'Войти по коду из SMS';
+      if (hintPhLogin) hintPhLogin.style.display = '';
+    }
+
+    linkPhLogin?.addEventListener('click', () => {
+      const open = wrapPhLogin && wrapPhLogin.style.display === 'block';
+      if (open) collapsePhoneLogin();
+      else {
+        if (wrapPhLogin) wrapPhLogin.style.display = 'block';
+        if (linkPhLogin) linkPhLogin.textContent = 'Скрыть вход по SMS';
+        if (hintPhLogin) hintPhLogin.style.display = 'none';
+      }
+    });
+
+    document.querySelectorAll('input[name="dialog-reg-channel"]').forEach((inp) => {
+      inp.addEventListener('change', syncRegDialogPhoneWrap);
+    });
+
     document.querySelectorAll('.auth-tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         const name = tab.getAttribute('data-auth-tab') || 'login';
         if (name !== 'register') {
           void closeRegDialog();
         }
+        if (name === 'register') collapsePhoneLogin();
         setTab(name);
       });
     });
@@ -269,16 +313,25 @@
       void closeRegDialog();
     });
 
-    el('dialog-reg-send-email')?.addEventListener('click', async () => {
-      regState.channel = 'email';
-      const ok = await sendPendingEmailCode();
-      if (ok) regDialogShowCodeStep();
-    });
-
-    el('dialog-reg-send-sms')?.addEventListener('click', async () => {
-      const phone = el('dialog-reg-phone')?.value || '';
+    el('dialog-reg-send-code')?.addEventListener('click', async () => {
       const pid = regState.pendingRegistrationId;
       if (!pid) return;
+      const useEmail = Boolean(el('dialog-reg-ch-email')?.checked);
+      if (useEmail) {
+        regState.channel = 'email';
+        const ok = await sendPendingEmailCode();
+        if (ok) regDialogShowCodeStep();
+        return;
+      }
+      regState.channel = 'sms';
+      const phone = el('dialog-reg-phone')?.value || '';
+      if (!phone.trim()) {
+        showMsg(gmsg, 'Выберите «В SMS» и укажите номер телефона.', 'err');
+        const wrap = el('dialog-reg-phone-wrap');
+        if (wrap) wrap.style.display = 'block';
+        el('dialog-reg-phone')?.focus();
+        return;
+      }
       const { r, body } = await jfetch('/v1/auth/register/send-sms-code', {
         method: 'POST',
         body: JSON.stringify({ pendingRegistrationId: pid, phone }),
@@ -297,7 +350,6 @@
         );
         return;
       }
-      regState.channel = 'sms';
       regState.smsPhone = body.normalizedPhone || phone.trim();
       let t = 'Код отправлен в SMS.';
       if (body.devVerificationCode) {
