@@ -37,6 +37,17 @@ export async function sendResendEmail(env: Env, opts: {
   return { ok: true };
 }
 
+export function registrationCodeEmailHtml(env: Env, code: string): string {
+  const site = publicOrigin(env);
+  return `<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;line-height:1.5">
+<p>Здравствуйте!</p>
+<p>Код подтверждения регистрации на <strong>katalog-uslug.pro</strong>:</p>
+<p style="font-size:28px;letter-spacing:6px;font-weight:700">${code}</p>
+<p style="color:#666;font-size:13px">Код действует ограниченное время. Если вы не регистрировались — проигнорируйте письмо.</p>
+<p style="color:#666;font-size:13px">${site}</p>
+</body></html>`;
+}
+
 export function verificationEmailHtml(
   env: Env,
   apiVerifyUrl: string
