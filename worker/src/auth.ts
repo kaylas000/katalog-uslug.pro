@@ -693,7 +693,7 @@ export async function handleAuth(
             {
               error: "email_not_configured",
               message:
-                "Почта не настроена (RESEND_API_KEY). Для разработки включите DEV_RETURN_EMAIL_LINK=true.",
+                "Сейчас нельзя отправить код на почту. Подтвердите регистрацию через SMS в этом окне или повторите позже.",
             },
             503,
             cors
@@ -766,7 +766,7 @@ export async function handleAuth(
           {
             error: "email_not_configured",
             message:
-              "Почта не настроена (RESEND_API_KEY). Для разработки включите DEV_RETURN_EMAIL_LINK=true.",
+              "Сейчас нельзя отправить код на почту. Подтвердите регистрацию через SMS в этом окне или повторите позже.",
           },
           503,
           cors
@@ -1250,7 +1250,15 @@ export async function handleAuth(
             sent.tokenRowId,
           ]);
         });
-        return json({ error: "email_not_configured" }, 503, cors);
+        return json(
+          {
+            error: "email_not_configured",
+            message:
+              "Сейчас нельзя отправить письмо с кодом. Попробуйте позже или обратитесь в поддержку.",
+          },
+          503,
+          cors
+        );
       }
       return json(
         {
@@ -1371,7 +1379,7 @@ export async function handleAuth(
           {
             error: "email_not_configured",
             message:
-              "Почта для сброса пароля не настроена на сервере (RESEND_API_KEY).",
+              "Восстановление пароля по почте сейчас недоступно. Попробуйте позже.",
           },
           503,
           cors

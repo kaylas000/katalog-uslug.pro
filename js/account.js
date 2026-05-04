@@ -163,11 +163,19 @@
       const back = el('dialog-reg-back');
       const resend = el('dialog-reg-resend');
       const otp = el('dialog-reg-otp');
+      const emailLbl = el('dialog-reg-ch-email-label');
       const emailRad = el('dialog-reg-ch-email');
       const smsRad = el('dialog-reg-ch-sms');
       const phoneWrap = el('dialog-reg-phone-wrap');
-      if (emailRad) emailRad.checked = true;
-      if (smsRad) smsRad.checked = false;
+      if (emailLbl) emailLbl.style.display = '';
+      if (emailRad) {
+        emailRad.checked = true;
+        emailRad.disabled = false;
+      }
+      if (smsRad) {
+        smsRad.checked = false;
+        smsRad.disabled = false;
+      }
       if (phoneWrap) phoneWrap.style.display = 'none';
       if (stepSend) stepSend.style.display = 'block';
       if (stepCode) stepCode.style.display = 'none';
@@ -199,15 +207,41 @@
       resetRegDialogPanels();
       const smsLabel = el('dialog-reg-ch-sms-label');
       const smsRad = el('dialog-reg-ch-sms');
-      if (smsLabel && smsRad) {
-        if (!cfg.registrationSms) {
-          smsLabel.style.display = 'none';
+      const emailLbl = el('dialog-reg-ch-email-label');
+      const emailRad = el('dialog-reg-ch-email');
+      const canEmail = Boolean(cfg.resendEmail || cfg.devEmailLink);
+
+      if (!cfg.registrationSms) {
+        if (smsLabel) smsLabel.style.display = 'none';
+        if (smsRad) {
           smsRad.checked = false;
-          el('dialog-reg-ch-email') && (el('dialog-reg-ch-email').checked = true);
+          smsRad.disabled = true;
+        }
+        if (emailLbl) emailLbl.style.display = '';
+        if (emailRad) {
+          emailRad.disabled = !canEmail;
+          emailRad.checked = canEmail;
+        }
+      } else {
+        if (smsLabel) smsLabel.style.display = '';
+        if (smsRad) smsRad.disabled = false;
+        if (!canEmail) {
+          if (emailLbl) emailLbl.style.display = 'none';
+          if (emailRad) {
+            emailRad.disabled = true;
+            emailRad.checked = false;
+          }
+          if (smsRad) smsRad.checked = true;
         } else {
-          smsLabel.style.display = '';
+          if (emailLbl) emailLbl.style.display = '';
+          if (emailRad) {
+            emailRad.disabled = false;
+            emailRad.checked = true;
+          }
+          if (smsRad) smsRad.checked = false;
         }
       }
+
       syncRegDialogPhoneWrap();
       if (dlgReg && typeof dlgReg.showModal === 'function') {
         dlgReg.showModal();
@@ -255,11 +289,11 @@
         return false;
       }
       if (!r.ok) {
-        showMsg(
-          gmsg,
-          body.message || body.error || 'Не удалось отправить код на почту',
-          'err'
-        );
+        const hint =
+          body.error === 'email_not_configured'
+            ? 'Сейчас нельзя отправить код на почту. Выберите SMS в этом окне или повторите позже.'
+            : body.message || body.error || 'Не удалось отправить код на почту';
+        showMsg(gmsg, hint, 'err');
         return false;
       }
       let t = 'Код отправлен на почту.';
@@ -499,7 +533,11 @@
         return;
       }
       if (!r.ok) {
-        showMsg(gmsg, body.message || body.error || 'Ошибка отправки', 'err');
+        const hint =
+          body.error === 'email_not_configured'
+            ? 'Отправка письма сейчас недоступна. Попробуйте позже.'
+            : body.message || body.error || 'Ошибка отправки';
+        showMsg(gmsg, hint, 'err');
         return;
       }
       let t =
@@ -519,13 +557,27 @@
         body: JSON.stringify({ email, password }),
       });
       if (r.status === 201 && body.pendingRegistrationId) {
+        const pid = body.pendingRegistrationId;
+        const canEmail = Boolean(cfg.resendEmail || cfg.devEmailLink);
+        if (!canEmail && !cfg.registrationSms) {
+          await jfetch('/v1/auth/register/cancel', {
+            method: 'POST',
+            body: JSON.stringify({ pendingRegistrationId: pid }),
+          });
+          showMsg(
+            gmsg,
+            'Регистрация по коду сейчас недоступна: не настроены ни почта, ни SMS.',
+            'err'
+          );
+          return;
+        }
         showMsg(
           gmsg,
           'Аккаунт ещё не создан. Подтвердите регистрацию в открывшемся окне.',
           'ok'
         );
-        openRegConfirmDialog(body.email || email, body.pendingRegistrationId);
-        if (!cfg.registrationSms) {
+        openRegConfirmDialog(body.email || email, pid);
+        if (!cfg.registrationSms && canEmail) {
           regState.channel = 'email';
           const ok = await sendPendingEmailCode();
           if (ok) regDialogShowCodeStep();
