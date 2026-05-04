@@ -49,10 +49,10 @@ jobs:
             exit 1
           fi
 
+      # Neon pooler не принимает statement_timeout в startup (PGOPTIONS) — см. neon.tech/docs/connect/connection-errors
       - name: Apply migrations in order
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-          PGOPTIONS: "-c statement_timeout=120000"
         run: |
           set -euo pipefail
           shopt -s nullglob
