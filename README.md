@@ -45,3 +45,20 @@ npm run build:site
 ## Одноразовая миграция URL (уже сделана в main)
 
 Скрипт `scripts/migrate-ia-urls.mjs` оставлен для справки / пустого клона; на актуальном репозитории повторно гонять не нужно.
+
+## База и Worker: одна схема без «переездов кода»
+
+Идея: **везде один PostgreSQL** и файлы в `db/migrations/`. Меняется только **строка подключения** (Neon → домашний ПК → облако РФ), код воркера тот же.
+
+| Где | Что настроить |
+|-----|----------------|
+| **Прод** (Cloudflare) | В [Hyperdrive](https://developers.cloudflare.com/hyperdrive/) в панели Cloudflare указываете строку на текущую БД. В `worker/wrangler.toml` раскомментируйте `[[hyperdrive]]` и вставьте `id` конфига. Деплой как обычно. |
+| **Смена хоста БД** (Neon → свой сервер) | В том же конфиге Hyperdrive меняете origin / строку — **репозиторий не трогаете**. |
+| **Локально, пока нет Hyperdrive** | `worker/.dev.vars.example` → скопировать в `worker/.dev.vars`, заполнить `DATABASE_URL`. Команда: `npm run worker:dev`. |
+| **Локально, как в проде** | `worker/wrangler.local.toml.example` → `worker/wrangler.local.toml`: тот же `id` Hyperdrive, что в проде, плюс `local_connection_string` на `127.0.0.1` или на Neon. Команда: `npm run worker:dev`. |
+
+**Миграции схемы:** любым клиентом `psql` (или GUI) выполнить SQL из `db/migrations/` по порядку номеров на ту БД, куда сейчас смотрит строка подключения.
+
+**Домашний ПК как БД для прод-API:** Worker из интернета не ходит на `192.168.*` напрямую — нужен [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) (или аналог) до Postgres; строка в Hyperdrive тогда ведёт на хост туннеля.
+
+Подробности по установке Postgres на ВМ: `scripts/cloudru-install-postgres.sh` в репозитории.

@@ -4,7 +4,13 @@ type Hyperdrive = { connectionString: string };
 
 export interface Env {
   HYPERDRIVE?: Hyperdrive;
+  /** Только для `wrangler dev` через `.dev.vars`. В проде — Hyperdrive. */
+  DATABASE_URL?: string;
   ALLOWED_ORIGIN?: string;
+}
+
+function getDbConnectionString(env: Env): string | undefined {
+  return env.HYPERDRIVE?.connectionString || env.DATABASE_URL;
 }
 
 const CATALOG_SQL = `
@@ -54,9 +60,9 @@ async function withClient<T>(
   env: Env,
   fn: (client: Client) => Promise<T>
 ): Promise<T> {
-  const cs = env.HYPERDRIVE?.connectionString;
+  const cs = getDbConnectionString(env);
   if (!cs) {
-    throw new Error("HYPERDRIVE binding is not configured");
+    throw new Error("Database URL missing: set Hyperdrive or DATABASE_URL for dev");
   }
   const client = new Client({
     connectionString: cs,
@@ -88,16 +94,16 @@ export default {
         {
           ok: true,
           service: "katalog-uslug-api",
-          db: Boolean(env.HYPERDRIVE?.connectionString),
+          db: Boolean(getDbConnectionString(env)),
         },
         { headers: cors }
       );
     }
 
     if (path === "/v1/catalog") {
-      if (!env.HYPERDRIVE?.connectionString) {
+      if (!getDbConnectionString(env)) {
         return Response.json(
-          { error: "misconfigured", detail: "hyperdrive" },
+          { error: "misconfigured", detail: "db_connection" },
           { status: 503, headers: cors }
         );
       }
@@ -117,9 +123,9 @@ export default {
     }
 
     if (path === "/v1/regions") {
-      if (!env.HYPERDRIVE?.connectionString) {
+      if (!getDbConnectionString(env)) {
         return Response.json(
-          { error: "misconfigured", detail: "hyperdrive" },
+          { error: "misconfigured", detail: "db_connection" },
           { status: 503, headers: cors }
         );
       }
