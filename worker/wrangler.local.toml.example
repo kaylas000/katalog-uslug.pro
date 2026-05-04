@@ -6,5 +6,5 @@
 
 [[hyperdrive]]
 binding = "HYPERDRIVE"
-id = "PASTE_HYPERDRIVE_CONFIG_ID"
+id = "c6b1caad988d420e86296f25cc0ceb1b"
 local_connection_string = "postgres://USER:PASSWORD@127.0.0.1:5432/katalog"

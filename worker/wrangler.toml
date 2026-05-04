@@ -4,19 +4,18 @@ account_id = "3d735a66c4d587a9d810375620bd2543"
 # Адрес API после деплоя: https://katalog-uslug-api.kaylas000.workers.dev (имя воркера + ваш поддомен)
 workers_dev = true
 
-# Hyperdrive (прод): создайте конфиг и раскомментируйте блок ниже.
-#   npx wrangler hyperdrive create katalog-uslug-db --connection-string="postgres://USER:PASS@HOST:5432/DBNAME"
-# Локально без Hyperdrive: скопируйте worker/.dev.vars.example → .dev.vars и задайте DATABASE_URL.
-# Локально с Hyperdrive: скопируйте worker/wrangler.local.toml.example → wrangler.local.toml (см. README).
+# Hyperdrive (прод): конфиг katalog-uslug-db в панели Cloudflare.
+# Локально без Hyperdrive: worker/.dev.vars → DATABASE_URL.
+# Локально с тем же Hyperdrive: wrangler.local.toml + local_connection_string (см. README).
 
 name = "katalog-uslug-api"
 main = "src/index.ts"
 compatibility_date = "2026-04-24"
 compatibility_flags = ["nodejs_compat"]
 
-# [[hyperdrive]]
-# binding = "HYPERDRIVE"
-# id = "<HYPERDRIVE_CONFIG_ID>"
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "c6b1caad988d420e86296f25cc0ceb1b"
 
 [vars]
 ALLOWED_ORIGIN = "https://katalog-uslug.pro"
