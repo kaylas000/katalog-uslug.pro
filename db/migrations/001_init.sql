@@ -33,3 +33,5 @@ CREATE INDEX IF NOT EXISTS idx_organizations_category ON organizations (category
 CREATE INDEX IF NOT EXISTS idx_organizations_published ON organizations (published) WHERE published;
 
 COMMENT ON TABLE organizations IS 'Публичные карточки; listing_text отдаётся в JSON как поле text';
+
+-- schema v1 (комментарий для повторного прогона CI миграций при необходимости)

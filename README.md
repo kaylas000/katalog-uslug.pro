@@ -61,6 +61,8 @@ npm run build:site
 
 **GitHub + Neon (автоматом из репозитория):** в настройках репозитория GitHub → **Secrets** → **Actions** добавьте секрет **`NEON_DATABASE_URL`** (тот же Connection string, что в Neon). При пуше в `main`, если менялись файлы в `db/migrations/`, workflow **Neon DB migrations** сам выполнит все `*.sql` по порядку. Интеграция «Neon ↔ GitHub» в панели Neon (приложение GitHub) **опциональна**: она для их сценариев (ветки, превью и т.д.); для этого workflow достаточно секрета — подключать приложение Neon в GitHub нужно только если сами хотите эти фичи.
 
+**Импорт данных в Neon:** после миграций в Actions запустите вручную workflow **Neon import data** (тот же секрет `NEON_DATABASE_URL`). Он зальёт `data/regions.json` и `data/catalog.json`. Локально: `neon.local.txt` с URI в корне проекта или переменная `NEON_DATABASE_URL`, затем **`npm run db:import`** из корня репозитория.
+
 **Домашний ПК как БД для прод-API:** Worker из интернета не ходит на `192.168.*` напрямую — нужен [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) (или аналог) до Postgres; строка в Hyperdrive тогда ведёт на хост туннеля.
 
 Подробности по установке Postgres на ВМ: `scripts/cloudru-install-postgres.sh` в репозитории.

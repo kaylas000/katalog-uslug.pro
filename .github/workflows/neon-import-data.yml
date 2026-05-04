@@ -1,0 +1,40 @@
+# Ручной импорт data/*.json в Neon (после миграций).
+# Actions → Neon import data → Run workflow
+# Секрет: NEON_DATABASE_URL (тот же, что для миграций)
+
+name: Neon import data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker deps
+        working-directory: worker
+        run: npm ci
+
+      - name: Check secret
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          if [ -z "$NEON_DATABASE_URL" ]; then
+            echo "::error::Нет NEON_DATABASE_URL в Secrets"
+            exit 1
+          fi
+
+      - name: Import regions + catalog JSON
+        working-directory: worker
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: node import-data-from-json.mjs
