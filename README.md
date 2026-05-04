@@ -75,7 +75,7 @@ npm run build:site
 | Данные из `data/*.json` в Neon | Скрипт + workflow **Neon import data** (ручной запуск в Actions после миграций) |
 | API Worker `/v1/catalog`, `/v1/regions` | Готово; **Hyperdrive** в `wrangler.toml` |
 | **Проверка Neon** | Если `/v1/catalog` пишет `relation "organizations" does not exist` — в GitHub **Actions → Neon DB migrations** дождаться зелёного, затем **Neon import data** (ручной запуск). |
-| **Авторизация** | См. ниже; миграция **`003_identity_providers.sql`**. Страница **`/account/`** (см. `accountBasePath` в `config/site.json`). |
+| **Авторизация** | См. ниже; миграция **`003_identity_providers.sql`**. Страница **`/account/`**. |
 | Сайт: каталог с API или fallback на JSON | `config/site.json` → **`catalogApiBaseUrl`**; при сборке `npm run build:layout` в страницы вставляется `<meta name="katalog-catalog-api">`; `main.js` сначала дергает API, при ошибке — `/data/catalog.json` |
 
 Большой файл `описание проекта с комментариями.txt` — дорожная карта на будущее (кабинеты, ORT, аналитика); для текущего v1 достаточно таблиц выше.

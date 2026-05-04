@@ -23,10 +23,8 @@
       </nav>
       <div class="header-actions">
         <a href="{{ADD_HREF}}" class="btn btn-sm btn-primary">{{ADD_LABEL}}</a>
-        <a href="{{ACCOUNT_HREF}}" class="btn btn-sm btn-ghost" data-auth-when="logged-out">Войти</a>
-        <a href="{{ACCOUNT_HREF}}#register" class="btn btn-sm btn-outline" data-auth-when="logged-out">Регистрация</a>
-        <span class="btn btn-sm btn-ghost" data-auth-when="logged-in" hidden style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="" data-auth-email></span>
-        <a href="{{ACCOUNT_HREF}}" class="btn btn-sm btn-primary" data-auth-when="logged-in" hidden>Аккаунт</a>
+        <a href="#" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
         <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
@@ -44,9 +42,5 @@
       <div class="mobile-menu-label">Услуги</div>
 {{CATEGORIES_MOBILE}}
 {{MOBILE_NAV_AFTER}}
-      <div class="mobile-menu-label">Аккаунт</div>
-      <a href="{{ACCOUNT_HREF}}" data-auth-when="logged-out">Войти</a>
-      <a href="{{ACCOUNT_HREF}}#register" data-auth-when="logged-out">Регистрация</a>
-      <a href="{{ACCOUNT_HREF}}" data-auth-when="logged-in" hidden>Аккаунт</a>
     </div>
   </div>

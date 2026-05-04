@@ -171,11 +171,30 @@ function findHeaderSliceStart(html) {
   const bodyOpen = html.match(/<body[^>]*>/);
   if (!bodyOpen) throw new Error('Нет <body>');
   const afterBody = bodyOpen.index + bodyOpen[0].length;
-  const c = html.indexOf('<!-- Header -->', afterBody);
   const headerIdx = html.indexOf('<header class="site-header">', afterBody);
   if (headerIdx === -1) throw new Error('Нет <header class="site-header">');
+  /** Точное `<!-- Header -->` (старый маркер) */
+  const c = html.indexOf('<!-- Header -->', afterBody);
   if (c !== -1 && c < headerIdx) return trimHorizontalSpaceBefore(html, afterBody, c);
-  return trimHorizontalSpaceBefore(html, afterBody, headerIdx);
+  /**
+   * Комментарий из partials: `<!-- Header (фрагменты …) -->`.
+   * Начало вырезаемого блока — с первого такого комментария (если есть), иначе с `<header>`,
+   * иначе при повторном build:layout старые копии комментариев остаются в HTML.
+   */
+  let i = afterBody;
+  let sliceStart = headerIdx;
+  while (i < headerIdx) {
+    while (i < headerIdx && /\s/.test(html[i])) i += 1;
+    if (i >= headerIdx) break;
+    if (!html.startsWith('<!--', i)) break;
+    const end = html.indexOf('-->', i + 4);
+    if (end === -1 || end > headerIdx) break;
+    const inner = html.slice(i + 4, end);
+    if (!/^\s*Header\b/i.test(inner)) break;
+    sliceStart = Math.min(sliceStart, i);
+    i = end + 3;
+  }
+  return trimHorizontalSpaceBefore(html, afterBody, sliceStart);
 }
 
 function findFooterSliceStart(html, hEnd) {

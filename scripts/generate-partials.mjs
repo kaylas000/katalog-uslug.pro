@@ -49,9 +49,6 @@ function main() {
     .join('\n');
 
   const add = site.addPrimaryCta || { href: '/add/', label: 'Добавить организацию' };
-  let accountHref = typeof site.accountBasePath === 'string' ? site.accountBasePath.trim() : '/account/';
-  if (!accountHref.startsWith('/')) accountHref = `/${accountHref}`;
-  if (!accountHref.endsWith('/')) accountHref = `${accountHref}/`;
 
   const footerTools = (site.footerTools || [])
     .map((l) => `          <a href="${escAttr(l.href)}">${escAttr(l.label)}</a>`)
@@ -68,8 +65,7 @@ function main() {
     .replace('{{DESKTOP_NAV_AFTER}}', desktopAfter)
     .replace('{{MOBILE_NAV_AFTER}}', mobileAfter)
     .replace(/\{\{ADD_HREF\}\}/g, escAttr(add.href))
-    .replace(/\{\{ADD_LABEL\}\}/g, escAttr(add.label))
-    .replace(/\{\{ACCOUNT_HREF\}\}/g, escAttr(accountHref));
+    .replace(/\{\{ADD_LABEL\}\}/g, escAttr(add.label));
 
   const footerTpl = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-footer.template.html'), 'utf8'));
   let footer = footerTpl
