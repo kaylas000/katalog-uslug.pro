@@ -66,3 +66,14 @@ npm run build:site
 **Домашний ПК как БД для прод-API:** Worker из интернета не ходит на `192.168.*` напрямую — нужен [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) (или аналог) до Postgres; строка в Hyperdrive тогда ведёт на хост туннеля.
 
 Подробности по установке Postgres на ВМ: `scripts/cloudru-install-postgres.sh` в репозитории.
+
+### Статус по базе и каталогу (v1)
+
+| Шаг | Состояние |
+|-----|-----------|
+| Схема Postgres (`db/migrations/001_init.sql`) | Готово; CI **Neon DB migrations** при пушах |
+| Данные из `data/*.json` в Neon | Скрипт + workflow **Neon import data** (ручной запуск в Actions после миграций) |
+| API Worker `/v1/catalog`, `/v1/regions` | Готово; в проде нужен **Hyperdrive** в `wrangler.toml`, иначе 503 |
+| Сайт: каталог с API или fallback на JSON | `config/site.json` → **`catalogApiBaseUrl`**; при сборке `npm run build:layout` в страницы вставляется `<meta name="katalog-catalog-api">`; `main.js` сначала дергает API, при ошибке — `/data/catalog.json` |
+
+Большой файл `описание проекта с комментариями.txt` — дорожная карта на будущее (кабинеты, ORT, аналитика); для текущего v1 достаточно таблиц выше.

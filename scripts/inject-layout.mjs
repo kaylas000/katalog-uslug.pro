@@ -16,6 +16,36 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
+const CATALOG_API_META = 'name="katalog-catalog-api"';
+
+function injectCatalogApiMeta(html) {
+  const sitePath = path.join(root, 'config', 'site.json');
+  if (!fs.existsSync(sitePath)) return html;
+  let url = '';
+  try {
+    const s = JSON.parse(fs.readFileSync(sitePath, 'utf8'));
+    url =
+      typeof s.catalogApiBaseUrl === 'string' ? s.catalogApiBaseUrl.trim() : '';
+  } catch {
+    return html;
+  }
+  let out = html.replace(
+    new RegExp(`\\n\\s*<meta ${CATALOG_API_META}[^>]*>\\s*`, 'gi'),
+    '\n'
+  );
+  if (!url) return out;
+  const esc = url
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+  const tag = `\n  <meta ${CATALOG_API_META} content="${esc}">`;
+  const headOpen = out.search(/<head\b/i);
+  if (headOpen === -1) return out;
+  const headTagEnd = out.indexOf('>', headOpen);
+  if (headTagEnd === -1) return out;
+  return out.slice(0, headTagEnd + 1) + tag + out.slice(headTagEnd + 1);
+}
+
 function normalizeEOL(s) {
   return s.replace(/\r\n/g, '\n');
 }
@@ -264,7 +294,9 @@ function runInject() {
     }
     let next;
     try {
-      next = normalizeFileContent(appendExtensionScripts(injectLayout(raw)));
+      next = normalizeFileContent(
+        injectCatalogApiMeta(appendExtensionScripts(injectLayout(raw)))
+      );
     } catch (e) {
       console.log(`${name}: пропуск — ${e.message}`);
       continue;

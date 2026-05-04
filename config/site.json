@@ -1,5 +1,6 @@
 {
   "$comment": "Отсюда собираются шапка и подвал (npm run build:partials). Новая категория — блок в categories; новый пункт меню — в desktopNavAfterCategories / mobileNavAfterCategories.",
+  "catalogApiBaseUrl": "https://katalog-uslug-api.kaylas000.workers.dev",
   "categories": [
     { "slug": "metalworking", "label": "Металлообработка" },
     { "slug": "autoservice", "label": "Автосервис" },

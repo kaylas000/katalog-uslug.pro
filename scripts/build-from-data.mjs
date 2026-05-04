@@ -282,7 +282,7 @@ ${ul}
 </main>
 <!-- katalog:page-main-end -->
 
-  <script src="/js/main.js?v=20260501"></script>
+  <script src="/js/main.js?v=20260505"></script>
 </body>
 </html>
 `;
