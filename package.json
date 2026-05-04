@@ -6,6 +6,7 @@
     "verify:worker": "npm run build:partials && npm run build:layout && cd worker && npx tsc --noEmit",
     "neon:paste": "node scripts/apply-neon-paste.mjs",
     "db:import": "npm run db:import --prefix worker",
+    "db:migrate": "npm run db:migrate --prefix worker",
     "worker:dev": "npm run dev --prefix worker",
     "worker:deploy": "npm run deploy --prefix worker",
     "build:data": "node scripts/generate-regions-json.mjs && node scripts/build-from-data.mjs",

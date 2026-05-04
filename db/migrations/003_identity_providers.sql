@@ -67,3 +67,5 @@ CREATE TABLE IF NOT EXISTS auth_phone_otp (
 
 CREATE INDEX IF NOT EXISTS idx_auth_phone_otp_lookup
   ON auth_phone_otp (phone_e164, purpose, created_at DESC);
+
+-- Повторный прогон безопасен (IF NOT EXISTS / ADD COLUMN IF NOT EXISTS).

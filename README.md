@@ -57,9 +57,9 @@ npm run build:site
 | **Локально, пока нет Hyperdrive** | Проще всего: в корне проекта скопировать `neon.local.example.txt` → `neon.local.txt`, вставить внутрь одну строку Connection string из Neon, выполнить `npm run neon:paste` — скрипт сам заполнит `worker/.dev.vars`. Затем `npm run worker:dev`. Либо вручную: `worker/.dev.vars.example` → `.dev.vars`. |
 | **Локально, как в проде** | `worker/wrangler.local.toml.example` → `worker/wrangler.local.toml`: тот же `id` Hyperdrive, что в проде, плюс `local_connection_string` на `127.0.0.1` или на Neon. Команда: `npm run worker:dev`. |
 
-**Миграции схемы:** любым клиентом `psql` (или GUI) выполнить SQL из `db/migrations/` по порядку номеров на ту БД, куда сейчас смотрит строка подключения.
+**Миграции схемы:** локально (тот же порядок, что в CI): **`npm run db:migrate`** — нужны `NEON_DATABASE_URL` / `DATABASE_URL` или `neon.local.txt` в корне. Либо вручную любым `psql` / GUI: SQL из `db/migrations/` по порядку имён файлов.
 
-**GitHub + Neon (автоматом из репозитория):** в настройках репозитория GitHub → **Secrets** → **Actions** добавьте секрет **`NEON_DATABASE_URL`** (тот же Connection string, что в Neon). При пуше в `main`, если менялись файлы в `db/migrations/`, workflow **Neon DB migrations** сам выполнит все `*.sql` по порядку. Интеграция «Neon ↔ GitHub» в панели Neon (приложение GitHub) **опциональна**: она для их сценариев (ветки, превью и т.д.); для этого workflow достаточно секрета — подключать приложение Neon в GitHub нужно только если сами хотите эти фичи.
+**GitHub + Neon (автоматом из репозитория):** в настройках репозитория GitHub → **Secrets** → **Actions** добавьте секрет **`NEON_DATABASE_URL`**. При пуше в `main`, если менялись файлы в `db/migrations/`, workflow **Neon DB migrations** выполнит все `*.sql` по порядку. Если миграции уже были в репозитории, но на базе их не накатывали: **Actions → Neon DB migrations → Run workflow** (ручной запуск), либо **`npm run db:migrate`** с той же строкой подключения. Интеграция «Neon ↔ GitHub» в панели Neon **опциональна**; для workflow достаточно секрета.
 
 **Импорт данных в Neon:** после миграций в Actions запустите вручную workflow **Neon import data** (тот же секрет `NEON_DATABASE_URL`). Он зальёт `data/regions.json` и `data/catalog.json`. Локально: `neon.local.txt` с URI в корне проекта или переменная `NEON_DATABASE_URL`, затем **`npm run db:import`** из корня репозитория.
 
@@ -74,8 +74,8 @@ npm run build:site
 | Схема Postgres (`db/migrations/001_init.sql`) | Готово; CI **Neon DB migrations** при пушах |
 | Данные из `data/*.json` в Neon | Скрипт + workflow **Neon import data** (ручной запуск в Actions после миграций) |
 | API Worker `/v1/catalog`, `/v1/regions` | Готово; **Hyperdrive** в `wrangler.toml` |
-| **Проверка Neon** | Если `/v1/catalog` пишет `relation "organizations" does not exist` — в GitHub **Actions → Neon DB migrations** дождаться зелёного, затем **Neon import data** (ручной запуск). |
-| **Авторизация** | См. ниже; миграция **`003_identity_providers.sql`**. Страница **`/account/`**. |
+| **Проверка Neon** | Если `/v1/catalog` пишет `relation "organizations" does not exist` — **Neon DB migrations** (зелёный job), затем **Neon import data**. Если формы входа на **`/account/`** отвечают ошибкой про таблицы (`auth_email_tokens` и т.д.) — не накатили **`003_identity_providers.sql`**: **`npm run db:migrate`** или ручной запуск workflow **Neon DB migrations**. |
+| **Авторизация** | См. ниже; миграции **`002_auth.sql`** + **`003_identity_providers.sql`**. Страница **`/account/`**. |
 | Сайт: каталог с API или fallback на JSON | `config/site.json` → **`catalogApiBaseUrl`**; при сборке `npm run build:layout` в страницы вставляется `<meta name="katalog-catalog-api">`; `main.js` сначала дергает API, при ошибке — `/data/catalog.json` |
 
 Большой файл `описание проекта с комментариями.txt` — дорожная карта на будущее (кабинеты, ORT, аналитика); для текущего v1 достаточно таблиц выше.
