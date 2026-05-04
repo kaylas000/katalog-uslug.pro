@@ -380,15 +380,22 @@ export async function handleAuth(
       if (!expectedKey) {
         return json({ error: "not_found" }, 404, cors);
       }
-      const key = (request.headers.get("x-dev-bootstrap-key") || "").trim();
-      if (!key || key !== expectedKey) {
-        return json({ error: "forbidden" }, 403, cors);
-      }
-      let body: { email?: string; password?: string };
+      let body: { email?: string; password?: string; devKey?: string };
       try {
-        body = (await request.json()) as { email?: string; password?: string };
+        body = (await request.json()) as {
+          email?: string;
+          password?: string;
+          devKey?: string;
+        };
       } catch {
         return json({ error: "invalid_json" }, 400, cors);
+      }
+      const key = (
+        request.headers.get("x-dev-bootstrap-key") ||
+        String(body.devKey || "")
+      ).trim();
+      if (!key || key !== expectedKey) {
+        return json({ error: "forbidden" }, 403, cors);
       }
       const email = normalizeEmail(String(body.email || ""));
       const password = String(body.password || "");
