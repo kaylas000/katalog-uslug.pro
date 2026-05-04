@@ -1,4 +1,5 @@
-# Ручной импорт data/*.json в Neon (после миграций).
+# Ручной импорт data/*.json в Neon (если нужен только импорт без пуша).
+# Обычно импорт уже идёт в workflow «Neon DB migrations» после SQL.
 # Actions → Neon import data → Run workflow
 # Секрет: NEON_DATABASE_URL (тот же, что для миграций)
 

@@ -1,4 +1,5 @@
-# Накатывает SQL из db/migrations/ на базу Neon при пуше в main.
+# Накатывает SQL из db/migrations/ на базу Neon при пуше в main,
+# затем заливает data/regions.json и data/catalog.json (организации) — без отдельной кнопки импорт не делался, API отдавал [].
 #
 # Это НЕ замена кнопки «подключить GitHub» в панели Neon — ту ты нажимаешь сам
 # (один раз), если хочешь их фичи (ветки БД под PR и т.д.).
@@ -18,7 +19,10 @@ on:
     branches: [main]
     paths:
       - "db/migrations/**"
+      - "data/catalog.json"
+      - "data/regions.json"
       - ".github/workflows/neon-migrate.yml"
+      - "worker/import-data-from-json.mjs"
   workflow_dispatch:
 
 env:
@@ -49,10 +53,10 @@ jobs:
             exit 1
           fi
 
+      # Neon pooler не принимает statement_timeout в startup (PGOPTIONS) — см. neon.tech/docs/connect/connection-errors
       - name: Apply migrations in order
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-          PGOPTIONS: "-c statement_timeout=120000"
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -67,4 +71,20 @@ jobs:
             echo ">>> $f"
             psql "$NEON_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
           done
-          echo "Готово."
+          echo "Миграции готовы."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker deps (импорт JSON)
+        working-directory: worker
+        run: npm ci
+
+      - name: Импорт регионов и организаций из data/*.json
+        working-directory: worker
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: node import-data-from-json.mjs
