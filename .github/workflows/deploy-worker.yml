@@ -14,6 +14,10 @@ on:
       - ".github/workflows/deploy-worker.yml"
   workflow_dispatch:
 
+# Убирает предупреждение GitHub про Node 20 в actions/checkout и setup-node (до дефолта на 24).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: deploy-worker-${{ github.ref }}
   cancel-in-progress: true
@@ -31,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
           cache: npm
           cache-dependency-path: worker/package-lock.json
 
