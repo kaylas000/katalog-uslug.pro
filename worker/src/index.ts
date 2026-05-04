@@ -1,13 +1,8 @@
 import { Client } from "pg";
+import { handleAuth } from "./auth";
+import type { Env } from "./types";
 
-type Hyperdrive = { connectionString: string };
-
-export interface Env {
-  HYPERDRIVE?: Hyperdrive;
-  /** Только для `wrangler dev` через `.dev.vars`. В проде — Hyperdrive. */
-  DATABASE_URL?: string;
-  ALLOWED_ORIGIN?: string;
-}
+export type { Env } from "./types";
 
 function getDbConnectionString(env: Env): string | undefined {
   return env.HYPERDRIVE?.connectionString || env.DATABASE_URL;
@@ -81,13 +76,18 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<Response> {
+    const url = new URL(request.url);
+    const path = url.pathname.replace(/\/$/, "") || "/";
+
+    if (path.startsWith("/v1/auth")) {
+      const authRes = await handleAuth(request, env);
+      if (authRes) return authRes;
+    }
+
     const cors = corsHeaders(env, request);
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
     }
-
-    const url = new URL(request.url);
-    const path = url.pathname.replace(/\/$/, "") || "/";
 
     if (path === "/v1/health") {
       return Response.json(
