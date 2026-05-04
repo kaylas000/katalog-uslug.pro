@@ -1,0 +1,67 @@
+# Накатывает SQL из db/migrations/ на базу Neon при пуше в main.
+#
+# Это НЕ замена кнопки «подключить GitHub» в панели Neon — ту ты нажимаешь сам
+# (один раз), если хочешь их фичи (ветки БД под PR и т.д.).
+#
+# Для ЭТОГО workflow достаточно секрета в GitHub:
+#   Settings → Secrets and variables → Actions → New repository secret
+#   Имя:  NEON_DATABASE_URL
+#   Значение: тот же Connection string, что в Neon (postgresql://...)
+#
+# Агент / я могут править файлы в репо, но секрет в GitHub ты добавляешь только ты
+# (или владелец репозитория) — без него job не запустит миграции.
+
+name: Neon DB migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "db/migrations/**"
+      - ".github/workflows/neon-migrate.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: neon-migrate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Check NEON_DATABASE_URL
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          if [ -z "$NEON_DATABASE_URL" ]; then
+            echo "::error::Нет секрета NEON_DATABASE_URL. GitHub → Settings → Secrets → Actions → добавь строку из Neon."
+            exit 1
+          fi
+
+      - name: Apply migrations in order
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          PGOPTIONS: "-c statement_timeout=120000"
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(db/migrations/*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "Нет файлов в db/migrations/"
+            exit 0
+          fi
+          IFS=$'\n' sorted=($(sort <<<"${files[*]}"))
+          unset IFS
+          for f in "${sorted[@]}"; do
+            echo ">>> $f"
+            psql "$NEON_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+          echo "Готово."

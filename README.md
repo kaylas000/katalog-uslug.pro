@@ -59,6 +59,8 @@ npm run build:site
 
 **Миграции схемы:** любым клиентом `psql` (или GUI) выполнить SQL из `db/migrations/` по порядку номеров на ту БД, куда сейчас смотрит строка подключения.
 
+**GitHub + Neon (автоматом из репозитория):** в настройках репозитория GitHub → **Secrets** → **Actions** добавьте секрет **`NEON_DATABASE_URL`** (тот же Connection string, что в Neon). При пуше в `main`, если менялись файлы в `db/migrations/`, workflow **Neon DB migrations** сам выполнит все `*.sql` по порядку. Интеграция «Neon ↔ GitHub» в панели Neon (приложение GitHub) **опциональна**: она для их сценариев (ветки, превью и т.д.); для этого workflow достаточно секрета — подключать приложение Neon в GitHub нужно только если сами хотите эти фичи.
+
 **Домашний ПК как БД для прод-API:** Worker из интернета не ходит на `192.168.*` напрямую — нужен [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) (или аналог) до Postgres; строка в Hyperdrive тогда ведёт на хост туннеля.
 
 Подробности по установке Postgres на ВМ: `scripts/cloudru-install-postgres.sh` в репозитории.
