@@ -375,6 +375,59 @@ export async function handleAuth(
   const reqUrl = request.url;
 
   try {
+    if (path === "/v1/auth/dev/bootstrap" && request.method === "POST") {
+      const expectedKey = env.DEV_BOOTSTRAP_KEY?.trim() || "";
+      if (!expectedKey) {
+        return json({ error: "not_found" }, 404, cors);
+      }
+      const key = (request.headers.get("x-dev-bootstrap-key") || "").trim();
+      if (!key || key !== expectedKey) {
+        return json({ error: "forbidden" }, 403, cors);
+      }
+      let body: { email?: string; password?: string };
+      try {
+        body = (await request.json()) as { email?: string; password?: string };
+      } catch {
+        return json({ error: "invalid_json" }, 400, cors);
+      }
+      const email = normalizeEmail(String(body.email || ""));
+      const password = String(body.password || "");
+      if (!isValidEmail(email)) {
+        return json({ error: "validation", field: "email" }, 400, cors);
+      }
+      const pwErr = validatePassword(password);
+      if (pwErr) {
+        return json({ error: "validation", field: "password", message: pwErr }, 400, cors);
+      }
+      const passwordHash = bcrypt.hashSync(password, BCRYPT_ROUNDS);
+      const user = await withDbClient(env, async (c) => {
+        const r = await c.query(
+          `INSERT INTO users (email, password_hash, email_verified_at)
+           VALUES ($1, $2, now())
+           ON CONFLICT (email) DO UPDATE SET
+             password_hash = EXCLUDED.password_hash,
+             email_verified_at = COALESCE(users.email_verified_at, now()),
+             updated_at = now()
+           RETURNING id, email`,
+          [email, passwordHash]
+        );
+        return r.rows[0] as { id: string; email: string };
+      });
+      const token = await withDbClient(env, async (c) =>
+        createSessionForUser(c, user.id)
+      );
+      const cookie = buildSessionCookie(token, reqUrl);
+      return json(
+        {
+          ok: true,
+          user: { id: user.id, email: user.email },
+        },
+        200,
+        cors,
+        cookie
+      );
+    }
+
     if (path === "/v1/auth/verify-email" && request.method === "GET") {
       const raw = url.searchParams.get("token") || "";
       if (raw.length < 16) {

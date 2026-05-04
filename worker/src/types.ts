@@ -16,6 +16,8 @@ export interface Env {
   DEV_RETURN_EMAIL_LINK?: string;
   /** SMS.RU api_id */
   SMSRU_API_ID?: string;
+  /** Служебный ключ для bootstrap-входа разработчика (опционально) */
+  DEV_BOOTSTRAP_KEY?: string;
   YANDEX_CLIENT_ID?: string;
   YANDEX_CLIENT_SECRET?: string;
   /** Зарегистрированный в приложении Яндекс redirect URI (должен совпадать с callback URL воркера) */
