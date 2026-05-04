@@ -7,6 +7,9 @@
   <title>Аккаунт — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/styles.css?v=20260502">
+  <style>
+    .auth-reg-dialog::backdrop { background: rgba(20, 28, 36, 0.45); }
+  </style>
 </head>
 <body>
 
@@ -167,13 +170,23 @@
             <p class="card-text" style="margin:0;"><a href="#" id="link-forgot">Забыли пароль?</a></p>
           </form>
           <div id="auth-resend-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
-            <p class="card-sub" style="margin-bottom:8px;">Почта ещё не подтверждена. Отправить письмо повторно?</p>
+            <p class="card-sub" style="margin-bottom:8px;">Почта ещё не подтверждена. Отправить код повторно?</p>
             <form id="form-resend-verify" class="auth-form">
               <div class="auth-field">
                 <label for="resend-email">Почта</label>
                 <input id="resend-email" type="email" required autocomplete="email">
               </div>
-              <button type="submit" class="btn btn-outline">Отправить ссылку снова</button>
+              <button type="submit" class="btn btn-outline">Отправить код на почту</button>
+            </form>
+          </div>
+          <div id="auth-login-verify-code-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <p class="card-sub" style="margin-bottom:8px;">Введите 6-значный код из письма (тот же пароль, что вы вводили выше).</p>
+            <form id="form-login-email-code" class="auth-form">
+              <div class="auth-field">
+                <label for="login-email-otp">Код</label>
+                <input id="login-email-otp" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Подтвердить почту и войти</button>
             </form>
           </div>
         </div>
@@ -188,8 +201,8 @@
               <label for="reg-password">Пароль (10+ символов, буква и цифра)</label>
               <input id="reg-password" type="password" required autocomplete="new-password">
             </div>
-            <button type="submit" class="btn btn-primary">Создать аккаунт</button>
-            <p class="card-text" style="font-size:13px;color:var(--text-2);margin:0;">На почту придёт ссылка для подтверждения — без неё вход не включится.</p>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <p class="card-text" style="font-size:13px;color:var(--text-2);margin:0;">Аккаунт появится только после подтверждения: откроется окно — код на почту или в SMS на указанный телефон.</p>
           </form>
         </div>
 
@@ -234,6 +247,38 @@
             <button type="submit" class="btn btn-primary">Сохранить и войти</button>
           </form>
         </div>
+
+        <dialog id="dialog-reg-confirm" class="auth-reg-dialog" style="max-width:min(440px,96vw);border:1px solid var(--border);border-radius:12px;padding:0;">
+          <div class="card-body" style="padding:22px;">
+            <h2 class="card-title" style="font-size:19px;margin-top:0;">Подтвердите регистрацию</h2>
+            <p class="card-sub" id="dialog-reg-lead" style="margin-bottom:6px;">Аккаунт ещё не создан. Выберите, куда отправить код.</p>
+            <p class="card-text" id="dialog-reg-email-line" style="font-weight:500;margin-bottom:14px;"></p>
+            <div class="auth-field">
+              <label for="dialog-reg-phone">Телефон (для кода по SMS)</label>
+              <input id="dialog-reg-phone" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+            </div>
+            <div id="dialog-reg-step-send">
+              <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+                <button type="button" class="btn btn-primary" id="dialog-reg-send-email">Отправить код на почту</button>
+                <button type="button" class="btn btn-outline" id="dialog-reg-send-sms">Отправить код в SMS</button>
+              </div>
+            </div>
+            <div id="dialog-reg-step-code" style="display:none;margin-top:16px;">
+              <form id="form-dialog-reg-code" class="auth-form" style="margin:0;">
+                <div class="auth-field">
+                  <label for="dialog-reg-otp" id="dialog-reg-otp-label">Код (6 цифр)</label>
+                  <input id="dialog-reg-otp" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать аккаунт и войти</button>
+              </form>
+              <button type="button" class="btn btn-outline btn-sm" id="dialog-reg-resend" style="margin-top:10px;display:none;">Отправить код снова</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;">
+              <button type="button" class="btn btn-ghost btn-sm" id="dialog-reg-back" style="display:none;">Назад</button>
+              <button type="button" class="btn btn-ghost" id="dialog-reg-cancel">Отмена</button>
+            </div>
+          </div>
+        </dialog>
 
       </div>
     </div>
@@ -309,6 +354,6 @@
   </div>
 
   <script src="/js/main.js?v=20260506"></script>
-  <script src="/js/account.js?v=20260507" defer></script>
+  <script src="/js/account.js?v=20260509" defer></script>
 </body>
 </html>

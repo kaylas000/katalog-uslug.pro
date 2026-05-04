@@ -52,6 +52,10 @@
     });
   }
 
+  function el(id) {
+    return document.getElementById(id);
+  }
+
   async function refreshLoggedUi(cfg) {
     const base = apiBase();
     const panelLogged = document.getElementById('auth-panel-logged');
@@ -131,13 +135,241 @@
       }
     }
 
+    const regState = {
+      pendingRegistrationId: '',
+      channel: 'email',
+      smsPhone: '',
+    };
+
+    const dlgReg = el('dialog-reg-confirm');
+
+    async function cancelRegistrationPending() {
+      const id = regState.pendingRegistrationId;
+      if (!id) return;
+      try {
+        await jfetch('/v1/auth/register/cancel', {
+          method: 'POST',
+          body: JSON.stringify({ pendingRegistrationId: id }),
+        });
+      } catch {
+        /* ignore */
+      }
+      regState.pendingRegistrationId = '';
+    }
+
+    function resetRegDialogPanels() {
+      const stepSend = el('dialog-reg-step-send');
+      const stepCode = el('dialog-reg-step-code');
+      const back = el('dialog-reg-back');
+      const resend = el('dialog-reg-resend');
+      const otp = el('dialog-reg-otp');
+      if (stepSend) stepSend.style.display = 'block';
+      if (stepCode) stepCode.style.display = 'none';
+      if (back) back.style.display = 'none';
+      if (resend) resend.style.display = 'none';
+      if (otp) otp.value = '';
+    }
+
+    async function closeRegDialog() {
+      await cancelRegistrationPending();
+      if (dlgReg && dlgReg.open) dlgReg.close();
+      resetRegDialogPanels();
+    }
+
+    function openRegConfirmDialog(emailText, pendingId) {
+      regState.pendingRegistrationId = pendingId;
+      regState.channel = 'email';
+      regState.smsPhone = '';
+      const line = el('dialog-reg-email-line');
+      if (line) line.textContent = 'Почта: ' + emailText;
+      const phoneIn = el('dialog-reg-phone');
+      if (phoneIn) phoneIn.value = '';
+      resetRegDialogPanels();
+      const btnSmsDlg = el('dialog-reg-send-sms');
+      if (btnSmsDlg) {
+        btnSmsDlg.style.display = cfg.registrationSms ? 'inline-flex' : 'none';
+      }
+      if (dlgReg && typeof dlgReg.showModal === 'function') {
+        dlgReg.showModal();
+      }
+    }
+
+    function regDialogShowCodeStep() {
+      const stepSend = el('dialog-reg-step-send');
+      const stepCode = el('dialog-reg-step-code');
+      const back = el('dialog-reg-back');
+      const resend = el('dialog-reg-resend');
+      const lbl = el('dialog-reg-otp-label');
+      if (stepSend) stepSend.style.display = 'none';
+      if (stepCode) stepCode.style.display = 'block';
+      if (back) back.style.display = 'inline-flex';
+      if (resend) resend.style.display = 'inline-flex';
+      if (lbl) {
+        lbl.textContent =
+          regState.channel === 'email'
+            ? 'Код из письма (6 цифр)'
+            : 'Код из SMS (6 цифр)';
+      }
+      if (resend) {
+        resend.textContent =
+          regState.channel === 'email'
+            ? 'Отправить код на почту снова'
+            : 'Отправить SMS снова';
+      }
+      const otp = el('dialog-reg-otp');
+      if (otp) {
+        otp.value = '';
+        otp.focus();
+      }
+    }
+
+    async function sendPendingEmailCode() {
+      const pid = regState.pendingRegistrationId;
+      if (!pid) return false;
+      const { r, body } = await jfetch('/v1/auth/register/send-email-code', {
+        method: 'POST',
+        body: JSON.stringify({ pendingRegistrationId: pid }),
+      });
+      if (r.status === 429) {
+        showMsg(gmsg, 'Слишком много запросов. Подождите час.', 'err');
+        return false;
+      }
+      if (!r.ok) {
+        showMsg(
+          gmsg,
+          body.message || body.error || 'Не удалось отправить код на почту',
+          'err'
+        );
+        return false;
+      }
+      let t = 'Код отправлен на почту.';
+      if (body.devVerificationCode) {
+        t += ' (dev) Код: ' + body.devVerificationCode;
+      }
+      showMsg(gmsg, t, 'ok');
+      return true;
+    }
+
     document.querySelectorAll('.auth-tab').forEach((tab) => {
       tab.addEventListener('click', () => {
-        setTab(tab.getAttribute('data-auth-tab') || 'login');
+        const name = tab.getAttribute('data-auth-tab') || 'login';
+        if (name !== 'register') {
+          void closeRegDialog();
+        }
+        setTab(name);
       });
     });
 
-    if (location.hash === '#register') setTab('register');
+    if (location.hash === '#register') {
+      setTab('register');
+    }
+
+    dlgReg?.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      void closeRegDialog();
+    });
+
+    el('dialog-reg-send-email')?.addEventListener('click', async () => {
+      regState.channel = 'email';
+      const ok = await sendPendingEmailCode();
+      if (ok) regDialogShowCodeStep();
+    });
+
+    el('dialog-reg-send-sms')?.addEventListener('click', async () => {
+      const phone = el('dialog-reg-phone')?.value || '';
+      const pid = regState.pendingRegistrationId;
+      if (!pid) return;
+      const { r, body } = await jfetch('/v1/auth/register/send-sms-code', {
+        method: 'POST',
+        body: JSON.stringify({ pendingRegistrationId: pid, phone }),
+      });
+      if (r.status === 429) {
+        showMsg(gmsg, 'Подождите минуту перед повторной отправкой.', 'err');
+        return;
+      }
+      if (!r.ok) {
+        showMsg(
+          gmsg,
+          body.error === 'phone_taken'
+            ? 'Этот номер уже занят другим аккаунтом.'
+            : body.message || body.error || 'Ошибка SMS',
+          'err'
+        );
+        return;
+      }
+      regState.channel = 'sms';
+      regState.smsPhone = body.normalizedPhone || phone.trim();
+      let t = 'Код отправлен в SMS.';
+      if (body.devVerificationCode) {
+        t += ' (dev) Код: ' + body.devVerificationCode;
+      }
+      showMsg(gmsg, t, 'ok');
+      regDialogShowCodeStep();
+    });
+
+    el('dialog-reg-resend')?.addEventListener('click', async () => {
+      if (regState.channel === 'email') {
+        const ok = await sendPendingEmailCode();
+        if (ok) showMsg(gmsg, 'Код отправлен повторно.', 'ok');
+      } else {
+        const phone = regState.smsPhone || el('dialog-reg-phone')?.value || '';
+        const { r, body } = await jfetch('/v1/auth/register/send-sms-code', {
+          method: 'POST',
+          body: JSON.stringify({
+            pendingRegistrationId: regState.pendingRegistrationId,
+            phone,
+          }),
+        });
+        if (!r.ok) {
+          showMsg(gmsg, body.message || body.error || 'Ошибка', 'err');
+          return;
+        }
+        regState.smsPhone = body.normalizedPhone || phone.trim();
+        showMsg(gmsg, 'SMS отправлено снова.', 'ok');
+      }
+    });
+
+    el('dialog-reg-back')?.addEventListener('click', () => {
+      resetRegDialogPanels();
+    });
+
+    el('dialog-reg-cancel')?.addEventListener('click', () => {
+      void closeRegDialog();
+    });
+
+    el('form-dialog-reg-code')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code =
+        el('dialog-reg-otp')?.value?.trim().replace(/\D/g, '').slice(0, 6) || '';
+      if (code.length !== 6) {
+        showMsg(gmsg, 'Введите 6 цифр кода.', 'err');
+        return;
+      }
+      const payload = {
+        pendingRegistrationId: regState.pendingRegistrationId,
+        channel: regState.channel,
+        code,
+      };
+      if (regState.channel === 'sms') {
+        payload.phone = regState.smsPhone;
+      }
+      const { r, body } = await jfetch('/v1/auth/register/verify-code', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (r.ok) {
+        regState.pendingRegistrationId = '';
+        window.location.reload();
+        return;
+      }
+      showMsg(
+        gmsg,
+        body.error === 'invalid_code'
+          ? 'Неверный или просроченный код.'
+          : body.message || 'Ошибка',
+        'err'
+      );
+    });
 
     const hash = location.hash || '';
     const resetMatch = hash.match(/^#reset=(.+)$/);
@@ -159,7 +391,9 @@
       const email = document.getElementById('login-email')?.value?.trim() || '';
       const password = document.getElementById('login-password')?.value || '';
       const resendWrap = document.getElementById('auth-resend-wrap');
+      const loginCodeWrap = document.getElementById('auth-login-verify-code-wrap');
       if (resendWrap) resendWrap.style.display = 'none';
+      if (loginCodeWrap) loginCodeWrap.style.display = 'none';
       const { r, body } = await jfetch('/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
@@ -175,9 +409,30 @@
           const re = document.getElementById('resend-email');
           if (re) re.value = email;
         }
+        if (loginCodeWrap) loginCodeWrap.style.display = 'block';
         return;
       }
       showMsg(gmsg, body.message || 'Неверная почта или пароль.', 'err');
+    });
+
+    document.getElementById('form-login-email-code')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email')?.value?.trim() || '';
+      const password = document.getElementById('login-password')?.value || '';
+      const code = el('login-email-otp')?.value?.trim().replace(/\D/g, '').slice(0, 6) || '';
+      if (code.length !== 6) {
+        showMsg(gmsg, 'Введите 6 цифр кода.', 'err');
+        return;
+      }
+      const { r, body } = await jfetch('/v1/auth/register/verify-code', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, channel: 'email', code }),
+      });
+      if (r.ok) {
+        window.location.reload();
+        return;
+      }
+      showMsg(gmsg, body.error === 'invalid_code' ? 'Неверный или просроченный код.' : (body.message || 'Ошибка'), 'err');
     });
 
     document.getElementById('form-resend-verify')?.addEventListener('submit', async (e) => {
@@ -195,26 +450,34 @@
         showMsg(gmsg, body.message || body.error || 'Ошибка отправки', 'err');
         return;
       }
-      let t = 'Если адрес зарегистрирован и не подтверждён, письмо отправлено.';
-      if (body.devVerificationLink) t += ' (dev) ' + body.devVerificationLink;
+      let t =
+        'Если адрес зарегистрирован и не подтверждён, на почту отправлен код.';
+      if (body.devVerificationCode) {
+        t += ' (dev) Код: ' + body.devVerificationCode;
+      }
       showMsg(gmsg, t, 'ok');
     });
 
     document.getElementById('form-register')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('reg-email')?.value?.trim() || '';
-      const password = document.getElementById('reg-password')?.value || '';
+      const email = el('reg-email')?.value?.trim() || '';
+      const password = el('reg-password')?.value || '';
       const { r, body } = await jfetch('/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      if (r.status === 201 && body.needsEmailVerification) {
-        let t =
-          'Проверьте почту: мы отправили ссылку для подтверждения.' +
-          (body.devVerificationLink
-            ? ' (dev) Ссылка: ' + body.devVerificationLink
-            : '');
-        showMsg(gmsg, t, 'ok');
+      if (r.status === 201 && body.pendingRegistrationId) {
+        showMsg(
+          gmsg,
+          'Аккаунт ещё не создан. Подтвердите регистрацию в открывшемся окне.',
+          'ok'
+        );
+        openRegConfirmDialog(body.email || email, body.pendingRegistrationId);
+        if (!cfg.registrationSms) {
+          regState.channel = 'email';
+          const ok = await sendPendingEmailCode();
+          if (ok) regDialogShowCodeStep();
+        }
         return;
       }
       if (body.error === 'email_taken') {

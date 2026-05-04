@@ -4,6 +4,7 @@ import { withDbClient } from "./db";
 import type { Env } from "./types";
 import {
   passwordResetEmailHtml,
+  registrationCodeEmailHtml,
   sendResendEmail,
   sendSmsRu,
   verificationEmailHtml,
@@ -22,6 +23,8 @@ const SESSION_DAYS = 30;
 const BCRYPT_ROUNDS = 11;
 const EMAIL_TOKEN_HOURS = 48;
 const RESET_TOKEN_HOURS = 2;
+const REG_EMAIL_CODE_MINUTES = 30;
+const PEND_REG_HOURS = 2;
 const OTP_MINUTES = 10;
 const MAX_OTP_ATTEMPTS = 6;
 
@@ -165,20 +168,25 @@ function buildClearSessionCookie(requestUrl: string): string {
   return parts.join("; ");
 }
 
+type EmailTokenPurpose =
+  | "email_verify"
+  | "password_reset"
+  | "registration_email_code";
+
 async function insertEmailToken(
   c: Client,
   userId: string,
-  purpose: "email_verify" | "password_reset",
+  purpose: EmailTokenPurpose,
   rawToken: string
 ): Promise<number> {
   const token_hash = await sha256hex(rawToken);
-  const exp = new Date(
-    Date.now() +
-      (purpose === "password_reset"
-        ? RESET_TOKEN_HOURS
-        : EMAIL_TOKEN_HOURS) *
-        3600000
-  ).toISOString();
+  const ttlMs =
+    purpose === "password_reset"
+      ? RESET_TOKEN_HOURS * 3600000
+      : purpose === "registration_email_code"
+        ? REG_EMAIL_CODE_MINUTES * 60000
+        : EMAIL_TOKEN_HOURS * 3600000;
+  const exp = new Date(Date.now() + ttlMs).toISOString();
   const ins = await c.query(
     `INSERT INTO auth_email_tokens (user_id, token_hash, purpose, expires_at)
      VALUES ($1, $2, $3, $4::timestamptz)
@@ -209,6 +217,76 @@ async function consumeEmailToken(
   );
   if (!r.rows.length) return null;
   return { userId: String((r.rows[0] as { user_id: string }).user_id) };
+}
+
+/** Код регистрации из письма — привязан к конкретному user_id (нет коллизий 6 цифр). */
+async function consumeRegistrationEmailCode(
+  c: Client,
+  userId: string,
+  rawCode: string
+): Promise<boolean> {
+  const token_hash = await sha256hex(rawCode);
+  const r = await c.query(
+    `UPDATE auth_email_tokens t
+     SET consumed_at = now()
+     FROM (
+       SELECT id FROM auth_email_tokens
+       WHERE token_hash = $1 AND purpose = 'registration_email_code' AND user_id = $2::uuid
+         AND consumed_at IS NULL AND expires_at > now()
+       ORDER BY id DESC LIMIT 1
+     ) x
+     WHERE t.id = x.id
+     RETURNING t.id`,
+    [token_hash, userId]
+  );
+  return r.rows.length > 0;
+}
+
+async function loadUnverifiedUserWithPassword(
+  c: Client,
+  email: string,
+  password: string
+): Promise<{ id: string } | null> {
+  const r = await c.query(
+    `SELECT id, password_hash, email_verified_at FROM users WHERE lower(trim(email)) = $1`,
+    [email]
+  );
+  if (!r.rows.length) return null;
+  const row = r.rows[0] as {
+    id: string;
+    password_hash: string | null;
+    email_verified_at: string | null;
+  };
+  if (row.email_verified_at != null) return null;
+  if (!row.password_hash || !bcrypt.compareSync(password, row.password_hash)) {
+    return null;
+  }
+  return { id: row.id };
+}
+
+function isUuid(s: string): boolean {
+  return (
+    s.length === 36 &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      s
+    )
+  );
+}
+
+async function registrationOtpHash(
+  env: Env,
+  pendingId: string,
+  channel: "email" | "sms",
+  phoneE164: string | null,
+  code: string
+): Promise<string> {
+  const pepper =
+    env.AUTH_PEPPER?.trim() || "dev-auth-pepper-set-AUTH_PEPPER-in-prod";
+  const phonePart =
+    channel === "sms" && phoneE164 ? phoneE164 : "";
+  return sha256hex(
+    `${pepper}:reg:${pendingId}:${channel}:${phonePart}:${code}`
+  );
 }
 
 async function createSessionForUser(
@@ -242,11 +320,13 @@ function authConfig(env: Env, requestUrl: string) {
   );
   const esiaConfigured = Boolean(env.ESIA_CLIENT_ID?.trim());
   const esiaReady = env.ESIA_FULL_IMPLEMENTATION === "true";
+  const smsOk = Boolean(env.SMSRU_API_ID?.trim());
   return {
     emailPassword: true,
     emailVerificationRequired: true,
     resendEmail: Boolean(env.RESEND_API_KEY?.trim()),
-    smsLogin: Boolean(env.SMSRU_API_ID?.trim()),
+    smsLogin: smsOk,
+    registrationSms: smsOk,
     yandex: yandexOk,
     yandexAuthorizeUrl:
       yandexOk && requestUrl
@@ -458,6 +538,25 @@ export async function handleAuth(
       );
     }
 
+    if (path === "/v1/auth/register/cancel" && request.method === "POST") {
+      let body: { pendingRegistrationId?: string };
+      try {
+        body = (await request.json()) as { pendingRegistrationId?: string };
+      } catch {
+        return json({ error: "invalid_json" }, 400, cors);
+      }
+      const pid = String(body.pendingRegistrationId || "").trim();
+      if (!isUuid(pid)) {
+        return json({ error: "validation", field: "pendingRegistrationId" }, 400, cors);
+      }
+      await withDbClient(env, async (c) => {
+        await c.query(`DELETE FROM registration_pending WHERE id = $1::uuid`, [
+          pid,
+        ]);
+      });
+      return json({ ok: true }, 200, cors);
+    }
+
     if (path === "/v1/auth/register" && request.method === "POST") {
       let body: { email?: string; password?: string };
       try {
@@ -474,62 +573,619 @@ export async function handleAuth(
       if (pwErr) return json({ error: "validation", message: pwErr }, 400, cors);
 
       const password_hash = bcrypt.hashSync(password, BCRYPT_ROUNDS);
-      const rawVerify = randomToken();
 
       const created = await withDbClient(env, async (c) => {
-        try {
-          const ins = await c.query(
-            `INSERT INTO users (email, password_hash, email_verified_at)
-             VALUES ($1, $2, NULL)
-             RETURNING id, email`,
-            [email, password_hash]
-          );
-          const u = ins.rows[0] as { id: string; email: string };
-          await insertEmailToken(c, u.id, "email_verify", rawVerify);
-          return u;
-        } catch (e: unknown) {
-          const err = e as { code?: string };
-          if (err.code === "23505") return null;
-          throw e;
-        }
-      });
-      if (!created) {
-        return json({ error: "email_taken" }, 409, cors);
-      }
-
-      const verifyUrl = `${new URL(reqUrl).origin}/v1/auth/verify-email?token=${encodeURIComponent(rawVerify)}`;
-      const devLink =
-        env.DEV_RETURN_EMAIL_LINK === "true" ? verifyUrl : undefined;
-      const send = await sendResendEmail(env, {
-        to: email,
-        subject: "Подтвердите почту — katalog-uslug.pro",
-        html: verificationEmailHtml(env, verifyUrl),
-      });
-
-      if (!send.ok && !devLink) {
-        await withDbClient(env, async (c) => {
-          await c.query(`DELETE FROM users WHERE id = $1`, [created.id]);
-        });
-        return json(
-          {
-            error: "email_not_configured",
-            message:
-              "Почтовый сервис не настроен (RESEND_API_KEY). Укажите ключ в Worker или включите DEV_RETURN_EMAIL_LINK=true только для разработки.",
-          },
-          503,
-          cors
+        const ex = await c.query(
+          `SELECT id FROM users WHERE lower(trim(email)) = $1`,
+          [email]
         );
+        if (ex.rows.length) return { kind: "taken" as const };
+        await c.query(
+          `DELETE FROM registration_pending WHERE lower(trim(email)) = $1`,
+          [email]
+        );
+        const exp = new Date(
+          Date.now() + PEND_REG_HOURS * 3600000
+        ).toISOString();
+        const ins = await c.query(
+          `INSERT INTO registration_pending (email, password_hash, expires_at)
+           VALUES ($1, $2, $3::timestamptz) RETURNING id`,
+          [email, password_hash, exp]
+        );
+        return {
+          kind: "ok" as const,
+          id: String((ins.rows[0] as { id: string }).id),
+        };
+      });
+      if (created.kind === "taken") {
+        return json({ error: "email_taken" }, 409, cors);
       }
 
       return json(
         {
           ok: true,
-          needsEmailVerification: true,
-          devVerificationLink: devLink,
-          emailSent: send.ok,
+          pendingRegistrationId: created.id,
+          email,
         },
         201,
         cors
+      );
+    }
+
+    if (
+      path === "/v1/auth/register/send-email-code" &&
+      request.method === "POST"
+    ) {
+      let body: {
+        pendingRegistrationId?: string;
+        email?: string;
+        password?: string;
+      };
+      try {
+        body = (await request.json()) as typeof body;
+      } catch {
+        return json({ error: "invalid_json" }, 400, cors);
+      }
+      const pendingId = String(body.pendingRegistrationId || "").trim();
+
+      if (pendingId && isUuid(pendingId)) {
+        const prep = await withDbClient(env, async (c) => {
+          const p = await c.query(
+            `SELECT id, email FROM registration_pending
+             WHERE id = $1::uuid AND expires_at > now()`,
+            [pendingId]
+          );
+          if (!p.rows.length) return { kind: "bad" as const };
+          const email = String((p.rows[0] as { email: string }).email);
+          const cnt = await c.query(
+            `SELECT COUNT(*)::int AS n FROM registration_pending_otp
+             WHERE pending_id = $1::uuid AND created_at > now() - interval '1 hour'`,
+            [pendingId]
+          );
+          const n = (cnt.rows[0] as { n: number }).n;
+          if (n >= 5) return { kind: "rate" as const };
+          await c.query(
+            `DELETE FROM registration_pending_otp
+             WHERE pending_id = $1::uuid AND consumed_at IS NULL`,
+            [pendingId]
+          );
+          const code = randomOtp6();
+          const code_hash = await registrationOtpHash(
+            env,
+            pendingId,
+            "email",
+            null,
+            code
+          );
+          const exp = new Date(
+            Date.now() + REG_EMAIL_CODE_MINUTES * 60000
+          ).toISOString();
+          await c.query(
+            `INSERT INTO registration_pending_otp
+             (pending_id, channel, phone_e164, code_hash, expires_at)
+             VALUES ($1::uuid, 'email', NULL, $2, $3::timestamptz)`,
+            [pendingId, code_hash, exp]
+          );
+          return { kind: "ok" as const, email, code };
+        });
+        if (prep.kind === "rate") {
+          return json({ error: "rate_limited" }, 429, cors);
+        }
+        if (prep.kind !== "ok") {
+          return json({ error: "invalid_or_expired_pending" }, 400, cors);
+        }
+        const devCode =
+          env.DEV_RETURN_EMAIL_LINK === "true" ? prep.code : undefined;
+        const mail = await sendResendEmail(env, {
+          to: prep.email,
+          subject: "Код подтверждения регистрации — katalog-uslug.pro",
+          html: registrationCodeEmailHtml(env, prep.code),
+        });
+        if (!mail.ok && !devCode) {
+          await withDbClient(env, async (c) => {
+            await c.query(
+              `DELETE FROM registration_pending_otp
+               WHERE pending_id = $1::uuid AND channel = 'email' AND consumed_at IS NULL`,
+              [pendingId]
+            );
+          });
+          return json(
+            {
+              error: "email_not_configured",
+              message:
+                "Почта не настроена (RESEND_API_KEY). Для разработки включите DEV_RETURN_EMAIL_LINK=true.",
+            },
+            503,
+            cors
+          );
+        }
+        return json(
+          {
+            ok: true,
+            emailSent: mail.ok,
+            devVerificationCode: devCode,
+          },
+          200,
+          cors
+        );
+      }
+
+      const email = normalizeEmail(String(body.email || ""));
+      const password = String(body.password || "");
+      if (!isValidEmail(email)) {
+        return json({ error: "validation", field: "email" }, 400, cors);
+      }
+
+      const prep = await withDbClient(env, async (c) => {
+        const u = await loadUnverifiedUserWithPassword(c, email, password);
+        if (!u) return { kind: "bad" as const };
+        const cnt = await c.query(
+          `SELECT COUNT(*)::int AS n FROM auth_email_tokens
+           WHERE user_id = $1::uuid AND purpose IN ('email_verify', 'registration_email_code')
+             AND created_at > now() - interval '1 hour'`,
+          [u.id]
+        );
+        const n = (cnt.rows[0] as { n: number }).n;
+        if (n >= 5) return { kind: "rate" as const };
+        await c.query(
+          `DELETE FROM auth_email_tokens
+           WHERE user_id = $1::uuid AND consumed_at IS NULL
+             AND purpose IN ('email_verify', 'registration_email_code')`,
+          [u.id]
+        );
+        const code = randomOtp6();
+        const tokenRowId = await insertEmailToken(
+          c,
+          u.id,
+          "registration_email_code",
+          code
+        );
+        return { kind: "ok" as const, userId: u.id, code, tokenRowId, email };
+      });
+      if (prep.kind === "rate") {
+        return json({ error: "rate_limited" }, 429, cors);
+      }
+      if (prep.kind !== "ok") {
+        return json({ error: "invalid_credentials" }, 401, cors);
+      }
+
+      const devCode =
+        env.DEV_RETURN_EMAIL_LINK === "true" ? prep.code : undefined;
+      const mail = await sendResendEmail(env, {
+        to: prep.email,
+        subject: "Код подтверждения — katalog-uslug.pro",
+        html: registrationCodeEmailHtml(env, prep.code),
+      });
+      if (!mail.ok && !devCode) {
+        await withDbClient(env, async (c) => {
+          await c.query(`DELETE FROM auth_email_tokens WHERE id = $1`, [
+            prep.tokenRowId,
+          ]);
+        });
+        return json(
+          {
+            error: "email_not_configured",
+            message:
+              "Почта не настроена (RESEND_API_KEY). Для разработки включите DEV_RETURN_EMAIL_LINK=true.",
+          },
+          503,
+          cors
+        );
+      }
+      return json(
+        {
+          ok: true,
+          emailSent: mail.ok,
+          devVerificationCode: devCode,
+        },
+        200,
+        cors
+      );
+    }
+
+    if (path === "/v1/auth/register/send-sms-code" && request.method === "POST") {
+      let body: {
+        pendingRegistrationId?: string;
+        phone?: string;
+        email?: string;
+        password?: string;
+      };
+      try {
+        body = (await request.json()) as typeof body;
+      } catch {
+        return json({ error: "invalid_json" }, 400, cors);
+      }
+      const pendingId = String(body.pendingRegistrationId || "").trim();
+
+      if (pendingId && isUuid(pendingId)) {
+        const phone = normalizePhoneRu(String(body.phone || ""));
+        if (!phone) {
+          return json(
+            { error: "validation", field: "phone", message: "Укажите телефон РФ." },
+            400,
+            cors
+          );
+        }
+        if (!env.SMSRU_API_ID?.trim()) {
+          return json({ error: "sms_not_configured" }, 503, cors);
+        }
+
+        const recent = await withDbClient(env, async (c) => {
+          const r = await c.query(
+            `SELECT id FROM registration_pending_otp
+             WHERE channel = 'sms' AND phone_e164 = $1 AND created_at > now() - interval '55 seconds'
+             ORDER BY id DESC LIMIT 1`,
+            [phone]
+          );
+          return r.rows.length > 0;
+        });
+        if (recent) return json({ error: "rate_limited" }, 429, cors);
+
+        const prep = await withDbClient(env, async (c) => {
+          const p = await c.query(
+            `SELECT id FROM registration_pending
+             WHERE id = $1::uuid AND expires_at > now()`,
+            [pendingId]
+          );
+          if (!p.rows.length) return { kind: "bad" as const };
+          const taken = await c.query(
+            `SELECT id FROM users WHERE phone_e164 = $1 AND phone_verified_at IS NOT NULL`,
+            [phone]
+          );
+          if (taken.rows.length) return { kind: "phone_taken" as const };
+          await c.query(
+            `DELETE FROM registration_pending_otp
+             WHERE pending_id = $1::uuid AND consumed_at IS NULL`,
+            [pendingId]
+          );
+          const code = randomOtp6();
+          const code_hash = await registrationOtpHash(
+            env,
+            pendingId,
+            "sms",
+            phone,
+            code
+          );
+          const exp = new Date(Date.now() + OTP_MINUTES * 60000).toISOString();
+          await c.query(
+            `INSERT INTO registration_pending_otp
+             (pending_id, channel, phone_e164, code_hash, expires_at)
+             VALUES ($1::uuid, 'sms', $2, $3, $4::timestamptz)`,
+            [pendingId, phone, code_hash, exp]
+          );
+          return { kind: "ok" as const, code };
+        });
+        if (prep.kind === "phone_taken") {
+          return json({ error: "phone_taken" }, 409, cors);
+        }
+        if (prep.kind !== "ok") {
+          return json({ error: "invalid_or_expired_pending" }, 400, cors);
+        }
+
+        const devCode =
+          env.DEV_RETURN_EMAIL_LINK === "true" ? prep.code : undefined;
+        const sms = await sendSmsRu(
+          env,
+          phone,
+          `Код регистрации katalog-uslug.pro: ${prep.code}`
+        );
+        if (!sms.ok && !devCode) {
+          await withDbClient(env, async (c) => {
+            await c.query(
+              `DELETE FROM registration_pending_otp
+               WHERE pending_id = $1::uuid AND channel = 'sms' AND consumed_at IS NULL`,
+              [pendingId]
+            );
+          });
+          return json({ error: sms.error }, 502, cors);
+        }
+        return json(
+          {
+            ok: true,
+            normalizedPhone: phone,
+            devVerificationCode: devCode,
+          },
+          200,
+          cors
+        );
+      }
+
+      const email = normalizeEmail(String(body.email || ""));
+      const password = String(body.password || "");
+      const phone = normalizePhoneRu(String(body.phone || ""));
+      if (!isValidEmail(email) || !phone) {
+        return json(
+          { error: "validation", message: "Укажите почту и телефон РФ." },
+          400,
+          cors
+        );
+      }
+      if (!env.SMSRU_API_ID?.trim()) {
+        return json({ error: "sms_not_configured" }, 503, cors);
+      }
+
+      const recent = await withDbClient(env, async (c) => {
+        const r = await c.query(
+          `SELECT id FROM auth_phone_otp
+           WHERE phone_e164 = $1 AND purpose = 'register_verify' AND created_at > now() - interval '55 seconds'
+           ORDER BY id DESC LIMIT 1`,
+          [phone]
+        );
+        return r.rows.length > 0;
+      });
+      if (recent) return json({ error: "rate_limited" }, 429, cors);
+
+      const prep = await withDbClient(env, async (c) => {
+        const u = await loadUnverifiedUserWithPassword(c, email, password);
+        if (!u) return { kind: "bad" as const };
+        const taken = await c.query(
+          `SELECT id FROM users WHERE phone_e164 = $1 AND phone_verified_at IS NOT NULL AND id <> $2::uuid`,
+          [phone, u.id]
+        );
+        if (taken.rows.length) return { kind: "phone_taken" as const };
+        const code = randomOtp6();
+        const code_hash = await otpCodeHash(env, phone, code);
+        const exp = new Date(Date.now() + OTP_MINUTES * 60000).toISOString();
+        const ins = await c.query(
+          `INSERT INTO auth_phone_otp (phone_e164, user_id, purpose, code_hash, expires_at)
+           VALUES ($1, $2::uuid, 'register_verify', $3, $4::timestamptz)
+           RETURNING id`,
+          [phone, u.id, code_hash, exp]
+        );
+        const otpId = String((ins.rows[0] as { id: string }).id);
+        return { kind: "ok" as const, code, otpId };
+      });
+      if (prep.kind === "phone_taken") {
+        return json({ error: "phone_taken" }, 409, cors);
+      }
+      if (prep.kind !== "ok") {
+        return json({ error: "invalid_credentials" }, 401, cors);
+      }
+
+      const devCode =
+        env.DEV_RETURN_EMAIL_LINK === "true" ? prep.code : undefined;
+      const sms = await sendSmsRu(
+        env,
+        phone,
+        `Код регистрации katalog-uslug.pro: ${prep.code}`
+      );
+      if (!sms.ok && !devCode) {
+        await withDbClient(env, async (c) => {
+          await c.query(`DELETE FROM auth_phone_otp WHERE id = $1::bigint`, [
+            prep.otpId,
+          ]);
+        });
+        return json({ error: sms.error }, 502, cors);
+      }
+      return json(
+        {
+          ok: true,
+          normalizedPhone: phone,
+          devVerificationCode: devCode,
+        },
+        200,
+        cors
+      );
+    }
+
+    if (path === "/v1/auth/register/verify-code" && request.method === "POST") {
+      let body: {
+        pendingRegistrationId?: string;
+        email?: string;
+        password?: string;
+        channel?: string;
+        code?: string;
+        phone?: string;
+      };
+      try {
+        body = (await request.json()) as typeof body;
+      } catch {
+        return json({ error: "invalid_json" }, 400, cors);
+      }
+      const pendingId = String(body.pendingRegistrationId || "").trim();
+      const channel = body.channel === "sms" ? "sms" : "email";
+      const code = String(body.code || "").replace(/\D/g, "").slice(0, 6);
+      const phone = normalizePhoneRu(String(body.phone || ""));
+
+      if (pendingId && isUuid(pendingId)) {
+        if (code.length !== 6) {
+          return json({ error: "validation" }, 400, cors);
+        }
+        if (channel === "sms" && !phone) {
+          return json({ error: "validation", field: "phone" }, 400, cors);
+        }
+
+        const sessionTok = await withDbClient(env, async (c) => {
+          await c.query("BEGIN");
+          try {
+            const pend = await c.query(
+              `SELECT id, email, password_hash FROM registration_pending
+               WHERE id = $1::uuid AND expires_at > now() FOR UPDATE`,
+              [pendingId]
+            );
+            if (!pend.rows.length) {
+              await c.query("ROLLBACK");
+              return { kind: "bad" as const };
+            }
+            const pRow = pend.rows[0] as {
+              id: string;
+              email: string;
+              password_hash: string;
+            };
+            const ch: "email" | "sms" = channel === "sms" ? "sms" : "email";
+            const phoneDb = ch === "sms" ? phone : null;
+
+            const otpQ = await c.query(
+              `SELECT id, code_hash, attempts FROM registration_pending_otp
+               WHERE pending_id = $1::uuid AND channel = $2
+                 AND phone_e164 IS NOT DISTINCT FROM $3
+                 AND consumed_at IS NULL AND expires_at > now()
+               ORDER BY id DESC LIMIT 1 FOR UPDATE`,
+              [pendingId, ch, phoneDb]
+            );
+            if (!otpQ.rows.length) {
+              await c.query("ROLLBACK");
+              return { kind: "bad" as const };
+            }
+            const otp = otpQ.rows[0] as {
+              id: string;
+              code_hash: string;
+              attempts: number;
+            };
+            if (otp.attempts >= MAX_OTP_ATTEMPTS) {
+              await c.query("ROLLBACK");
+              return { kind: "bad" as const };
+            }
+            const match = await registrationOtpHash(
+              env,
+              pendingId,
+              ch,
+              phoneDb,
+              code
+            );
+            if (otp.code_hash !== match) {
+              await c.query(
+                `UPDATE registration_pending_otp SET attempts = attempts + 1 WHERE id = $1`,
+                [otp.id]
+              );
+              await c.query("ROLLBACK");
+              return { kind: "bad" as const };
+            }
+            await c.query(
+              `UPDATE registration_pending_otp SET consumed_at = now() WHERE id = $1`,
+              [otp.id]
+            );
+
+            let ins;
+            try {
+              if (ch === "email") {
+                ins = await c.query(
+                  `INSERT INTO users (email, password_hash, email_verified_at)
+                   VALUES ($1, $2, now()) RETURNING id, email`,
+                  [pRow.email, pRow.password_hash]
+                );
+              } else {
+                ins = await c.query(
+                  `INSERT INTO users (email, password_hash, email_verified_at, phone_e164, phone_verified_at)
+                   VALUES ($1, $2, now(), $3, now()) RETURNING id, email`,
+                  [pRow.email, pRow.password_hash, phone]
+                );
+              }
+            } catch (e: unknown) {
+              await c.query("ROLLBACK");
+              const err = e as { code?: string };
+              if (err.code === "23505") return { kind: "dup_email" as const };
+              throw e;
+            }
+            const newUser = ins.rows[0] as { id: string; email: string };
+            await c.query(
+              `DELETE FROM registration_pending WHERE id = $1::uuid`,
+              [pendingId]
+            );
+            const tok = await createSessionForUser(c, newUser.id);
+            await c.query("COMMIT");
+            return {
+              kind: "ok" as const,
+              token: tok,
+              userId: newUser.id,
+              email: newUser.email,
+            };
+          } catch (e) {
+            await c.query("ROLLBACK").catch(() => {});
+            throw e;
+          }
+        });
+        if (sessionTok.kind === "dup_email") {
+          return json({ error: "email_taken" }, 409, cors);
+        }
+        if (sessionTok.kind !== "ok") {
+          return json({ error: "invalid_code" }, 401, cors);
+        }
+        const cookie = buildSessionCookie(sessionTok.token, reqUrl);
+        return json(
+          {
+            ok: true,
+            user: { id: sessionTok.userId, email: sessionTok.email },
+          },
+          200,
+          cors,
+          cookie
+        );
+      }
+
+      const email = normalizeEmail(String(body.email || ""));
+      const password = String(body.password || "");
+      if (!isValidEmail(email) || code.length !== 6) {
+        return json({ error: "validation" }, 400, cors);
+      }
+      if (channel === "sms" && !phone) {
+        return json({ error: "validation", field: "phone" }, 400, cors);
+      }
+
+      const sessionTok = await withDbClient(env, async (c) => {
+        const u = await loadUnverifiedUserWithPassword(c, email, password);
+        if (!u) return { kind: "bad" as const };
+        if (channel === "email") {
+          const ok = await consumeRegistrationEmailCode(c, u.id, code);
+          if (!ok) return { kind: "bad" as const };
+          await c.query(
+            `UPDATE users SET email_verified_at = now() WHERE id = $1::uuid AND email_verified_at IS NULL`,
+            [u.id]
+          );
+        } else {
+          const match = await otpCodeHash(env, phone!, code);
+          const r = await c.query(
+            `SELECT id, user_id, code_hash, attempts FROM auth_phone_otp
+             WHERE phone_e164 = $1 AND purpose = 'register_verify' AND user_id = $2::uuid
+               AND consumed_at IS NULL AND expires_at > now()
+             ORDER BY id DESC LIMIT 1`,
+            [phone, u.id]
+          );
+          if (!r.rows.length) return { kind: "bad" as const };
+          const row = r.rows[0] as {
+            id: string;
+            user_id: string;
+            code_hash: string;
+            attempts: number;
+          };
+          if (row.attempts >= MAX_OTP_ATTEMPTS) return { kind: "bad" as const };
+          if (row.code_hash !== match) {
+            await c.query(
+              `UPDATE auth_phone_otp SET attempts = attempts + 1 WHERE id = $1`,
+              [row.id]
+            );
+            return { kind: "bad" as const };
+          }
+          await c.query(
+            `UPDATE auth_phone_otp SET consumed_at = now() WHERE id = $1`,
+            [row.id]
+          );
+          await c.query(
+            `UPDATE users SET email_verified_at = COALESCE(email_verified_at, now()),
+               phone_e164 = $2, phone_verified_at = now()
+             WHERE id = $1::uuid`,
+            [u.id, phone]
+          );
+        }
+        const tok = await createSessionForUser(c, u.id);
+        const urow = await c.query(`SELECT email FROM users WHERE id = $1`, [
+          u.id,
+        ]);
+        const em = String((urow.rows[0] as { email: string }).email);
+        return { kind: "ok" as const, token: tok, userId: u.id, email: em };
+      });
+      if (sessionTok.kind !== "ok") {
+        return json({ error: "invalid_code" }, 401, cors);
+      }
+      const cookie = buildSessionCookie(sessionTok.token, reqUrl);
+      return json(
+        {
+          ok: true,
+          user: { id: sessionTok.userId, email: sessionTok.email },
+        },
+        200,
+        cors,
+        cookie
       );
     }
 
@@ -545,7 +1201,6 @@ export async function handleAuth(
         return json({ error: "validation", field: "email" }, 400, cors);
       }
 
-      const rawVerify = randomToken();
       const sent = await withDbClient(env, async (c) => {
         const u = await c.query(
           `SELECT id FROM users WHERE lower(trim(email)) = $1 AND email_verified_at IS NULL`,
@@ -555,18 +1210,26 @@ export async function handleAuth(
         const userId = String((u.rows[0] as { id: string }).id);
         const cnt = await c.query(
           `SELECT COUNT(*)::int AS n FROM auth_email_tokens
-           WHERE user_id = $1 AND purpose = 'email_verify' AND created_at > now() - interval '1 hour'`,
+           WHERE user_id = $1::uuid AND purpose IN ('email_verify', 'registration_email_code')
+             AND created_at > now() - interval '1 hour'`,
           [userId]
         );
         const n = (cnt.rows[0] as { n: number }).n;
         if (n >= 5) return { kind: "rate_limited" as const };
+        await c.query(
+          `DELETE FROM auth_email_tokens
+           WHERE user_id = $1::uuid AND consumed_at IS NULL
+             AND purpose IN ('email_verify', 'registration_email_code')`,
+          [userId]
+        );
+        const code = randomOtp6();
         const tokenRowId = await insertEmailToken(
           c,
           userId,
-          "email_verify",
-          rawVerify
+          "registration_email_code",
+          code
         );
-        return { kind: "ok" as const, tokenRowId };
+        return { kind: "ok" as const, tokenRowId, code };
       });
       if (sent.kind === "rate_limited") {
         return json({ error: "rate_limited" }, 429, cors);
@@ -574,15 +1237,14 @@ export async function handleAuth(
       if (sent.kind === "noop") {
         return json({ ok: true }, 200, cors);
       }
-      const verifyUrl = `${new URL(reqUrl).origin}/v1/auth/verify-email?token=${encodeURIComponent(rawVerify)}`;
-      const devLink =
-        env.DEV_RETURN_EMAIL_LINK === "true" ? verifyUrl : undefined;
+      const devCode =
+        env.DEV_RETURN_EMAIL_LINK === "true" ? sent.code : undefined;
       const mail = await sendResendEmail(env, {
         to: email,
-        subject: "Подтвердите почту — katalog-uslug.pro",
-        html: verificationEmailHtml(env, verifyUrl),
+        subject: "Код подтверждения — katalog-uslug.pro",
+        html: registrationCodeEmailHtml(env, sent.code),
       });
-      if (!mail.ok && !devLink) {
+      if (!mail.ok && !devCode) {
         await withDbClient(env, async (c) => {
           await c.query(`DELETE FROM auth_email_tokens WHERE id = $1`, [
             sent.tokenRowId,
@@ -591,7 +1253,11 @@ export async function handleAuth(
         return json({ error: "email_not_configured" }, 503, cors);
       }
       return json(
-        { ok: true, devVerificationLink: devLink, emailSent: mail.ok },
+        {
+          ok: true,
+          emailSent: mail.ok,
+          devVerificationCode: devCode,
+        },
         200,
         cors
       );
@@ -628,7 +1294,8 @@ export async function handleAuth(
         return json(
           {
             error: "email_not_verified",
-            message: "Подтвердите почту по ссылке из письма или запросите повторную отправку.",
+            message:
+              "Подтвердите почту: введите код из письма (раздел регистрации) или запросите код повторно ниже.",
           },
           403,
           cors
@@ -1095,7 +1762,7 @@ export async function handleAuth(
         {
           error: "db_not_ready",
           message:
-            "Таблицы auth не созданы или устарели. Запустите миграции (в т.ч. 003_identity_providers.sql).",
+            "Таблицы auth не созданы или устарели. Запустите миграции (003_identity_providers.sql, 005_registration_pending.sql).",
         },
         503,
         cors
