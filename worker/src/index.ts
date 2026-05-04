@@ -72,6 +72,9 @@ export default {
           ok: true,
           service: "katalog-uslug-api",
           db: Boolean(getDbConnectionString(env)),
+          /** Без секретов регистрация по коду на сайте недоступна */
+          resendEmailConfigured: Boolean(env.RESEND_API_KEY?.trim()),
+          smsRuConfigured: Boolean(env.SMSRU_API_ID?.trim()),
         },
         { headers: cors }
       );

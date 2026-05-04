@@ -20,7 +20,8 @@ id = "c6b1caad988d420e86296f25cc0ceb1b"
 [vars]
 ALLOWED_ORIGIN = "https://katalog-uslug.pro"
 
-# Секреты в Cloudflare (Workers → katalog-uslug-api → Settings) или через GitHub Secret RESEND_API_KEY в workflow деплоя:
-# RESEND_API_KEY — иначе коды на почту не уходят; опционально EMAIL_FROM.
+# Секреты в Cloudflare (Workers → katalog-uslug-api → Settings) или через GitHub Actions (см. deploy-worker.yml):
+# RESEND_API_KEY — код на почту (Resend). SMSRU_API_ID — код в SMS (sms.ru). Нужен хотя бы один.
+# Проверка без секретов: GET …/v1/health → resendEmailConfigured, smsRuConfigured.
 
 # trigger: Actions deploy check
