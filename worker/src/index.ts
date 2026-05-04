@@ -1,12 +1,8 @@
-import { Client } from "pg";
 import { handleAuth } from "./auth";
+import { getDbConnectionString, withDbClient } from "./db";
 import type { Env } from "./types";
 
 export type { Env } from "./types";
-
-function getDbConnectionString(env: Env): string | undefined {
-  return env.HYPERDRIVE?.connectionString || env.DATABASE_URL;
-}
 
 const CATALOG_SQL = `
   SELECT
@@ -51,25 +47,6 @@ function corsHeaders(env: Env, request: Request): HeadersInit {
   };
 }
 
-async function withClient<T>(
-  env: Env,
-  fn: (client: Client) => Promise<T>
-): Promise<T> {
-  const cs = getDbConnectionString(env);
-  if (!cs) {
-    throw new Error("Database URL missing: set Hyperdrive or DATABASE_URL for dev");
-  }
-  const client = new Client({
-    connectionString: cs,
-  });
-  await client.connect();
-  try {
-    return await fn(client);
-  } finally {
-    await client.end();
-  }
-}
-
 export default {
   async fetch(
     request: Request,
@@ -108,7 +85,7 @@ export default {
         );
       }
       try {
-        const rows = await withClient(env, async (c) => {
+        const rows = await withDbClient(env, async (c) => {
           const r = await c.query(CATALOG_SQL);
           return r.rows;
         });
@@ -130,7 +107,7 @@ export default {
         );
       }
       try {
-        const rows = await withClient(env, async (c) => {
+        const rows = await withDbClient(env, async (c) => {
           const r = await c.query(REGIONS_SQL);
           return r.rows;
         });

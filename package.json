@@ -3,6 +3,7 @@
   "private": true,
   "description": "Статический каталог услуг; шапка/подвал собираются из partials",
   "scripts": {
+    "verify:worker": "npm run build:partials && npm run build:layout && cd worker && npx tsc --noEmit",
     "neon:paste": "node scripts/apply-neon-paste.mjs",
     "db:import": "npm run db:import --prefix worker",
     "worker:dev": "npm run dev --prefix worker",

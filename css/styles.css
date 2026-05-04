@@ -599,3 +599,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .card-footer{padding:10px 12px}
   .tag{font-size:12px;padding:3px 8px}
 }
+
+.auth-layout{max-width:520px;margin:0 auto}
+.auth-providers{display:flex;flex-direction:column;gap:10px}
+.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-weight:600;cursor:pointer;font-size:15px;font-family:inherit;color:var(--text)}
+.auth-provider-btn:hover{border-color:#c6d3e2}
+.auth-provider-btn.is-disabled{opacity:.45;cursor:not-allowed}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.auth-field label{display:block;font-size:13px;color:var(--text-2);margin-bottom:4px}
+.auth-field input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:15px;font-family:inherit;box-sizing:border-box}
+.auth-msg{font-size:14px;padding:10px 12px;border-radius:8px;line-height:1.45}
+.auth-msg.is-error{background:#fdeaea;color:#8b1a1a;border:1px solid #f0c4c4}
+.auth-msg.is-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #c8e6c9}
+.auth-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.auth-tab{padding:8px 14px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600;color:var(--text-2);font-family:inherit;font-size:14px}
+.auth-tab.is-active{background:var(--surface);border-color:var(--border);color:var(--text)}

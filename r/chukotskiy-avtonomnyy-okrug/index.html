@@ -22,6 +22,8 @@
   <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
@@ -52,8 +54,10 @@
       </nav>
       <div class="header-actions">
         <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
-        <a href="#" class="btn btn-sm btn-ghost">Войти</a>
-        <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
+        <a href="/account/" class="btn btn-sm btn-ghost" data-auth-when="logged-out">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline" data-auth-when="logged-out">Регистрация</a>
+        <span class="btn btn-sm btn-ghost" data-auth-when="logged-in" hidden style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="" data-auth-email></span>
+        <a href="/account/" class="btn btn-sm btn-primary" data-auth-when="logged-in" hidden>Аккаунт</a>
         <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
@@ -78,6 +82,10 @@
       <a href="/moderation/">Модерация</a>
       <a href="/blog/">Статьи и новости</a>
       <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/" data-auth-when="logged-out">Войти</a>
+      <a href="/account/#register" data-auth-when="logged-out">Регистрация</a>
+      <a href="/account/" data-auth-when="logged-in" hidden>Аккаунт</a>
     </div>
   </div>
 
@@ -331,6 +339,8 @@
     </div>
   </section>
 
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->

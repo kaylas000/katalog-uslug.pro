@@ -533,4 +533,49 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
+
+  function katalogApiBase() {
+    return (
+      document
+        .querySelector('meta[name="katalog-catalog-api"]')
+        ?.getAttribute('content')
+        ?.trim()
+        .replace(/\/$/, '') || ''
+    );
+  }
+
+  async function initKatalogAuthHeader() {
+    const base = katalogApiBase();
+    const out = document.querySelectorAll('[data-auth-when="logged-out"]');
+    const inn = document.querySelectorAll('[data-auth-when="logged-in"]');
+    const emailEl = document.querySelector('[data-auth-email]');
+    if (!base || (out.length === 0 && inn.length === 0)) return;
+    try {
+      const r = await fetch(`${base}/v1/auth/me`, { credentials: 'include', cache: 'no-store' });
+      if (!r.ok) throw new Error('out');
+      const j = await r.json();
+      if (!j.user) throw new Error('out');
+      const u = j.user;
+      const short = u.displayName || (u.email ? String(u.email).split('@')[0] : '') || 'Аккаунт';
+      out.forEach((el) => {
+        el.setAttribute('hidden', '');
+      });
+      inn.forEach((el) => {
+        el.removeAttribute('hidden');
+      });
+      if (emailEl instanceof HTMLElement) {
+        emailEl.textContent = short;
+        emailEl.setAttribute('title', u.email || '');
+      }
+    } catch {
+      inn.forEach((el) => {
+        el.setAttribute('hidden', '');
+      });
+      out.forEach((el) => {
+        el.removeAttribute('hidden');
+      });
+    }
+  }
+
+  initKatalogAuthHeader();
 });

@@ -75,7 +75,26 @@ npm run build:site
 | Данные из `data/*.json` в Neon | Скрипт + workflow **Neon import data** (ручной запуск в Actions после миграций) |
 | API Worker `/v1/catalog`, `/v1/regions` | Готово; **Hyperdrive** в `wrangler.toml` |
 | **Проверка Neon** | Если `/v1/catalog` пишет `relation "organizations" does not exist` — в GitHub **Actions → Neon DB migrations** дождаться зелёного, затем **Neon import data** (ручной запуск). |
-| **Авторизация** | `POST /v1/auth/register`, `POST /v1/auth/login`, `POST /v1/auth/logout`, `GET /v1/auth/me` — пароль **bcrypt**, сессия в **HttpOnly cookie** `session` (`SameSite=None; Secure` для запросов с `katalog-uslug.pro`). Подтверждение e‑mail пока **нет** (следующий этап). |
+| **Авторизация** | См. ниже; миграция **`003_identity_providers.sql`**. Страница **`/account/`** (см. `accountBasePath` в `config/site.json`). |
 | Сайт: каталог с API или fallback на JSON | `config/site.json` → **`catalogApiBaseUrl`**; при сборке `npm run build:layout` в страницы вставляется `<meta name="katalog-catalog-api">`; `main.js` сначала дергает API, при ошибке — `/data/catalog.json` |
 
 Большой файл `описание проекта с комментариями.txt` — дорожная карта на будущее (кабинеты, ORT, аналитика); для текущего v1 достаточно таблиц выше.
+
+### Авторизация и провайдеры (Worker + UI)
+
+**Cookie-сессия** как раньше: `session`, HttpOnly, `SameSite=None`, `Secure` в HTTPS.
+
+| Возможность | API / UI | Секреты и настройки |
+|-------------|----------|---------------------|
+| Почта + пароль, подтверждение письмом | `POST /v1/auth/register` (без сессии до клика), `GET /v1/auth/verify-email?token=…`, `POST /v1/auth/resend-verification`, `POST /v1/auth/login` | **Resend**: `RESEND_API_KEY`, `EMAIL_FROM`. Локально: `DEV_RETURN_EMAIL_LINK=true` — ссылка в JSON ответа вместо письма. |
+| Сброс пароля | `POST /v1/auth/forgot-password`, `POST /v1/auth/reset-password` | Resend; лимит писем сброса на аккаунт; при ошибке отправки токен удаляется, ответ `503 email_not_configured`. |
+| Пароль в кабинете | `POST /v1/auth/password/set` (только если пароля ещё не было, напр. после Яндекса), `POST /v1/auth/password/change` (текущий + новый; остальные сессии сбрасываются, выдаётся новая cookie) | Сессия в cookie |
+| Яндекс ID (OAuth 2 + PKCE) | `GET /v1/auth/oauth/yandex/start`, `GET …/callback` | `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`; в консоли Яндекса redirect = `…/v1/auth/oauth/yandex/callback` (или `YANDEX_REDIRECT_URI`). |
+| Госуслуги (ЕСИА) | Кнопка на сайте активна только при **`ESIA_FULL_IMPLEMENTATION=true`** и реализованном обмене; иначе `GET …/esia/start` — заглушка | `ESIA_CLIENT_ID`, сертификаты, контур ЕСИА; до готовности флаг не включать. |
+| Вход по SMS | `POST /v1/auth/phone/send-login` (в ответе `normalizedPhone` для ввода кода), `POST /v1/auth/phone/verify-login` | **SMS.RU** `SMSRU_API_ID`; номер должен быть привязан в кабинете. |
+| Привязка телефона (после входа) | `POST /v1/auth/phone/send-attach`, `POST /v1/auth/phone/verify-attach` | SMS.RU |
+| Публичная конфигурация | `GET /v1/auth/config` — какие методы включены | — |
+
+Дополнительно: **`PUBLIC_SITE_URL`** (редиректы после верификации/OAuth), **`AUTH_PEPPER`** (хэш SMS-кода; задайте в проде).
+
+Секреты в проде задаются через **Wrangler secrets** / переменные окружения в Cloudflare, не коммитьте их в репозиторий.
