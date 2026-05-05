@@ -42,6 +42,19 @@
       align-self: flex-start;
       margin-top: auto;
     }
+    .account-page .account-security-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .account-page .account-security-grid > div {
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
     @media (max-width: 1100px) {
       .account-page .account-roadmap-grid {
         grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -52,6 +65,9 @@
         max-width: 520px;
       }
       .account-page .account-roadmap-grid {
+        grid-template-columns: 1fr;
+      }
+      .account-page .account-security-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -208,37 +224,39 @@
             <button type="submit" class="btn btn-primary">Сохранить пароль</button>
           </form>
         </div>
-        <div id="auth-panel-change-password" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
-          <h3 class="card-title" style="font-size:16px;">Изменить пароль</h3>
-          <form id="form-change-password" class="auth-form" style="margin-top:10px;">
-            <div class="auth-field">
-              <label for="ch-pw-current">Текущий пароль</label>
-              <input id="ch-pw-current" type="password" required autocomplete="current-password">
-            </div>
-            <div class="auth-field">
-              <label for="ch-pw-new">Новый пароль</label>
-              <input id="ch-pw-new" type="password" required autocomplete="new-password">
-            </div>
-            <button type="submit" class="btn btn-primary">Обновить</button>
-          </form>
-        </div>
-        <div id="auth-panel-attach" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
-          <h3 class="card-title" style="font-size:16px;">Привязать телефон (SMS)</h3>
-          <p class="card-sub">Нужен для входа по SMS.</p>
-          <form id="form-attach-send" class="auth-form" style="margin-top:10px;">
-            <div class="auth-field">
-              <label for="attach-phone">Телефон</label>
-              <input id="attach-phone" type="tel" inputmode="tel" placeholder="+7 …">
-            </div>
-            <button type="submit" class="btn btn-outline">Получить код</button>
-          </form>
-          <form id="form-attach-code" class="auth-form" style="margin-top:12px;display:none;">
-            <div class="auth-field">
-              <label for="attach-otp">Код</label>
-              <input id="attach-otp" type="text" maxlength="6" inputmode="numeric">
-            </div>
-            <button type="submit" class="btn btn-primary">Подтвердить</button>
-          </form>
+        <div class="account-security-grid">
+          <div id="auth-panel-change-password" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 class="card-title" style="font-size:16px;">Изменить пароль</h3>
+            <form id="form-change-password" class="auth-form" style="margin-top:10px;">
+              <div class="auth-field">
+                <label for="ch-pw-current">Текущий пароль</label>
+                <input id="ch-pw-current" type="password" required autocomplete="current-password">
+              </div>
+              <div class="auth-field">
+                <label for="ch-pw-new">Новый пароль</label>
+                <input id="ch-pw-new" type="password" required autocomplete="new-password">
+              </div>
+              <button type="submit" class="btn btn-primary">Обновить</button>
+            </form>
+          </div>
+          <div id="auth-panel-attach" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 class="card-title" style="font-size:16px;">Привязать телефон (SMS)</h3>
+            <p class="card-sub">Нужен для входа по SMS.</p>
+            <form id="form-attach-send" class="auth-form" style="margin-top:10px;">
+              <div class="auth-field">
+                <label for="attach-phone">Телефон</label>
+                <input id="attach-phone" type="tel" inputmode="tel" placeholder="+7 …">
+              </div>
+              <button type="submit" class="btn btn-outline">Получить код</button>
+            </form>
+            <form id="form-attach-code" class="auth-form" style="margin-top:12px;display:none;">
+              <div class="auth-field">
+                <label for="attach-otp">Код</label>
+                <input id="attach-otp" type="text" maxlength="6" inputmode="numeric">
+              </div>
+              <button type="submit" class="btn btn-primary">Подтвердить</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
