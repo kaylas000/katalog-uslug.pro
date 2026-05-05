@@ -18,6 +18,8 @@ export interface Env {
   SMSRU_API_ID?: string;
   /** Служебный ключ для bootstrap-входа разработчика (опционально) */
   DEV_BOOTSTRAP_KEY?: string;
+  /** Bearer-ключ для admin moderation API (/v1/admin/org-applications). */
+  ADMIN_MODERATION_KEY?: string;
   YANDEX_CLIENT_ID?: string;
   YANDEX_CLIENT_SECRET?: string;
   /** Зарегистрированный в приложении Яндекс redirect URI (должен совпадать с callback URL воркера) */

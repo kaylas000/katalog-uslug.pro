@@ -1,5 +1,6 @@
 import { handleAuth } from "./auth";
 import { getDbConnectionString, withDbClient } from "./db";
+import { handleOrgAdmin } from "./org-admin";
 import type { Env } from "./types";
 
 export type { Env } from "./types";
@@ -410,6 +411,9 @@ export default {
         );
       }
     }
+
+    const adminRes = await handleOrgAdmin(request, env, path, cors);
+    if (adminRes) return adminRes;
 
     return Response.json(
       { error: "not_found" },
