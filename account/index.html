@@ -87,9 +87,62 @@
       <div class="card-body">
         <h2 class="card-title" style="font-size:17px;">Вы вошли</h2>
         <p class="card-text" id="auth-logged-summary"></p>
+        <div style="margin-top:14px;">
+          <span class="tag tag-green">Статус: Посетитель</span>
+          <span class="tag" style="margin-left:8px;">Сценарий организаций — отдельно</span>
+        </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;">
           <button type="button" class="btn btn-sm btn-outline" id="auth-btn-logout">Выйти</button>
         </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Кабинет посетителя (дорожная карта)</h3>
+          <p class="card-sub">Ниже разделы, которые будут постепенно включаться. Сейчас это безопасные заглушки для навигации и будущего UX.</p>
+
+          <div class="footer-grid" style="margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+            <div class="card" style="margin:0;">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Избранные организации</h4>
+                <p class="card-text">Список сохраненных карточек, быстрый переход и заметки.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin:0;">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Сравнение услуг</h4>
+                <p class="card-text">Таблица сравнения выбранных организаций по цене, срокам и условиям.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin:0;">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Мои заявки и отклики</h4>
+                <p class="card-text">История обращений, статус обработки, контроль обратной связи.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin:0;">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Уведомления и подписки</h4>
+                <p class="card-text">Оповещения по интересующим категориям, регионам и новым предложениям.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Переход к сценарию организации</h3>
+          <p class="card-sub">Размещение своей организации идет по отдельному сценарию через модерацию. Позже будет доступна смена статуса прямо в кабинете.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <a href="/add/" class="btn btn-sm btn-primary">Подать заявку на размещение</a>
+            <button type="button" class="btn btn-sm btn-outline" disabled>Смена статуса в кабинете (скоро)</button>
+          </div>
+        </div>
+
         <div id="auth-panel-set-password" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
           <h3 class="card-title" style="font-size:16px;">Установить пароль</h3>
           <p class="card-sub">Если вы заходили через Яндекс, можно добавить пароль для входа по почте.</p>
@@ -364,7 +417,7 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260506"></script>
-  <script src="/js/account.js?v=20260512" defer></script>
+  <script src="/js/main.js?v=20260513"></script>
+  <script src="/js/account.js?v=20260515" defer></script>
 </body>
 </html>
