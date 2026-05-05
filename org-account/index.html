@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кабинет организации — katalog-uslug.pro</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <style>
+    .org-cab-wrap { max-width: var(--container); margin: 0 auto; }
+    .org-cab-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .org-cab-card .card-body { display: flex; flex-direction: column; gap: 8px; min-height: 180px; }
+    .org-cab-card .btn { margin-top: auto; align-self: flex-start; }
+    @media (max-width: 1100px) { .org-cab-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+    @media (max-width: 900px) { .org-cab-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="8" width="84" height="84" rx="16" fill="none" stroke="#2F4B6A" stroke-width="8"/>
+          <circle cx="42" cy="42" r="18" fill="none" stroke="#2F4B6A" stroke-width="7"/>
+          <line x1="55" y1="55" x2="78" y2="78" stroke="#2F4B6A" stroke-width="7" stroke-linecap="round"/>
+          <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-desktop">katalog-uslug.pro</span>
+        <span class="logo-mobile">Услуги&nbsp;<span class="logo-mobile-accent">Про</span></span>
+      </a>
+      <nav class="nav-desktop">
+        <a href="/">Главная</a>
+        <a href="/categories/">Категории</a>
+        <a href="/add/">Регистрация организации</a>
+        <a href="/account/">Аккаунт</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Аккаунт</a>
+        <button class="burger" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" style="padding-top:80px;">
+    <div class="container org-cab-wrap">
+      <h1 class="section-title" style="margin-bottom:18px;">Личный кабинет организации</h1>
+      <div id="org-cab-msg" class="auth-msg" style="display:none;margin-bottom:14px;"></div>
+      <div id="org-cab-lock" class="card" style="display:none;">
+        <div class="card-body">
+          <h2 class="card-title" style="font-size:17px;">Требуется вход</h2>
+          <p class="card-text">Чтобы управлять заявками и карточкой организации, войдите в аккаунт.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="/account/" class="btn btn-sm btn-primary">Войти</a>
+            <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="org-cab-content" style="display:none;">
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-body">
+            <h2 class="card-title" style="font-size:17px;">Профиль представителя</h2>
+            <p class="card-text" id="org-cab-user-summary"></p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+              <a href="/add/" class="btn btn-sm btn-primary">Новая заявка</a>
+              <a href="/account/" class="btn btn-sm btn-outline">Личный аккаунт</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-body">
+            <h2 class="card-title" style="font-size:17px;">Мои заявки организаций</h2>
+            <p class="card-sub">Статусы: на модерации, одобрено, отклонено, опубликовано.</p>
+            <div id="org-cab-apps" style="display:grid;gap:10px;margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <div class="org-cab-grid">
+          <div class="card org-cab-card">
+            <div class="card-body">
+              <h3 class="card-title" style="font-size:16px;">Профиль организации</h3>
+              <p class="card-text">Редактирование описания, контактов, сайта и рабочих часов.</p>
+              <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+            </div>
+          </div>
+          <div class="card org-cab-card">
+            <div class="card-body">
+              <h3 class="card-title" style="font-size:16px;">Услуги и прайс</h3>
+              <p class="card-text">Управление услугами, ценами, сроками и условиями.</p>
+              <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+            </div>
+          </div>
+          <div class="card org-cab-card">
+            <div class="card-body">
+              <h3 class="card-title" style="font-size:16px;">Лиды и обращения</h3>
+              <p class="card-text">Входящие обращения клиентов, статусы и история обработки.</p>
+              <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/main.js?v=20260513"></script>
+  <script src="/js/org-account.js?v=20260505" defer></script>
+</body>
+</html>
