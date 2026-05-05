@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Добавить организацию — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <link rel="stylesheet" href="/css/styles.css?v=20260509">
   <style>
     .org-apply-wrap {
       max-width: 900px;
@@ -125,7 +125,7 @@
           <div id="org-auth-lock" class="auth-msg is-error" style="display:none;margin-top:14px;">
             Для отправки заявки нужно войти в аккаунт. <a href="/account/" style="text-decoration:underline;">Открыть вход</a>
           </div>
-          <div id="org-auth-actions" style="display:none;margin-top:14px;gap:10px;flex-wrap:wrap;">
+          <div id="org-auth-actions" class="btn-row" style="display:none;margin-top:14px;">
             <a href="/account/" class="btn btn-sm btn-outline">Войти по почте / SMS</a>
             <a href="/account/#register" class="btn btn-sm btn-ghost">Регистрация</a>
             <button type="button" id="org-auth-yandex" class="btn btn-sm btn-primary" style="display:none;">Войти через Яндекс</button>
@@ -133,7 +133,7 @@
           <div id="org-verify-lock" class="auth-msg is-error" style="display:none;margin-top:14px;">
             Аккаунт не верифицирован для подачи заявки. Подтвердите email или телефон теми же способами, что в регистрации пользователя (почта/SMS/провайдер), затем возвращайтесь на эту страницу.
           </div>
-          <div id="org-verify-actions" style="display:none;margin-top:14px;gap:10px;flex-wrap:wrap;">
+          <div id="org-verify-actions" class="btn-row" style="display:none;margin-top:14px;">
             <a href="/account/" class="btn btn-sm btn-outline">Подтвердить в аккаунте</a>
             <button type="button" id="org-verify-yandex" class="btn btn-sm btn-primary" style="display:none;">Подтвердить через Яндекс</button>
           </div>

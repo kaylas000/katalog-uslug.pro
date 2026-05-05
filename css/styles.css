@@ -91,6 +91,38 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .btn-lg{padding:14px 32px;font-size:16px}
 .btn .arrow{transition:transform .2s ease}
 .btn:hover .arrow{transform:translateX(3px)}
+/* Ряд кнопок/ссылок после текста — не слипается с абзацем */
+.btn-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:16px;
+}
+/* Не использовать .btn-row.mt-0 — он убивает отступ после текста */
+/* Карточка: после основного текста — следующий блок (кнопки и т.д.) отступает */
+.card-body > .card-text + div{margin-top:14px}
+/* Сообщения с ссылкой: зазор перед ссылкой */
+.auth-msg a{margin-left:0.35em;text-underline-offset:2px;font-weight:600}
+/* Кнопка как ссылка в одной строке с текстом */
+.btn-link{
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  color:var(--primary);
+  text-decoration:underline;
+  font:inherit;
+  vertical-align:baseline;
+}
+.btn-link:hover{color:var(--primary-dark)}
+.card-text.is-inline-actions,
+p.card-text:has(.btn-link){
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:6px 12px;
+}
 
 /* ========== TAG / BADGE ========== */
 .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
@@ -102,10 +134,23 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c6d3e2}
 .card-body{padding:20px}
 .card-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.22;letter-spacing:-0.1px}
-.card-sub{font-size:14px;color:var(--text-2);margin-top:3px;line-height:1.35}
-.card-text{font-size:14px;color:var(--text-2);margin-top:8px;line-height:1.5}
-.card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2)}
-.card-footer .btn{flex-shrink:0}
+.card-sub{font-size:14px;color:var(--text-2);margin-top:3px;margin-bottom:10px;line-height:1.35}
+.card-sub:last-child{margin-bottom:0}
+.card-text{font-size:14px;color:var(--text-2);margin-top:8px;line-height:1.5;margin-bottom:0}
+/* Текст карточки не прилипает к полосе с рейтингом и кнопкой */
+.card > .card-body > .card-text:last-child{margin-bottom:18px}
+.card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px 20px;
+  padding:18px 20px;
+  border-top:1px solid var(--border);
+  background:var(--surface-2);
+  flex-wrap:wrap;
+}
+.card-footer .tag{flex:1 1 auto;min-width:0;line-height:1.35}
+.card-footer .btn{flex-shrink:0;margin-left:auto}
 
 /* ========== HEADER ========== */
 .site-header{background:var(--surface);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100;box-shadow:var(--shadow-sm)}
@@ -176,8 +221,16 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .section{padding:44px 0}
 .section.bg-surface{background:var(--surface)}
 .section-title{font-size:clamp(22px,3vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.3px}
-.section-sub{font-size:15px;color:var(--text-2);margin-top:8px;max-width:560px;line-height:1.45}
+.section-sub{font-size:15px;color:var(--text-2);margin-top:8px;margin-bottom:12px;max-width:560px;line-height:1.45}
+.section-sub:last-child{margin-bottom:0}
 .section-header{margin-bottom:24px}
+/* /c/… и похожие: сетка карточек после вводных абзацев (часто с mb-0 у последнего) */
+.section > .container > .section-sub + .grid,
+.section > .container > .section-sub + #catalog-cards-host{margin-top:36px}
+.section > .container > h1.section-title{margin-bottom:18px}
+.section > .container > .breadcrumbs + h1.section-title{margin-top:2px}
+/* Страницы /c/… — явный зазор (на проде может подтягиваться старый кэш; класс без селектора «+» надёжнее) */
+.section .container .category-cards-below-intro{margin-top:48px!important}
 
 /* ========== FILTER BAR ========== */
 .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -498,7 +551,7 @@ button.portfolio-pixel:hover:not(.portfolio-pixel--photo){
 .consultant-btn svg{width:26px;height:26px}
 .consultant-panel{position:absolute;bottom:68px;right:0;width:min(340px,90vw);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:none;flex-direction:column;gap:12px}
 .consultant-panel.open{display:flex}
-.consultant-panel h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.consultant-panel h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
 .consultant-btn-sm{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);font-size:14px;font-weight:500;color:var(--text);transition:background .2s,border-color .2s;text-align:left}
 .consultant-btn-sm:hover{background:var(--bg);border-color:var(--primary-2)}
 .consultant-btn-sm svg{width:18px;height:18px;color:var(--primary);flex-shrink:0}
@@ -614,3 +667,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .auth-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .auth-tab{padding:8px 14px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600;color:var(--text-2);font-family:inherit;font-size:14px}
 .auth-tab.is-active{background:var(--surface);border-color:var(--border);color:var(--text)}
+/* /account/: подзаголовки и кнопки во вложенных div — не только прямой child .card-body */
+.account-page .card-body p.card-sub + .btn-row,
+.account-page .card-body .card-sub + .btn-row{margin-top:22px}
+.account-page .card-body p.card-text + .btn-row{margin-top:16px}
