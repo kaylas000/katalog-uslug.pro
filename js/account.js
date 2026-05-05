@@ -1,4 +1,7 @@
 (function () {
+  /** Same key as in main.js — cross-origin API when cookies are blocked. */
+  const SESSION_STORE_KEY = 'katalog_catalog_api_session';
+
   function apiBase() {
     return (
       document
@@ -7,6 +10,35 @@
         ?.trim()
         .replace(/\/$/, '') || ''
     );
+  }
+
+  function storedSessionToken() {
+    try {
+      const a = sessionStorage.getItem(SESSION_STORE_KEY);
+      if (a) return a;
+    } catch {
+      /* ignore */
+    }
+    try {
+      return localStorage.getItem(SESSION_STORE_KEY) || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function setStoredSessionToken(tok) {
+    try {
+      if (tok) sessionStorage.setItem(SESSION_STORE_KEY, tok);
+      else sessionStorage.removeItem(SESSION_STORE_KEY);
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (tok) localStorage.setItem(SESSION_STORE_KEY, tok);
+      else localStorage.removeItem(SESSION_STORE_KEY);
+    } catch {
+      /* ignore */
+    }
   }
 
   function showMsg(el, text, kind) {
@@ -25,16 +57,23 @@
     if (opts.body != null && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
+    const st = storedSessionToken();
+    if (st && !headers['Authorization']) {
+      headers['Authorization'] = 'Bearer ' + st;
+    }
     const r = await fetch(`${base}${path}`, {
-      credentials: 'include',
       ...opts,
       headers,
+      credentials: 'include',
     });
     let body = null;
     try {
       body = await r.json();
     } catch {
       body = {};
+    }
+    if (r.ok && body && typeof body.sessionToken === 'string' && body.sessionToken.length > 0) {
+      setStoredSessionToken(body.sessionToken);
     }
     return { r, body };
   }
@@ -54,6 +93,60 @@
 
   function el(id) {
     return document.getElementById(id);
+  }
+
+  function statusLabel(status) {
+    if (status === 'pending_email') return 'Ожидает подтверждения email';
+    if (status === 'pending_moderation') return 'На модерации';
+    if (status === 'approved') return 'Одобрена';
+    if (status === 'rejected') return 'Отклонена';
+    if (status === 'published') return 'Опубликована';
+    return status || 'Неизвестно';
+  }
+
+  async function loadOrgApplications(msgEl) {
+    const list = el('org-applications-list');
+    if (!list) return;
+    list.innerHTML = '';
+    const { r, body } = await jfetch('/v1/org/applications/mine', { method: 'GET' });
+    if (!r.ok) {
+      showMsg(
+        msgEl,
+        body.error === 'unauthorized'
+          ? 'Для просмотра заявок нужен вход.'
+          : (body.message || body.error || 'Не удалось загрузить заявки.'),
+        'err'
+      );
+      return;
+    }
+    const items = Array.isArray(body.items) ? body.items : [];
+    if (!items.length) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="card-body"><p class="card-text" style="margin-top:0;">Пока заявок нет. <a href="/add/" style="text-decoration:underline;">Отправить первую заявку</a>.</p></div>';
+      list.appendChild(card);
+      return;
+    }
+    for (const item of items) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const created = item.created_at
+        ? new Date(item.created_at).toLocaleString('ru-RU')
+        : '—';
+      const rej = item.rejection_reason
+        ? `<p class="card-text" style="margin-top:8px;color:#8b1a1a;">Причина отклонения: ${item.rejection_reason}</p>`
+        : '';
+      card.innerHTML = `
+        <div class="card-body">
+          <h4 class="card-title" style="font-size:15px;">${item.org_title || 'Без названия'}</h4>
+          <p class="card-sub">Slug: ${item.org_slug || '—'} · Статус: ${statusLabel(item.status)}</p>
+          <p class="card-text">Категория: ${item.category_slug || '—'} · Регион: ${item.region_slug || '—'}</p>
+          <p class="card-text">Создано: ${created}</p>
+          ${rej}
+        </div>`;
+      list.appendChild(card);
+    }
   }
 
   async function refreshLoggedUi(cfg) {
@@ -88,6 +181,7 @@
       if (attach && cfg && cfg.smsLogin && !u.phoneVerified) {
         attach.style.display = 'block';
       } else if (attach) attach.style.display = 'none';
+      await loadOrgApplications(el('org-applications-msg'));
       return;
     }
     panelLogged.style.display = 'none';
@@ -445,6 +539,7 @@
       });
       if (r.ok) {
         regState.pendingRegistrationId = '';
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
         window.location.reload();
         return;
       }
@@ -468,7 +563,8 @@
     }
 
     document.getElementById('auth-btn-logout')?.addEventListener('click', async () => {
-      await jfetch('/v1/auth/logout', { method: 'POST', body: '{}' });
+      const { r } = await jfetch('/v1/auth/logout', { method: 'POST', body: '{}' });
+      if (r.ok) setStoredSessionToken('');
       window.location.href = '/account/';
     });
 
@@ -485,6 +581,16 @@
         body: JSON.stringify({ email, password }),
       });
       if (r.ok) {
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
+        const me = await jfetch('/v1/auth/me', { method: 'GET' });
+        if (!me.r.ok || !me.body.user) {
+          showMsg(
+            gmsg,
+            'Пароль верный, но «внутрь» не пускает: на сервере либо старая версия входа (нужен свежий код из папки worker и команда npm run deploy), либо в ответе на вход нет поля sessionToken. Пока это не исправят на сервере, с разных доменов войти не получится.',
+            'err'
+          );
+          return;
+        }
         window.location.reload();
         return;
       }
@@ -515,6 +621,7 @@
         body: JSON.stringify({ email, password, channel: 'email', code }),
       });
       if (r.ok) {
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
         window.location.reload();
         return;
       }
@@ -626,6 +733,7 @@
         body: JSON.stringify({ token, password }),
       });
       if (r.ok) {
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
         showMsg(gmsg, 'Пароль обновлён.', 'ok');
         window.location.href = '/account/';
         return;
@@ -657,6 +765,7 @@
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       if (r.ok) {
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
         showMsg(gmsg, 'Пароль обновлён, сессия сохранена.', 'ok');
         window.location.reload();
         return;
@@ -698,6 +807,7 @@
         body: JSON.stringify({ phone: phonePending, code }),
       });
       if (r.ok) {
+        if (body.sessionToken) setStoredSessionToken(body.sessionToken);
         window.location.reload();
         return;
       }
