@@ -70,6 +70,16 @@ function parseCookie(req: Request, name: string): string | null {
   return null;
 }
 
+/** Cookie or `Authorization: Bearer` (cross-origin when third-party cookies are blocked). */
+function parseSessionToken(req: Request): string | null {
+  const fromCookie = parseCookie(req, SESSION_COOKIE);
+  if (fromCookie) return fromCookie;
+  const auth = req.headers.get("Authorization")?.trim();
+  if (!auth) return null;
+  const m = /^Bearer\s+(\S+)/i.exec(auth);
+  return m?.[1] ? decodeURIComponent(m[1]) : null;
+}
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -123,7 +133,10 @@ export function corsAuthHeaders(env: Env, request: Request): Headers {
   h.set("Access-Control-Allow-Origin", allow);
   h.set("Access-Control-Allow-Credentials", "true");
   h.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  h.set("Access-Control-Allow-Headers", "Content-Type, Cookie");
+  h.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, content-type, Cookie, Authorization, authorization, x-dev-bootstrap-key"
+  );
   h.set("Access-Control-Max-Age", "86400");
   return h;
 }
@@ -136,6 +149,7 @@ function json(
 ): Response {
   const h = new Headers(headers);
   h.set("Content-Type", "application/json; charset=utf-8");
+  h.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
   if (setCookie) h.append("Set-Cookie", setCookie);
   return new Response(JSON.stringify(body), { status, headers: h });
 }
@@ -150,6 +164,9 @@ function buildSessionCookie(token: string, requestUrl: string): string {
     "HttpOnly",
     "SameSite=None",
     secure ? "Secure" : "",
+    // CHIPS: Chrome sends/stores third-party session only when partitioned
+    // (site https://katalog-uslug.pro → API on *.workers.dev).
+    secure ? "Partitioned" : "",
   ].filter(Boolean);
   return parts.join("; ");
 }
@@ -164,6 +181,7 @@ function buildClearSessionCookie(requestUrl: string): string {
     "HttpOnly",
     "SameSite=None",
     secure ? "Secure" : "",
+    secure ? "Partitioned" : "",
   ].filter(Boolean);
   return parts.join("; ");
 }
@@ -428,6 +446,7 @@ export async function handleAuth(
         {
           ok: true,
           user: { id: user.id, email: user.email },
+          sessionToken: token,
         },
         200,
         cors,
@@ -1166,6 +1185,7 @@ export async function handleAuth(
           {
             ok: true,
             user: { id: sessionTok.userId, email: sessionTok.email },
+            sessionToken: sessionTok.token,
           },
           200,
           cors,
@@ -1242,6 +1262,7 @@ export async function handleAuth(
         {
           ok: true,
           user: { id: sessionTok.userId, email: sessionTok.email },
+          sessionToken: sessionTok.token,
         },
         200,
         cors,
@@ -1378,7 +1399,11 @@ export async function handleAuth(
       );
       const cookie = buildSessionCookie(token, reqUrl);
       return json(
-        { ok: true, user: { id: row.id, email: row.email } },
+        {
+          ok: true,
+          user: { id: row.id, email: row.email },
+          sessionToken: token,
+        },
         200,
         cors,
         cookie
@@ -1483,7 +1508,7 @@ export async function handleAuth(
         createSessionForUser(c, userId)
       );
       const cookie = buildSessionCookie(sessionTok, reqUrl);
-      return json({ ok: true }, 200, cors, cookie);
+      return json({ ok: true, sessionToken: sessionTok }, 200, cors, cookie);
     }
 
     if (path === "/v1/auth/password/set" && request.method === "POST") {
@@ -1580,7 +1605,12 @@ export async function handleAuth(
         return json({ error: "server_error" }, 500, cors);
       }
       const cookie = buildSessionCookie(result.token, reqUrl);
-      return json({ ok: true }, 200, cors, cookie);
+      return json(
+        { ok: true, sessionToken: result.token },
+        200,
+        cors,
+        cookie
+      );
     }
 
     if (path === "/v1/auth/phone/send-login" && request.method === "POST") {
@@ -1691,6 +1721,7 @@ export async function handleAuth(
         {
           ok: true,
           user: { id: result.userId, email: result.email },
+          sessionToken: result.token,
         },
         200,
         cors,
@@ -1803,7 +1834,7 @@ export async function handleAuth(
     }
 
     if (path === "/v1/auth/logout" && request.method === "POST") {
-      const token = parseCookie(request, SESSION_COOKIE);
+      const token = parseSessionToken(request);
       if (token) {
         const token_hash = await sha256hex(token);
         await withDbClient(env, async (c) => {
@@ -1830,7 +1861,7 @@ export async function handleAuth(
         {
           error: "db_not_ready",
           message:
-            "Таблицы auth не созданы или устарели. Запустите миграции (003_identity_providers.sql, 005_registration_pending.sql).",
+            "В этой базе нет нужных таблиц (или Worker смотрит не на ту БД, что мигрировали). Сделайте: npm run db:migrate из корня репозитория (NEON_DATABASE_URL или neon.local.txt) либо GitHub Actions → «Neon DB migrations»; убедитесь, что Hyperdrive в Cloudflare указывает на ту же Neon. Проверка: GET /v1/health → authSchemaOk должно быть true.",
         },
         503,
         cors
@@ -1844,7 +1875,7 @@ async function getSessionUser(
   request: Request,
   env: Env
 ): Promise<{ id: string } | null> {
-  const token = parseCookie(request, SESSION_COOKIE);
+  const token = parseSessionToken(request);
   if (!token) return null;
   const token_hash = await sha256hex(token);
   return withDbClient(env, async (c) => {
@@ -1860,7 +1891,7 @@ async function getSessionUser(
 }
 
 async function loadFullUser(request: Request, env: Env) {
-  const token = parseCookie(request, SESSION_COOKIE);
+  const token = parseSessionToken(request);
   if (!token) return null;
   const token_hash = await sha256hex(token);
   return withDbClient(env, async (c) => {
