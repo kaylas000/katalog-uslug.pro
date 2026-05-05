@@ -110,15 +110,16 @@
       if (lockActions) lockActions.style.display = "none";
       if (verifyLock) verifyLock.style.display = "block";
       if (verifyActions) verifyActions.style.display = "flex";
-      box.style.display = "none";
-      return;
+      // Как в /account/: в пилоте не блокируем функционал полностью,
+      // но явно подсказываем пройти верификацию.
+      box.style.display = "block";
+    } else {
+      lock.style.display = "none";
+      if (lockActions) lockActions.style.display = "none";
+      if (verifyLock) verifyLock.style.display = "none";
+      if (verifyActions) verifyActions.style.display = "none";
+      box.style.display = "block";
     }
-
-    lock.style.display = "none";
-    if (lockActions) lockActions.style.display = "none";
-    if (verifyLock) verifyLock.style.display = "none";
-    if (verifyActions) verifyActions.style.display = "none";
-    box.style.display = "block";
 
     const meta = await jfetch("/v1/org/meta", { method: "GET" });
     if (meta.r.ok) {
