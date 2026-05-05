@@ -623,6 +623,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   }
   .hero{padding:34px 0 30px}
   .hero-actions .btn{width:100%}
+  /* ЛК /account/: «Войти» и «Регистрация» в шапке на узком экране перекрывали бургер — пункты уже есть в выезжающем меню */
+  body.account-page .header-actions .btn-ghost,
+  body.account-page .header-actions .btn-outline{display:none!important}
+  .header-actions .burger{
+    flex-shrink:0;
+    min-width:44px;
+    min-height:44px;
+    align-items:center;
+    justify-content:center;
+  }
   .section{padding:30px 0}
   .container.footer-inner{padding-top:36px}
   .footer-bottom{flex-direction:column;text-align:center;gap:8px}
