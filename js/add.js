@@ -61,16 +61,63 @@
     const form = document.getElementById("org-apply-form");
     const msg = document.getElementById("org-apply-msg");
     const lock = document.getElementById("org-auth-lock");
+    const lockActions = document.getElementById("org-auth-actions");
+    const verifyLock = document.getElementById("org-verify-lock");
+    const verifyActions = document.getElementById("org-verify-actions");
+    const btnAuthYandex = document.getElementById("org-auth-yandex");
+    const btnVerifyYandex = document.getElementById("org-verify-yandex");
     const box = document.getElementById("org-form-box");
     if (!form || !msg || !lock || !box) return;
+
+    const cfg = await jfetch("/v1/auth/config", { method: "GET" });
+    const yandexAuthorizeUrl =
+      cfg.r.ok && cfg.body && cfg.body.yandexAuthorizeUrl
+        ? cfg.body.yandexAuthorizeUrl
+        : "";
+    if (yandexAuthorizeUrl) {
+      if (btnAuthYandex) {
+        btnAuthYandex.style.display = "inline-flex";
+        btnAuthYandex.addEventListener("click", () => {
+          window.location.href = `${yandexAuthorizeUrl}?next=${encodeURIComponent(
+            "/add/"
+          )}`;
+        });
+      }
+      if (btnVerifyYandex) {
+        btnVerifyYandex.style.display = "inline-flex";
+        btnVerifyYandex.addEventListener("click", () => {
+          window.location.href = `${yandexAuthorizeUrl}?next=${encodeURIComponent(
+            "/add/"
+          )}`;
+        });
+      }
+    }
 
     const me = await jfetch("/v1/auth/me", { method: "GET" });
     if (!me.r.ok) {
       lock.style.display = "block";
+      if (lockActions) lockActions.style.display = "flex";
+      if (verifyLock) verifyLock.style.display = "none";
+      if (verifyActions) verifyActions.style.display = "none";
       box.style.display = "none";
       return;
     }
+
+    const user = me.body?.user || {};
+    const isVerified = Boolean(user.emailVerified || user.phoneVerified);
+    if (!isVerified) {
+      lock.style.display = "none";
+      if (lockActions) lockActions.style.display = "none";
+      if (verifyLock) verifyLock.style.display = "block";
+      if (verifyActions) verifyActions.style.display = "flex";
+      box.style.display = "none";
+      return;
+    }
+
     lock.style.display = "none";
+    if (lockActions) lockActions.style.display = "none";
+    if (verifyLock) verifyLock.style.display = "none";
+    if (verifyActions) verifyActions.style.display = "none";
     box.style.display = "block";
 
     const meta = await jfetch("/v1/org/meta", { method: "GET" });
