@@ -58,7 +58,8 @@
       headers['Content-Type'] = 'application/json';
     }
     const st = storedSessionToken();
-    if (st && !headers['Authorization']) {
+    const skipAuthHeader = path === '/v1/auth/config';
+    if (!skipAuthHeader && st && !headers['Authorization']) {
       headers['Authorization'] = 'Bearer ' + st;
     }
     const r = await fetch(`${base}${path}`, {
@@ -194,8 +195,13 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     const gmsg = document.getElementById('auth-global-msg');
-    const cfgRes = await jfetch('/v1/auth/config', { method: 'GET' });
-    const cfg = cfgRes.r.ok ? cfgRes.body : {};
+    let cfg = {};
+    try {
+      const cfgRes = await jfetch('/v1/auth/config', { method: 'GET' });
+      cfg = cfgRes.r.ok ? cfgRes.body : {};
+    } catch {
+      cfg = {};
+    }
 
     const err = qs('error');
     const verified = qs('verified');

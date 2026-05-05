@@ -33,7 +33,10 @@
       headers["Content-Type"] = "application/json";
     }
     const st = storedSessionToken();
-    if (st && !headers.Authorization) headers.Authorization = `Bearer ${st}`;
+    const skipAuthHeader = path === "/v1/auth/config";
+    if (!skipAuthHeader && st && !headers.Authorization) {
+      headers.Authorization = `Bearer ${st}`;
+    }
     const r = await fetch(`${base}${path}`, {
       ...opts,
       headers,
@@ -69,11 +72,16 @@
     const box = document.getElementById("org-form-box");
     if (!form || !msg || !lock || !box) return;
 
-    const cfg = await jfetch("/v1/auth/config", { method: "GET" });
-    const yandexAuthorizeUrl =
-      cfg.r.ok && cfg.body && cfg.body.yandexAuthorizeUrl
-        ? cfg.body.yandexAuthorizeUrl
-        : "";
+    let yandexAuthorizeUrl = "";
+    try {
+      const cfg = await jfetch("/v1/auth/config", { method: "GET" });
+      yandexAuthorizeUrl =
+        cfg.r.ok && cfg.body && cfg.body.yandexAuthorizeUrl
+          ? cfg.body.yandexAuthorizeUrl
+          : "";
+    } catch {
+      yandexAuthorizeUrl = "";
+    }
     if (yandexAuthorizeUrl) {
       if (btnAuthYandex) {
         btnAuthYandex.style.display = "inline-flex";
