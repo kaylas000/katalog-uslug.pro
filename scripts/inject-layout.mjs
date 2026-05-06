@@ -33,17 +33,27 @@ function injectCatalogApiMeta(html) {
     new RegExp(`\\n\\s*<meta ${CATALOG_API_META}[^>]*>\\s*`, 'gi'),
     '\n'
   );
-  if (!url) return out;
-  const esc = url
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;');
-  const tag = `\n  <meta ${CATALOG_API_META} content="${esc}">`;
+  /** Кодировка — первым в <head>; иначе длинный префикс до charset мешает раннему распознаванию UTF-8. */
+  out = out.replace(/\s*<meta\s+charset\s*=\s*["'][^"']*["']\s*\/?>\s*/gi, '');
+  const esc =
+    url
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .trim() || '';
   const headOpen = out.search(/<head\b/i);
   if (headOpen === -1) return out;
   const headTagEnd = out.indexOf('>', headOpen);
   if (headTagEnd === -1) return out;
-  return out.slice(0, headTagEnd + 1) + tag + out.slice(headTagEnd + 1);
+  const apiTag =
+    esc.length === 0
+      ? ''
+      : `\n  <meta ${CATALOG_API_META} content="${esc}">`;
+  const merged =
+    out.slice(0, headTagEnd + 1) +
+    `\n  <meta charset="UTF-8">${apiTag}\n` +
+    out.slice(headTagEnd + 1);
+  return merged.replace(/\n<meta name="viewport"/, '\n  <meta name="viewport"');
 }
 
 function normalizeEOL(s) {

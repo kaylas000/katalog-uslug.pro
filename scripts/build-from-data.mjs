@@ -28,6 +28,8 @@ const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
 const M_CATEGORY_CARDS_START = '<!-- katalog:category-cards -->';
 const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
+const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
+const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
 const STYLES_VERSION = '20260519';
 const MAIN_JS_VERSION = '20260519';
@@ -146,6 +148,37 @@ function replaceCategoryCardsBlock(html, inner) {
   }
   const endIdx = afterStart + m.index;
   return html.slice(0, afterStart) + inner + html.slice(endIdx);
+}
+
+/** Хлебные крошки, h1, абзацы c/* — из label (UTF-8 из site.json); не редактировать вручную в HTML. */
+function buildCategoryIntroInner(label) {
+  const L = escapeHtml(label);
+  return `\n      <nav class="breadcrumbs">
+        <a href="/">Главная</a><span>/</span><span>${L}</span>
+      </nav>
+      <h1 class="section-title">${L}</h1>
+      <p class="section-sub">Проверенные организации категории «${L}». Контакты и информация о компаниях — в карточках ниже.</p>
+
+      <p class="section-sub mt-24 mb-0" style="max-width:640px">
+        Фильтры по регионам и рейтингу — на <a href="/#catalog" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px">главной странице каталога</a>.
+      </p>
+`;
+}
+
+const LEGACY_CATEGORY_INTRO_BLOCK_RE =
+  /\s*<nav class="breadcrumbs">[\s\S]*?<\/nav>\s*<h1 class="section-title">[^<]*<\/h1>\s*<p class="section-sub">[\s\S]*?<\/p>\s*<p class="section-sub mt-24[^>]*>[\s\S]*?<\/p>/;
+
+function ensureCategoryIntroMarkers(html, relPathForError) {
+  if (html.includes(M_CATEGORY_INTRO_START)) return html;
+  if (!LEGACY_CATEGORY_INTRO_BLOCK_RE.test(html)) {
+    throw new Error(
+      `${relPathForError}: добавьте маркеры ${M_CATEGORY_INTRO_START} … ${M_CATEGORY_INTRO_END} вместо статического вводного блока (breadcrumbs, h1, два абзаца).`
+    );
+  }
+  return html.replace(
+    LEGACY_CATEGORY_INTRO_BLOCK_RE,
+    `\n      ${M_CATEGORY_INTRO_START}\n      ${M_CATEGORY_INTRO_END}`
+  );
 }
 
 function applyCategoryPageCards(html, categorySlug, catalog) {
@@ -319,7 +352,7 @@ function run() {
     const fp = path.join(root, ...relPath.split('/'));
     if (!fs.existsSync(fp)) {
       console.warn(
-        `${relPath}: нет файла страницы категории — создайте шаблон с маркерами ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}, см. другие c/*/index.html`
+        `${relPath}: нет файла страницы категории — шаблон c/*/index.html с маркерами ${M_CATEGORY_INTRO_START}, ${M_CATEGORY_CARDS_START}`
       );
       continue;
     }
@@ -329,6 +362,13 @@ function run() {
     chtml = chtml.replace(
       /<title>[^<]*<\/title>/i,
       `<title>${escapeHtml(pageTitle)}</title>`
+    );
+    chtml = ensureCategoryIntroMarkers(chtml, relPath);
+    chtml = replaceBetween(
+      chtml,
+      M_CATEGORY_INTRO_START,
+      M_CATEGORY_INTRO_END,
+      buildCategoryIntroInner(catLabel)
     );
     chtml = applyCategoryPageCards(chtml, catSlug, catalog);
     fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
