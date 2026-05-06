@@ -415,6 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const href = esc(item.url || '#');
       const rs = esc(item.regionSlug || '');
       const cs = esc(item.categorySlug || '');
+      const subtitleHtml = esc(item.subtitle || '').replace(/\n/g, '<br>');
+      const textHtml = esc(item.text || '').replace(/\n/g, '<br>');
       return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
@@ -427,8 +429,8 @@ ${catalogMediaSlidesHtml(item)}
                 <span class="tag tag-green">${esc(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${esc(item.title)}</h3>
-              <p class="catalog-card-text catalog-card-text-main">${esc(item.subtitle || '')}</p>
-              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${esc(item.text || '')}</p>
+              <p class="catalog-card-text catalog-card-text-main">${subtitleHtml}</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${textHtml}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>
                 <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>

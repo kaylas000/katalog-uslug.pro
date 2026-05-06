@@ -29,8 +29,8 @@ const M_GRID_END = '<!-- /katalog:catalog-grid -->';
 const M_CATEGORY_CARDS_START = '<!-- katalog:category-cards -->';
 const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 
-const STYLES_VERSION = '20260516';
-const MAIN_JS_VERSION = '20260518';
+const STYLES_VERSION = '20260519';
+const MAIN_JS_VERSION = '20260519';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
