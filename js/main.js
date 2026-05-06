@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   const orgCardTextCache = new Map();
+  const escHtml = (value) =>
+    String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  const withBreaks = (value) => escHtml(value).replace(/\n/g, '<br>');
 
   /* Mobile menu */
   const burger = document.querySelector('.burger');
@@ -289,32 +297,23 @@ document.addEventListener('DOMContentLoaded', () => {
         orgCardTextCache.set(orgUrl, null);
         return null;
       }
-      const blocks = Array.from(article.querySelectorAll('.content-block'));
-      const allPs = Array.from(article.querySelectorAll('.content-block p'))
-        .map((p) => (p.textContent || '').trim())
-        .filter(Boolean);
-      if (allPs.length === 0) {
+      const firstBlock = article.querySelector('.content-block');
+      const firstBlockParagraphs = firstBlock
+        ? Array.from(firstBlock.querySelectorAll('p'))
+            .map((p) => (p.textContent || '').trim())
+            .filter(Boolean)
+        : [];
+      if (firstBlockParagraphs.length === 0) {
         orgCardTextCache.set(orgUrl, null);
         return null;
       }
+      const contactRows = Array.from(doc.querySelectorAll('.org-showcase-aside .sidebar-card .sidebar-row'))
+        .map((row) => (row.textContent || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .slice(0, 4);
 
-      const firstBlock = blocks[0] || null;
-      const firstText = (firstBlock?.querySelector('p')?.textContent || allPs[0] || '').trim();
-
-      let secondText = '';
-      if (firstBlock) {
-        const ps = Array.from(firstBlock.querySelectorAll('p'))
-          .map((p) => (p.textContent || '').trim())
-          .filter(Boolean);
-        if (ps.length > 1) secondText = ps[1];
-      }
-      if (!secondText && blocks.length > 1) {
-        secondText = (blocks[1].querySelector('p')?.textContent || '').trim();
-      }
-      if (!secondText) {
-        secondText = allPs.find((t) => t !== firstText) || firstText;
-      }
-
+      const firstText = [...contactRows, firstBlockParagraphs[0]].filter(Boolean).join('\n');
+      const secondText = firstBlockParagraphs[1] || '';
       const payload = { firstText, secondText };
       orgCardTextCache.set(orgUrl, payload);
       return payload;
@@ -333,9 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!txt) continue;
       const intro = card.querySelector('.catalog-card-text-main');
       const about = card.querySelector('.catalog-card-about');
-      if (intro && txt.firstText) intro.textContent = txt.firstText;
+      if (intro && txt.firstText) {
+        intro.innerHTML = withBreaks(txt.firstText);
+      }
       if (about && txt.secondText) {
-        about.innerHTML = `<strong>О компании:</strong> ${txt.secondText}`;
+        about.innerHTML = `<strong>О компании:</strong> ${withBreaks(txt.secondText)}`;
       }
     }
   }
