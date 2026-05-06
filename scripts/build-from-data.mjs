@@ -24,8 +24,8 @@ const M_CAT_OPTS_START = '<!-- katalog:gen-category-options -->';
 const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
-const STYLES_VERSION = '20260513';
-const MAIN_JS_VERSION = '20260514';
+const STYLES_VERSION = '20260516';
+const MAIN_JS_VERSION = '20260516';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -48,15 +48,20 @@ function stripTags(html) {
     .trim();
 }
 
-function extractOrgCardContent(orgUrl) {
-  if (!orgUrl || !orgUrl.startsWith('/org/')) return null;
-  const parts = orgUrl.split('/').filter(Boolean);
-  const slug = parts[1];
-  if (!slug) return null;
-  const fp = path.join(root, 'org', slug, 'index.html');
-  if (!fs.existsSync(fp)) return null;
+function extractOrgPortfolioImagesFromHtml(html) {
+  const start = html.indexOf('data-portfolio-source');
+  if (start === -1) return [];
+  const chunk = html.slice(start, start + 12000);
+  const re = /data-slide-src="([^"]+)"/gi;
+  const urls = [];
+  let m;
+  while ((m = re.exec(chunk)) !== null) {
+    if (!urls.includes(m[1])) urls.push(m[1]);
+  }
+  return urls;
+}
 
-  const html = fs.readFileSync(fp, 'utf8');
+function extractOrgCardContentFromHtml(html) {
   const contactsMatch = html.match(
     /<div class="sidebar-card">\s*<h3>Контакты<\/h3>([\s\S]*?)<\/div>\s*<div class="sidebar-card">/i
   );
@@ -85,6 +90,44 @@ function extractOrgCardContent(orgUrl) {
     subtitle: rows.slice(0, 4).join('\n'),
     text: paragraphs.join('\n\n'),
   };
+}
+
+function extractOrgPageBundle(orgUrl) {
+  if (!orgUrl || !orgUrl.startsWith('/org/')) return null;
+  const parts = orgUrl.split('/').filter(Boolean);
+  const slug = parts[1];
+  if (!slug) return null;
+  const fp = path.join(root, 'org', slug, 'index.html');
+  if (!fs.existsSync(fp)) return null;
+
+  const html = fs.readFileSync(fp, 'utf8');
+  const portfolioImages = extractOrgPortfolioImagesFromHtml(html);
+  const card = extractOrgCardContentFromHtml(html);
+  if (!card && !portfolioImages.length) return null;
+  return {
+    ...(card || {}),
+    portfolioImages,
+  };
+}
+
+function catalogMediaSlidesHtml(portfolioImages) {
+  const imgs = Array.isArray(portfolioImages) ? portfolioImages.filter(Boolean) : [];
+  const gradients = ['s1', 's2', 's3'];
+  const n = imgs.length === 0 ? 3 : Math.min(4, Math.max(3, imgs.length));
+  const slides = [];
+  for (let i = 0; i < n; i++) {
+    const isActive = i === 0 ? ' is-active' : '';
+    const url = imgs.length ? imgs[i % imgs.length] : null;
+    if (url) {
+      const u = escapeHtml(url);
+      slides.push(
+        `<span class="catalog-slide catalog-slide-photo${isActive}" style="background-image:url(&quot;${u}&quot;)"></span>`
+      );
+    } else {
+      slides.push(`<span class="catalog-slide ${gradients[i % 3]}${isActive}"></span>`);
+    }
+  }
+  return slides.map((s) => `              ${s}`).join('\n');
 }
 
 function replaceBetween(html, startMark, endMark, inner) {
@@ -132,9 +175,7 @@ function cardHtml(item) {
   return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
-              <span class="catalog-slide s1 is-active"></span>
-              <span class="catalog-slide s2"></span>
-              <span class="catalog-slide s3"></span>
+${catalogMediaSlidesHtml(item.portfolioImages)}
               <span class="catalog-media-label">Фото</span>
             </div>
             <div class="catalog-card-content">
@@ -228,16 +269,23 @@ function run() {
 
   const site = readJson(path.join(root, 'config', 'site.json'));
   const regions = readJson(path.join(root, 'data', 'regions.json'));
-  const catalogRaw = readJson(path.join(root, 'data', 'catalog.json'));
+  const catalogPath = path.join(root, 'data', 'catalog.json');
+  const catalogRaw = readJson(catalogPath);
   const catalog = catalogRaw.map((item) => {
-    const extracted = extractOrgCardContent(item.url);
-    if (!extracted) return item;
-    return {
-      ...item,
-      subtitle: extracted.subtitle,
-      text: extracted.text,
-    };
+    const bundle = extractOrgPageBundle(item.url);
+    if (!bundle) return item;
+    const next = { ...item };
+    if (bundle.subtitle && bundle.text) {
+      next.subtitle = bundle.subtitle;
+      next.text = bundle.text;
+    }
+    if (bundle.portfolioImages?.length) {
+      next.portfolioImages = bundle.portfolioImages;
+    }
+    return next;
   });
+  fs.writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
+  console.log('data/catalog.json: тексты и portfolioImages синхронизированы со страницами org');
   const categories = Array.isArray(site.categories) ? site.categories : [];
 
   const catOpts = buildCategoryOptions(categories);

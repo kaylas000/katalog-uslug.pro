@@ -10,7 +10,13 @@
     "regionLabel": "Москва и МО",
     "rating": 4.9,
     "reviews": 62,
-    "url": "/org/lazer-rezka/"
+    "url": "/org/lazer-rezka/",
+    "portfolioImages": [
+      "/images/portfolio/lazer-rezka/1.jpg",
+      "/images/portfolio/lazer-rezka/2.jpg",
+      "/images/portfolio/lazer-rezka/3.jpg",
+      "/images/portfolio/lazer-rezka/4.jpg"
+    ]
   },
   {
     "id": "svk-avto",
@@ -23,7 +29,13 @@
     "regionLabel": "Москва",
     "rating": 4.8,
     "reviews": 48,
-    "url": "/org/svk-avto/"
+    "url": "/org/svk-avto/",
+    "portfolioImages": [
+      "/images/portfolio/svk-avto/1.jpg",
+      "/images/portfolio/svk-avto/2.jpg",
+      "/images/portfolio/svk-avto/3.jpg",
+      "/images/portfolio/svk-avto/4.jpg"
+    ]
   },
   {
     "id": "sidelki",
@@ -34,9 +46,15 @@
     "categoryLabel": "Патронаж",
     "regionSlug": "moskva",
     "regionLabel": "Москва",
-    "rating": 5.0,
+    "rating": 5,
     "reviews": 110,
-    "url": "/org/sidelki/"
+    "url": "/org/sidelki/",
+    "portfolioImages": [
+      "/images/portfolio/sidelki/1.jpg",
+      "/images/portfolio/sidelki/2.jpg",
+      "/images/portfolio/sidelki/3.jpg",
+      "/images/portfolio/sidelki/4.jpg"
+    ]
   },
   {
     "id": "club-ring",
@@ -49,6 +67,12 @@
     "regionLabel": "Россия",
     "rating": 4.7,
     "reviews": 35,
-    "url": "/org/club-ring/"
+    "url": "/org/club-ring/",
+    "portfolioImages": [
+      "/images/portfolio/club-ring/1.jpg",
+      "/images/portfolio/club-ring/2.jpg",
+      "/images/portfolio/club-ring/3.jpg",
+      "/images/portfolio/club-ring/4.jpg"
+    ]
   }
 ]

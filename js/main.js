@@ -390,6 +390,26 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/'/g, '&#39;');
     }
 
+    function catalogMediaSlidesHtml(item) {
+      const imgs = Array.isArray(item.portfolioImages) ? item.portfolioImages.filter(Boolean) : [];
+      const gradients = ['s1', 's2', 's3'];
+      const n = imgs.length === 0 ? 3 : Math.min(4, Math.max(3, imgs.length));
+      const slides = [];
+      for (let i = 0; i < n; i++) {
+        const isActive = i === 0 ? ' is-active' : '';
+        const url = imgs.length ? imgs[i % imgs.length] : null;
+        if (url) {
+          const u = esc(url);
+          slides.push(
+            `<span class="catalog-slide catalog-slide-photo${isActive}" style="background-image:url(&quot;${u}&quot;)"></span>`
+          );
+        } else {
+          slides.push(`<span class="catalog-slide ${gradients[i % 3]}${isActive}"></span>`);
+        }
+      }
+      return slides.map((line) => `              ${line}`).join('\n');
+    }
+
     function cardHtml(item) {
       const rating = typeof item.rating === 'number' ? item.rating.toFixed(1) : esc(item.rating);
       const href = esc(item.url || '#');
@@ -398,9 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
-              <span class="catalog-slide s1 is-active"></span>
-              <span class="catalog-slide s2"></span>
-              <span class="catalog-slide s3"></span>
+${catalogMediaSlidesHtml(item)}
               <span class="catalog-media-label">Фото</span>
             </div>
             <div class="catalog-card-content">
