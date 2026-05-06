@@ -270,7 +270,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* Каталог на главной и /r/…/: фильтры сразу по региону, категории, рейтингу и строке поиска */
+  initCatalogStaticSliders();
   initCatalogFilters();
+
+  function initCatalogStaticSliders() {
+    document.querySelectorAll('[data-auto-slider]').forEach((media) => {
+      if (media.dataset.sliderReady === '1') return;
+      const slides = Array.from(media.querySelectorAll('.catalog-slide'));
+      if (slides.length < 2) return;
+      let idx = 0;
+      const tick = () => {
+        idx = (idx + 1) % slides.length;
+        slides.forEach((s, i) => s.classList.toggle('is-active', i === idx));
+      };
+      media.dataset.sliderReady = '1';
+      window.setInterval(tick, 2600);
+    });
+  }
 
   function initCatalogFilters() {
     const section = document.querySelector('[data-catalog-section]');
@@ -312,22 +328,32 @@ document.addEventListener('DOMContentLoaded', () => {
       const href = esc(item.url || '#');
       const rs = esc(item.regionSlug || '');
       const cs = esc(item.categorySlug || '');
-      return `<div class="card" data-region-slug="${rs}" data-category-slug="${cs}">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">${esc(item.categoryLabel)}</span>
-              <span class="tag tag-green">${esc(item.regionLabel)}</span>
+      return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">${esc(item.title)}</h3>
-            <p class="card-sub">${esc(item.subtitle)}</p>
-            <p class="card-text">${esc(item.text)}</p>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">${esc(item.categoryLabel)}</span>
+                <span class="tag tag-green">${esc(item.regionLabel)}</span>
+              </div>
+              <h3 class="card-title">${esc(item.title)}</h3>
+              <p class="catalog-card-text">${esc(item.subtitle || '')}</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${esc(item.text || '')}</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>
+                <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>
-            <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>`;
+        </article>`;
     }
+
+    const initAutoSliders = initCatalogStaticSliders;
 
     function renderCards(items) {
       if (items.length === 0) {
@@ -335,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       host.innerHTML = items.map(cardHtml).join('\n');
+      initAutoSliders();
     }
 
     function applyLocalFilters(catalog) {

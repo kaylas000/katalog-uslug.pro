@@ -78,21 +78,29 @@ function cardHtml(item) {
   const href = escapeHtml(item.url || '#');
   const rs = escapeHtml(item.regionSlug || '');
   const cs = escapeHtml(item.categorySlug || '');
-  return `        <div class="card" data-region-slug="${rs}" data-category-slug="${cs}">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">${escapeHtml(item.categoryLabel)}</span>
-              <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
+  return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-sub">${escapeHtml(item.subtitle)}</p>
-            <p class="card-text">${escapeHtml(item.text)}</p>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">${escapeHtml(item.categoryLabel)}</span>
+                <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
+              </div>
+              <h3 class="card-title">${escapeHtml(item.title)}</h3>
+              <p class="catalog-card-text">${escapeHtml(item.subtitle || '')}</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${escapeHtml(item.text || '')}</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
+                <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
-            <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>`;
+        </article>`;
 }
 
 function catalogEmptyInner() {
@@ -104,10 +112,10 @@ function catalogEmptyInner() {
 
 function buildCardsGridInner(items) {
   if (!items.length) {
-    return `\n      <div class="grid cards-4 gap-24" id="catalog-cards-host">\n${catalogEmptyInner()}\n      </div>\n      `;
+    return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${catalogEmptyInner()}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
   }
   const cards = items.map(cardHtml).join('\n');
-  return `\n      <div class="grid cards-4 gap-24" id="catalog-cards-host">\n${cards}\n      </div>\n      `;
+  return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${cards}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
 }
 
 function headSeoBlock({ description, canonical, jsonLd }) {

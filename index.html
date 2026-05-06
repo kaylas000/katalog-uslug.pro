@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- katalog:gen-head-seo -->
-  <meta name="description" content="Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, патронаж и другие услуги. Фильтры по регионам и рейтингу.">
+  <meta name="description" content="Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, патронаж и другие услуги. Фильтры по региону и рейтингу.">
   <link rel="canonical" href="https://katalog-uslug.pro/">
   <!-- /katalog:gen-head-seo -->
   <title>katalog-uslug.pro — платформа услуг для бизнеса</title>
@@ -97,11 +97,6 @@
         <h2 class="section-title">Каталог организаций</h2>
         <p class="section-sub">Фильтруйте по направлению, городу и рейтингу</p>
         <!-- katalog:gen-region-seo-nav -->
-        <nav class="region-seo-nav" aria-label="Каталог по регионам">
-          <a href="/">Главная</a>
-          <span class="region-seo-sep">·</span>
-          <a href="/regions/">Все субъекты РФ</a>
-        </nav>
         <!-- /katalog:gen-region-seo-nav -->
       </div>
       <div class="filter-bar mb-24">
@@ -232,67 +227,102 @@
       </div>
 
       <!-- katalog:catalog-grid -->
-      <div class="grid cards-4 gap-24" id="catalog-cards-host">
-        <div class="card" data-region-slug="moskva" data-category-slug="metalworking">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Металлообработка</span>
-              <span class="tag tag-green">Москва и МО</span>
+      <div class="catalog-split">
+        <div class="catalog-main" id="catalog-cards-host">
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="metalworking">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">Цех лазерной резки</h3>
-            <p class="card-sub">Лазерная резка, гибка, сварка, порошковая покраска</p>
-            <p class="card-text">Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.</p>
-          </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 4.9 · 62 отзыва</span>
-            <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>
-        <div class="card" data-region-slug="moskva" data-category-slug="autoservice">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Автосервис</span>
-              <span class="tag tag-green">Москва</span>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Металлообработка</span>
+                <span class="tag tag-green">Москва и МО</span>
+              </div>
+              <h3 class="card-title">Цех лазерной резки</h3>
+              <p class="catalog-card-text">Лазерная резка, гибка, сварка, порошковая покраска</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 4.9 · 62 отзыва</span>
+                <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
             </div>
-            <h3 class="card-title">СВК Авто</h3>
-            <p class="card-sub">Техническое обслуживание и ремонт автомобилей</p>
-            <p class="card-text">м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.</p>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 4.8 · 48 отзывов</span>
-            <a href="/org/svk-avto/" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>
-        <div class="card" data-region-slug="moskva" data-category-slug="care">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Патронаж</span>
-              <span class="tag tag-green">Москва</span>
+        </article>
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="autoservice">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">Бережные сиделки</h3>
-            <p class="card-sub">Сиделки с проживанием, приходящие, в больницу</p>
-            <p class="card-text">Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.</p>
-          </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 5.0 · 110 отзывов</span>
-            <a href="/org/sidelki/" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>
-        <div class="card" data-region-slug="rossiya" data-category-slug="sportwear">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Спортивная одежда</span>
-              <span class="tag tag-green">Россия</span>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Автосервис</span>
+                <span class="tag tag-green">Москва</span>
+              </div>
+              <h3 class="card-title">СВК Авто</h3>
+              <p class="catalog-card-text">Техническое обслуживание и ремонт автомобилей</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 4.8 · 48 отзывов</span>
+                <a href="/org/svk-avto/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
             </div>
-            <h3 class="card-title">CLUB RING</h3>
-            <p class="card-sub">Премиальная спортивная одежда</p>
-            <p class="card-text">Одежда для бокса, MMA, фитнеса и тренировок. Собственное производство. Доставка по всей России.</p>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 4.7 · 35 отзывов</span>
-            <a href="/org/club-ring/" class="btn btn-sm btn-primary">Подробнее →</a>
+        </article>
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="care">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
+            </div>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Патронаж</span>
+                <span class="tag tag-green">Москва</span>
+              </div>
+              <h3 class="card-title">Бережные сиделки</h3>
+              <p class="catalog-card-text">Сиделки с проживанием, приходящие, в больницу</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 5.0 · 110 отзывов</span>
+                <a href="/org/sidelki/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
           </div>
+        </article>
+        <article class="card catalog-card-wide" data-region-slug="rossiya" data-category-slug="sportwear">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
+            </div>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Спортивная одежда</span>
+                <span class="tag tag-green">Россия</span>
+              </div>
+              <h3 class="card-title">CLUB RING</h3>
+              <p class="catalog-card-text">Премиальная спортивная одежда</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Одежда для бокса, MMA, фитнеса и тренировок. Собственное производство. Доставка по всей России.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 4.7 · 35 отзывов</span>
+                <a href="/org/club-ring/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
+          </div>
+        </article>
         </div>
+        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>
       </div>
       <!-- /katalog:catalog-grid -->
     </div>

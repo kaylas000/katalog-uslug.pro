@@ -81,8 +81,8 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <h1>Найдите проверенного подрядчика для бизнеса</h1>
-      <p>Каталог организаций с проверкой данных, прозрачным рейтингом и прямым контактом. Без посредников и скрытых комиссий.</p>
+      <h1>Услуги для бизнеса</h1>
+      <p>Найдите проверенного партнера для бизнеса и поставщика товаров.</p>
       <div class="hero-actions">
         <a href="#catalog" class="btn btn-accent btn-lg">Найти услугу <span class="arrow">→</span></a>
         <a href="/add/" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.55)">Добавить организацию</a>
@@ -233,52 +233,79 @@
       </div>
 
       <!-- katalog:catalog-grid -->
-      <div class="grid cards-4 gap-24" id="catalog-cards-host">
-        <div class="card" data-region-slug="moskva" data-category-slug="metalworking">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Металлообработка</span>
-              <span class="tag tag-green">Москва и МО</span>
+      <div class="catalog-split">
+        <div class="catalog-main" id="catalog-cards-host">
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="metalworking">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">Цех лазерной резки</h3>
-            <p class="card-sub">Лазерная резка, гибка, сварка, порошковая покраска</p>
-            <p class="card-text">Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.</p>
-          </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 4.9 · 62 отзыва</span>
-            <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>
-        <div class="card" data-region-slug="moskva" data-category-slug="autoservice">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Автосервис</span>
-              <span class="tag tag-green">Москва</span>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Металлообработка</span>
+                <span class="tag tag-green">Москва и МО</span>
+              </div>
+              <h3 class="card-title">Цех лазерной резки</h3>
+              <p class="catalog-card-text">Лазерная резка, гибка, сварка, порошковая покраска</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 4.9 · 62 отзыва</span>
+                <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
             </div>
-            <h3 class="card-title">СВК Авто</h3>
-            <p class="card-sub">Техническое обслуживание и ремонт автомобилей</p>
-            <p class="card-text">м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.</p>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 4.8 · 48 отзывов</span>
-            <a href="/org/svk-avto/" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>
-        <div class="card" data-region-slug="moskva" data-category-slug="care">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">Патронаж</span>
-              <span class="tag tag-green">Москва</span>
+        </article>
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="autoservice">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
             </div>
-            <h3 class="card-title">Бережные сиделки</h3>
-            <p class="card-sub">Сиделки с проживанием, приходящие, в больницу</p>
-            <p class="card-text">Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.</p>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Автосервис</span>
+                <span class="tag tag-green">Москва</span>
+              </div>
+              <h3 class="card-title">СВК Авто</h3>
+              <p class="catalog-card-text">Техническое обслуживание и ремонт автомобилей</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 4.8 · 48 отзывов</span>
+                <a href="/org/svk-avto/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
           </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ 5.0 · 110 отзывов</span>
-            <a href="/org/sidelki/" class="btn btn-sm btn-primary">Подробнее →</a>
+        </article>
+        <article class="card catalog-card-wide" data-region-slug="moskva" data-category-slug="care">
+          <div class="catalog-card-layout">
+            <div class="catalog-media" data-auto-slider>
+              <span class="catalog-slide s1 is-active"></span>
+              <span class="catalog-slide s2"></span>
+              <span class="catalog-slide s3"></span>
+              <span class="catalog-media-label">Фото</span>
+            </div>
+            <div class="catalog-card-content">
+              <div class="tag-row">
+                <span class="tag">Патронаж</span>
+                <span class="tag tag-green">Москва</span>
+              </div>
+              <h3 class="card-title">Бережные сиделки</h3>
+              <p class="catalog-card-text">Сиделки с проживанием, приходящие, в больницу</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.</p>
+              <div class="catalog-card-footer">
+                <span class="tag tag-accent">★ 5.0 · 110 отзывов</span>
+                <a href="/org/sidelki/" class="btn btn-sm btn-primary">Подробнее →</a>
+              </div>
+            </div>
           </div>
+        </article>
         </div>
+        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>
       </div>
       <!-- /katalog:catalog-grid -->
     </div>
@@ -449,6 +476,6 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260505"></script>
+  <script src="/js/main.js?v=20260506"></script>
 </body>
 </html>

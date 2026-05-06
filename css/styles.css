@@ -258,6 +258,48 @@ p.card-text:has(.btn-link){
 .catalog-empty-text{font-size:14px;color:var(--text-2);line-height:1.55;max-width:480px;margin:0 auto}
 .catalog-empty-text a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
 
+/* Каталог: 2 колонки (слева карточки, справа вертикальный слот) */
+.catalog-split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
+.catalog-main{display:flex;flex-direction:column;gap:16px}
+.catalog-side{
+  min-height:100%;
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,#f8fafc 0%, #eef3f8 100%);
+  padding:14px;
+}
+.catalog-side-placeholder{
+  min-height:320px;
+  height:100%;
+  border-radius:10px;
+  border:1px dashed #cbd5e1;
+  background:repeating-linear-gradient(135deg,#f8fafc,#f8fafc 12px,#f1f5f9 12px,#f1f5f9 24px);
+}
+
+.catalog-card-wide.card{overflow:hidden}
+.catalog-card-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;padding:16px}
+.catalog-media{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#e2e8f0}
+.catalog-slide{position:absolute;inset:0;opacity:0;transition:opacity .45s ease;background-size:cover;background-position:center}
+.catalog-slide.is-active{opacity:1}
+.catalog-slide.s1{background:linear-gradient(145deg,#cbd5e1,#94a3b8)}
+.catalog-slide.s2{background:linear-gradient(145deg,#bfdbfe,#93c5fd)}
+.catalog-slide.s3{background:linear-gradient(145deg,#fde68a,#fca5a5)}
+.catalog-media-label{position:absolute;left:8px;bottom:8px;font-size:11px;font-weight:700;background:rgba(15,23,42,.72);color:#fff;padding:3px 6px;border-radius:999px}
+.catalog-card-content{display:flex;flex-direction:column;min-width:0}
+.catalog-card-content .card-title{font-size:20px}
+.catalog-card-text{color:var(--text-2);font-size:14px;line-height:1.5}
+.catalog-card-about{margin-top:8px}
+.catalog-card-footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+
+@media(max-width:1020px){
+  .catalog-split{grid-template-columns:1fr}
+  .catalog-side{display:none}
+}
+@media(max-width:700px){
+  .catalog-card-layout{grid-template-columns:1fr;gap:12px;padding:12px}
+  .catalog-media{max-width:240px}
+}
+
 .regions-index-list{
   list-style:none;
   margin-top:24px;
