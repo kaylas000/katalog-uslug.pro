@@ -24,6 +24,7 @@ const M_CAT_OPTS_START = '<!-- katalog:gen-category-options -->';
 const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
+const STYLES_VERSION = '20260513';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -36,6 +37,53 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function stripTags(html) {
+  return String(html || '')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractOrgCardContent(orgUrl) {
+  if (!orgUrl || !orgUrl.startsWith('/org/')) return null;
+  const parts = orgUrl.split('/').filter(Boolean);
+  const slug = parts[1];
+  if (!slug) return null;
+  const fp = path.join(root, 'org', slug, 'index.html');
+  if (!fs.existsSync(fp)) return null;
+
+  const html = fs.readFileSync(fp, 'utf8');
+  const contactsMatch = html.match(
+    /<div class="sidebar-card">\s*<h3>Контакты<\/h3>([\s\S]*?)<\/div>\s*<div class="sidebar-card">/i
+  );
+  const firstBlockMatch = html.match(
+    /<div class="org-article">[\s\S]*?<div class="content-block">([\s\S]*?)<\/div>/i
+  );
+  if (!contactsMatch || !firstBlockMatch) return null;
+
+  const rowRe = /<div class="sidebar-row">([\s\S]*?)<\/div>/gi;
+  const rows = [];
+  let rowMatch;
+  while ((rowMatch = rowRe.exec(contactsMatch[1])) !== null) {
+    const t = stripTags(rowMatch[1]);
+    if (t) rows.push(t);
+  }
+  const pRe = /<p>([\s\S]*?)<\/p>/gi;
+  const paragraphs = [];
+  let pMatch;
+  while ((pMatch = pRe.exec(firstBlockMatch[1])) !== null) {
+    const t = stripTags(pMatch[1]);
+    if (t) paragraphs.push(t);
+  }
+  if (!rows.length || !paragraphs.length) return null;
+
+  return {
+    subtitle: [...rows.slice(0, 4), paragraphs[0]].join('\n'),
+    text: paragraphs[1] || '',
+  };
 }
 
 function replaceBetween(html, startMark, endMark, inner) {
@@ -78,6 +126,8 @@ function cardHtml(item) {
   const href = escapeHtml(item.url || '#');
   const rs = escapeHtml(item.regionSlug || '');
   const cs = escapeHtml(item.categorySlug || '');
+  const subtitleHtml = escapeHtml(item.subtitle || '').replace(/\n/g, '<br>');
+  const textHtml = escapeHtml(item.text || '').replace(/\n/g, '<br>');
   return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
@@ -92,8 +142,8 @@ function cardHtml(item) {
                 <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${escapeHtml(item.title)}</h3>
-              <p class="catalog-card-text catalog-card-text-main">${escapeHtml(item.subtitle || '')}</p>
-              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${escapeHtml(item.text || '')}</p>
+              <p class="catalog-card-text catalog-card-text-main">${subtitleHtml}</p>
+              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${textHtml}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
                 <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
@@ -177,7 +227,16 @@ function run() {
 
   const site = readJson(path.join(root, 'config', 'site.json'));
   const regions = readJson(path.join(root, 'data', 'regions.json'));
-  const catalog = readJson(path.join(root, 'data', 'catalog.json'));
+  const catalogRaw = readJson(path.join(root, 'data', 'catalog.json'));
+  const catalog = catalogRaw.map((item) => {
+    const extracted = extractOrgCardContent(item.url);
+    if (!extracted) return item;
+    return {
+      ...item,
+      subtitle: extracted.subtitle,
+      text: extracted.text,
+    };
+  });
   const categories = Array.isArray(site.categories) ? site.categories : [];
 
   const catOpts = buildCategoryOptions(categories);
@@ -273,7 +332,7 @@ function writeRegionsIndex(regions) {
   <meta name="description" content="${escapeHtml(desc)}">
   <link rel="canonical" href="${SITE_ORIGIN}/regions/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <link rel="stylesheet" href="/css/styles.css?v=${STYLES_VERSION}">
 </head>
 <body>
 
