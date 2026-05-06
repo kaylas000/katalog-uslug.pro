@@ -323,7 +323,13 @@ function run() {
       );
       continue;
     }
-    let chtml = fs.readFileSync(fp, 'utf8');
+    let chtml = fs.readFileSync(fp, 'utf8').replace(/^\uFEFF/, '');
+    const catLabel = typeof cat.label === 'string' ? cat.label.trim() : catSlug;
+    const pageTitle = `${catLabel} — katalog-uslug.pro`;
+    chtml = chtml.replace(
+      /<title>[^<]*<\/title>/i,
+      `<title>${escapeHtml(pageTitle)}</title>`
+    );
     chtml = applyCategoryPageCards(chtml, catSlug, catalog);
     fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
     const n = catalog.filter((i) => i.categorySlug === catSlug).length;

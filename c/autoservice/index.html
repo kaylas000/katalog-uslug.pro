@@ -1,15 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
+<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ав�?осе�?вис �?? katalog-uslug.pro</title>
+  <title>Автосервис — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/styles.css?v=20260519">
 </head>
 <body>
 
-  <!-- Header (�?�?агмен�?�? {{...}} подс�?авляе�? scripts/generate-partials.mjs из config/site.json) -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
@@ -20,29 +21,29 @@
           <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
         </svg>
         <span class="logo-desktop">katalog-uslug.pro</span>
-        <span class="logo-mobile">Усл�?ги&nbsp;<span class="logo-mobile-accent">�?�?о</span></span>
+        <span class="logo-mobile">Услуги&nbsp;<span class="logo-mobile-accent">Про</span></span>
       </a>
       <nav class="nav-desktop">
-        <a href="/">�?лавная</a>
+        <a href="/">Главная</a>
         <div class="nav-item has-submenu">
-          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Усл�?ги</button>
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
           <div class="submenu">
-            <a href="/c/metalworking/">�?е�?аллооб�?або�?ка</a>
-            <a href="/c/autoservice/">Ав�?осе�?вис</a>
-            <a href="/c/care/">�?а�?�?онаж и сиделки</a>
-            <a href="/c/sportwear/">Спо�?�?ивная одежда</a>
+            <a href="/c/metalworking/">Металлообработка</a>
+            <a href="/c/autoservice/">Автосервис</a>
+            <a href="/c/care/">Патронаж и сиделки</a>
+            <a href="/c/sportwear/">Спортивная одежда</a>
           </div>
         </div>
-        <a href="/analytics/">Анали�?ика</a>
-        <a href="/moderation/">�?оде�?а�?ия</a>
-        <a href="/contacts/">�?он�?ак�?�?</a>
-        <a href="/blog/">С�?а�?�?и</a>
+        <a href="/analytics/">Аналитика</a>
+        <a href="/moderation/">Модерация</a>
+        <a href="/contacts/">Контакты</a>
+        <a href="/blog/">Статьи</a>
       </nav>
       <div class="header-actions">
-        <a href="/add/" class="btn btn-sm btn-primary">�?обави�?�? о�?ганиза�?и�?</a>
-        <a href="/account/" class="btn btn-sm btn-ghost">�?ой�?и</a>
-        <a href="/account/#register" class="btn btn-sm btn-outline">Регис�?�?а�?ия</a>
-        <button class="burger" aria-label="�?ен�?">
+        <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
+        <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -52,23 +53,23 @@
   <!-- Mobile nav -->
   <div class="mobile-nav">
     <div class="mobile-panel">
-      <button class="mobile-close" aria-label="�?ак�?�?�?�?">
+      <button class="mobile-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-      <a href="/">�?лавная</a>
-      <div class="mobile-menu-label">Усл�?ги</div>
-      <a href="/c/metalworking/">�?е�?аллооб�?або�?ка</a>
-      <a href="/c/autoservice/">Ав�?осе�?вис</a>
-      <a href="/c/care/">�?а�?�?онаж и сиделки</a>
-      <a href="/c/sportwear/">Спо�?�?ивная одежда</a>
-      <a href="/analytics/">Анали�?ика</a>
-      <a href="/contacts/">�?он�?ак�?�?</a>
-      <a href="/moderation/">�?оде�?а�?ия</a>
-      <a href="/blog/">С�?а�?�?и и новос�?и</a>
-      <a href="/add/">�?обави�?�? о�?ганиза�?и�?</a>
-      <div class="mobile-menu-label">Акка�?н�?</div>
-      <a href="/account/">�?ой�?и</a>
-      <a href="/account/#register">Регис�?�?а�?ия</a>
+      <a href="/">Главная</a>
+      <div class="mobile-menu-label">Услуги</div>
+      <a href="/c/metalworking/">Металлообработка</a>
+      <a href="/c/autoservice/">Автосервис</a>
+      <a href="/c/care/">Патронаж и сиделки</a>
+      <a href="/c/sportwear/">Спортивная одежда</a>
+      <a href="/analytics/">Аналитика</a>
+      <a href="/contacts/">Контакты</a>
+      <a href="/moderation/">Модерация</a>
+      <a href="/blog/">Статьи и новости</a>
+      <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/">Войти</a>
+      <a href="/account/#register">Регистрация</a>
     </div>
   </div>
 
@@ -132,67 +133,70 @@
   <!-- Footer ({{...}} из config/site.json �?е�?ез scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json �?е�?ез scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json �?е�?ез scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
         <div class="footer-col">
-          <h4>�? пла�?�?о�?ме</h4>
-          <p>�?а�?алог �?сл�?г для бизнеса с п�?ове�?кой данн�?�?, п�?оз�?а�?н�?м �?ей�?ингом и п�?ям�?м кон�?ак�?ом.</p>
-          <p class="footer-legal-inline"><a href="/privacy/">�?он�?иден�?иал�?нос�?�?</a> · <a href="/terms/">Условия испол�?зования</a></p>
+          <h4>О платформе</h4>
+          <p>Каталог услуг для бизнеса с проверкой данных, прозрачным рейтингом и прямым контактом.</p>
+          <p class="footer-legal-inline"><a href="/privacy/">Конфиденциальность</a> · <a href="/terms/">Условия использования</a></p>
         </div>
         <div class="footer-col">
-          <h4>�?а�?его�?ии</h4>
-          <a href="/categories/">�?се ка�?его�?ии</a>
-          <a href="/c/metalworking/">�?е�?аллооб�?або�?ка</a>
-          <a href="/c/autoservice/">Ав�?осе�?вис</a>
-          <a href="/c/care/">�?а�?�?онаж и сиделки</a>
-          <a href="/c/sportwear/">Спо�?�?ивная одежда</a>
+          <h4>Категории</h4>
+          <a href="/categories/">Все категории</a>
+          <a href="/c/metalworking/">Металлообработка</a>
+          <a href="/c/autoservice/">Автосервис</a>
+          <a href="/c/care/">Патронаж и сиделки</a>
+          <a href="/c/sportwear/">Спортивная одежда</a>
         </div>
         <div class="footer-col">
-          <h4>�?нс�?�?�?мен�?�?</h4>
-          <a href="/analytics/">Анали�?ика �?�?нка</a>
-          <a href="/add/">�?обави�?�? о�?ганиза�?и�?</a>
-          <a href="/moderation/">�?оде�?а�?ия</a>
-          <a href="/blog/">С�?а�?�?и и новос�?и</a>
+          <h4>Инструменты</h4>
+          <a href="/analytics/">Аналитика рынка</a>
+          <a href="/add/">Добавить организацию</a>
+          <a href="/moderation/">Модерация</a>
+          <a href="/blog/">Статьи и новости</a>
         </div>
         <div class="footer-col">
-          <h4>�?он�?ак�?�?</h4>
+          <h4>Контакты</h4>
           <p>Email: info@katalog-uslug.pro</p>
-          <p>Режим �?або�?�?: ежедневно 09:00�??20:00</p>
+          <p>Режим работы: ежедневно 09:00–20:00</p>
         </div>
       </div>
       <div class="footer-bottom">
         <span>© 2025 katalog-uslug.pro</span>
-        <span>�?ла�?�?о�?ма �?сл�?г для бизнеса</span>
+        <span>Платформа услуг для бизнеса</span>
       </div>
     </div>
   </footer>
 
   <!-- Consultant widget -->
   <div class="consultant">
-    <button class="consultant-btn" aria-label="�?онс�?л�?�?ан�?">
+    <button class="consultant-btn" aria-label="Консультант">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </button>
     <div class="consultant-panel">
-      <button class="consultant-close" aria-label="�?ак�?�?�?�?">
+      <button class="consultant-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-      <h4>Чем мог�? помо�?�??</h4>
+      <h4>Чем могу помочь?</h4>
       <button class="consultant-btn-sm" data-consult="pick-service">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        �?одоб�?а�?�? �?сл�?г�?
+        Подобрать услугу
       </button>
       <button class="consultant-btn-sm" data-consult="filters">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-        �?б�?ясни�?�? �?ил�?�?�?�?
+        Объяснить фильтры
       </button>
       <button class="consultant-btn-sm" data-consult="compare">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-        С�?авни�?�? о�?ганиза�?ии
+        Сравнить организации
       </button>
       <button class="consultant-btn-sm" data-consult="free-site">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        �?ак пол�?�?и�?�? сай�? беспла�?но
+        Как получить сайт бесплатно
       </button>
       <div class="consultant-answer"></div>
     </div>
@@ -201,4 +205,3 @@
   <script src="/js/main.js?v=20260519"></script>
 </body>
 </html>
-

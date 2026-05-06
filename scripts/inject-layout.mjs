@@ -52,7 +52,7 @@ function normalizeEOL(s) {
 
 /** Единый финальный \\n — иначе сравнение на Windows «плавает» */
 function normalizeFileContent(s) {
-  return normalizeEOL(s).replace(/\s+$/, '') + '\n';
+  return normalizeEOL(s.replace(/^\uFEFF/, '')).replace(/\s+$/, '') + '\n';
 }
 
 const HEADER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-header.html'), 'utf8'));
