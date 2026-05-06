@@ -25,6 +25,7 @@ const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
 const STYLES_VERSION = '20260513';
+const MAIN_JS_VERSION = '20260514';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -349,7 +350,7 @@ ${ul}
 </main>
 <!-- katalog:page-main-end -->
 
-  <script src="/js/main.js?v=20260505"></script>
+  <script src="/js/main.js?v=${MAIN_JS_VERSION}"></script>
 </body>
 </html>
 `;

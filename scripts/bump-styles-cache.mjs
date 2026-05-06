@@ -1,4 +1,4 @@
-/** Одноразово/по необходимости: синхронизировать ?v= у styles.css во всех .html */
+/** Одноразово/по необходимости: синхронизировать ?v= у styles.css и main.js во всех .html */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +15,9 @@ function walk(dir) {
       walk(p);
     } else if (ent.name.endsWith(".html")) {
       let s = fs.readFileSync(p, "utf8");
-      const u = s.replace(/styles\.css\?v=[^\s">]+/g, `styles.css?v=${NEWV}`);
+      const u = s
+        .replace(/styles\.css\?v=[^\s">]+/g, `styles.css?v=${NEWV}`)
+        .replace(/main\.js\?v=[^\s">]+/g, `main.js?v=${NEWV}`);
       if (u !== s) fs.writeFileSync(p, u);
     }
   }
