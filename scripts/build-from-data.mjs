@@ -1,6 +1,7 @@
 /**
  * Собирает каталог из data/catalog.json + data/regions.json + config/site.json:
  * — подставляет опции фильтров и карточки в index.html;
+ * — те же карточки (одна правда: data/catalog.json + cardHtml) в c/<категория>/index.html;
  * — генерирует статические страницы r/<регион>/index.html (канонический URL для SEO по регионам).
  *
  * Запуск: npm run build:data
@@ -24,6 +25,15 @@ const M_CAT_OPTS_START = '<!-- katalog:gen-category-options -->';
 const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
+const M_CATEGORY_CARDS_START = '<!-- katalog:category-cards -->';
+const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
+
+const CATEGORY_PAGE_FILES = [
+  ['metalworking', 'c/metalworking/index.html'],
+  ['autoservice', 'c/autoservice/index.html'],
+  ['care', 'c/care/index.html'],
+  ['sportwear', 'c/sportwear/index.html'],
+];
 const STYLES_VERSION = '20260516';
 const MAIN_JS_VERSION = '20260518';
 
@@ -210,6 +220,52 @@ function buildCardsGridInner(items) {
   return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${cards}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
 }
 
+/** Контент между маркерами katalog:category-cards (тот же cardHtml, что на главной). */
+function buildCategoryCardsInner(items) {
+  if (!items.length) {
+    return `
+          <div class="catalog-empty" role="status">
+          <p class="catalog-empty-title">Пока нет организаций</p>
+          <p class="catalog-empty-text">Откройте <a href="/#catalog">главный каталог</a>.</p>
+        </div>
+        `;
+  }
+  return `\n${items.map(cardHtml).join('\n')}\n        `;
+}
+
+function replaceCategoryCardsBlock(html, inner) {
+  const a = html.indexOf(M_CATEGORY_CARDS_START);
+  if (a === -1) {
+    throw new Error(`нет маркера ${M_CATEGORY_CARDS_START}`);
+  }
+  const afterStart = a + M_CATEGORY_CARDS_START.length;
+  const tail = html.slice(afterStart);
+  const m = /<!--\s*\/katalog:category-cards\s*-->/.exec(tail);
+  if (!m) {
+    throw new Error(`нет маркера закрытия category-cards после ${M_CATEGORY_CARDS_START}`);
+  }
+  const endIdx = afterStart + m.index;
+  return html.slice(0, afterStart) + inner + html.slice(endIdx);
+}
+
+function applyCategoryPageCards(html, categorySlug, catalog) {
+  const items = catalog.filter((i) => i.categorySlug === categorySlug);
+  const inner = buildCategoryCardsInner(items);
+  if (html.includes(M_CATEGORY_CARDS_START)) {
+    return replaceCategoryCardsBlock(html, inner);
+  }
+  const migrated = html.replace(
+    /<div class="catalog-main">\s*<article\b[\s\S]*?<\/article>\s*<\/div>(\s*<aside class="catalog-side">)/,
+    `<div class="catalog-main">\n${M_CATEGORY_CARDS_START}${inner}${M_CATEGORY_CARDS_END}\n        </div>$1`
+  );
+  if (migrated === html) {
+    throw new Error(
+      `Не удалось вставить карточки категории ${categorySlug}: ожидается <div class="catalog-main"> с одним <article> перед <aside class="catalog-side">. Добавьте маркеры ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}.`
+    );
+  }
+  return migrated;
+}
+
 function headSeoBlock({ description, canonical, jsonLd }) {
   const lines = [
     `\n  <meta name="description" content="${escapeHtml(description)}">`,
@@ -355,6 +411,19 @@ function run() {
     const outFp = path.join(dir, 'index.html');
     fs.writeFileSync(outFp, page.replace(/\r\n/g, '\n'), 'utf8');
     console.log(`${path.relative(root, outFp)}: ${items.length} карточек`);
+  }
+
+  for (const [catSlug, relPath] of CATEGORY_PAGE_FILES) {
+    const fp = path.join(root, ...relPath.split('/'));
+    if (!fs.existsSync(fp)) {
+      console.warn(`${relPath}: файл не найден, пропуск`);
+      continue;
+    }
+    let chtml = fs.readFileSync(fp, 'utf8');
+    chtml = applyCategoryPageCards(chtml, catSlug, catalog);
+    fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
+    const n = catalog.filter((i) => i.categorySlug === catSlug).length;
+    console.log(`${relPath}: карточки как на главной (${n})`);
   }
 
   writeRegionsIndex(regions);
