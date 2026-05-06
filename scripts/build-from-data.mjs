@@ -78,7 +78,7 @@ function cardHtml(item) {
   const href = escapeHtml(item.url || '#');
   const rs = escapeHtml(item.regionSlug || '');
   const cs = escapeHtml(item.categorySlug || '');
-  return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}">
+  return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
               <span class="catalog-slide s1 is-active"></span>
@@ -92,7 +92,7 @@ function cardHtml(item) {
                 <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${escapeHtml(item.title)}</h3>
-              <p class="catalog-card-text">${escapeHtml(item.subtitle || '')}</p>
+              <p class="catalog-card-text catalog-card-text-main">${escapeHtml(item.subtitle || '')}</p>
               <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${escapeHtml(item.text || '')}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>

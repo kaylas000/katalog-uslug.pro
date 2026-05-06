@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const orgCardTextCache = new Map();
+
   /* Mobile menu */
   const burger = document.querySelector('.burger');
   const mobileNav = document.querySelector('.mobile-nav');
@@ -271,7 +273,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Каталог на главной и /r/…/: фильтры сразу по региону, категории, рейтингу и строке поиска */
   initCatalogStaticSliders();
+  hydrateCatalogCardsFromOrgPages();
   initCatalogFilters();
+
+  async function loadOrgCardText(orgUrl) {
+    if (!orgUrl) return null;
+    if (orgCardTextCache.has(orgUrl)) return orgCardTextCache.get(orgUrl);
+    try {
+      const res = await fetch(orgUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error('org_fetch');
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const article = doc.querySelector('.org-article');
+      if (!article) {
+        orgCardTextCache.set(orgUrl, null);
+        return null;
+      }
+      const blocks = Array.from(article.querySelectorAll('.content-block'));
+      const allPs = Array.from(article.querySelectorAll('.content-block p'))
+        .map((p) => (p.textContent || '').trim())
+        .filter(Boolean);
+      if (allPs.length === 0) {
+        orgCardTextCache.set(orgUrl, null);
+        return null;
+      }
+
+      const firstBlock = blocks[0] || null;
+      const firstText = (firstBlock?.querySelector('p')?.textContent || allPs[0] || '').trim();
+
+      let secondText = '';
+      if (firstBlock) {
+        const ps = Array.from(firstBlock.querySelectorAll('p'))
+          .map((p) => (p.textContent || '').trim())
+          .filter(Boolean);
+        if (ps.length > 1) secondText = ps[1];
+      }
+      if (!secondText && blocks.length > 1) {
+        secondText = (blocks[1].querySelector('p')?.textContent || '').trim();
+      }
+      if (!secondText) {
+        secondText = allPs.find((t) => t !== firstText) || firstText;
+      }
+
+      const payload = { firstText, secondText };
+      orgCardTextCache.set(orgUrl, payload);
+      return payload;
+    } catch {
+      orgCardTextCache.set(orgUrl, null);
+      return null;
+    }
+  }
+
+  async function hydrateCatalogCardsFromOrgPages(root = document) {
+    const cards = Array.from(root.querySelectorAll('.catalog-card-wide[data-org-url]'));
+    for (const card of cards) {
+      const url = card.getAttribute('data-org-url') || '';
+      if (!url) continue;
+      const txt = await loadOrgCardText(url);
+      if (!txt) continue;
+      const intro = card.querySelector('.catalog-card-text-main');
+      const about = card.querySelector('.catalog-card-about');
+      if (intro && txt.firstText) intro.textContent = txt.firstText;
+      if (about && txt.secondText) {
+        about.innerHTML = `<strong>О компании:</strong> ${txt.secondText}`;
+      }
+    }
+  }
 
   function initCatalogStaticSliders() {
     document.querySelectorAll('[data-auto-slider]').forEach((media) => {
@@ -328,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const href = esc(item.url || '#');
       const rs = esc(item.regionSlug || '');
       const cs = esc(item.categorySlug || '');
-      return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}">
+      return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
               <span class="catalog-slide s1 is-active"></span>
@@ -342,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="tag tag-green">${esc(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${esc(item.title)}</h3>
-              <p class="catalog-card-text">${esc(item.subtitle || '')}</p>
+              <p class="catalog-card-text catalog-card-text-main">${esc(item.subtitle || '')}</p>
               <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${esc(item.text || '')}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>
@@ -362,6 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       host.innerHTML = items.map(cardHtml).join('\n');
       initAutoSliders();
+      hydrateCatalogCardsFromOrgPages(host);
     }
 
     function applyLocalFilters(catalog) {
