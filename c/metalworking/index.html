@@ -1,16 +1,16 @@
-п»ї<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР° вЂ” katalog-uslug.pro</title>
+  <title>Металлообработка — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/styles.css?v=20260516">
 </head>
 <body>
 
-  <!-- Header (С„СЂР°РіРјРµРЅС‚С‹ {{...}} РїРѕРґСЃС‚Р°РІР»СЏРµС‚ scripts/generate-partials.mjs РёР· config/site.json) -->
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
@@ -21,29 +21,29 @@
           <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
         </svg>
         <span class="logo-desktop">katalog-uslug.pro</span>
-        <span class="logo-mobile">РЈСЃР»СѓРіРё&nbsp;<span class="logo-mobile-accent">РџСЂРѕ</span></span>
+        <span class="logo-mobile">Услуги&nbsp;<span class="logo-mobile-accent">Про</span></span>
       </a>
       <nav class="nav-desktop">
-        <a href="/">Р“Р»Р°РІРЅР°СЏ</a>
+        <a href="/">Главная</a>
         <div class="nav-item has-submenu">
-          <button class="nav-link nav-submenu-toggle" aria-expanded="false">РЈСЃР»СѓРіРё</button>
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
           <div class="submenu">
-            <a href="/c/metalworking/">РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</a>
-            <a href="/c/autoservice/">РђРІС‚РѕСЃРµСЂРІРёСЃ</a>
-            <a href="/c/care/">РџР°С‚СЂРѕРЅР°Р¶ Рё СЃРёРґРµР»РєРё</a>
-            <a href="/c/sportwear/">РЎРїРѕСЂС‚РёРІРЅР°СЏ РѕРґРµР¶РґР°</a>
+            <a href="/c/metalworking/">Металлообработка</a>
+            <a href="/c/autoservice/">Автосервис</a>
+            <a href="/c/care/">Патронаж и сиделки</a>
+            <a href="/c/sportwear/">Спортивная одежда</a>
           </div>
         </div>
-        <a href="/analytics/">РђРЅР°Р»РёС‚РёРєР°</a>
-        <a href="/moderation/">РњРѕРґРµСЂР°С†РёСЏ</a>
-        <a href="/contacts/">РљРѕРЅС‚Р°РєС‚С‹</a>
-        <a href="/blog/">РЎС‚Р°С‚СЊРё</a>
+        <a href="/analytics/">Аналитика</a>
+        <a href="/moderation/">Модерация</a>
+        <a href="/contacts/">Контакты</a>
+        <a href="/blog/">Статьи</a>
       </nav>
       <div class="header-actions">
-        <a href="/add/" class="btn btn-sm btn-primary">Р”РѕР±Р°РІРёС‚СЊ РѕСЂРіР°РЅРёР·Р°С†РёСЋ</a>
-        <a href="/account/" class="btn btn-sm btn-ghost">Р’РѕР№С‚Рё</a>
-        <a href="/account/#register" class="btn btn-sm btn-outline">Р РµРіРёСЃС‚СЂР°С†РёСЏ</a>
-        <button class="burger" aria-label="РњРµРЅСЋ">
+        <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
+        <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -53,36 +53,36 @@
   <!-- Mobile nav -->
   <div class="mobile-nav">
     <div class="mobile-panel">
-      <button class="mobile-close" aria-label="Р—Р°РєСЂС‹С‚СЊ">
+      <button class="mobile-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-      <a href="/">Р“Р»Р°РІРЅР°СЏ</a>
-      <div class="mobile-menu-label">РЈСЃР»СѓРіРё</div>
-      <a href="/c/metalworking/">РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</a>
-      <a href="/c/autoservice/">РђРІС‚РѕСЃРµСЂРІРёСЃ</a>
-      <a href="/c/care/">РџР°С‚СЂРѕРЅР°Р¶ Рё СЃРёРґРµР»РєРё</a>
-      <a href="/c/sportwear/">РЎРїРѕСЂС‚РёРІРЅР°СЏ РѕРґРµР¶РґР°</a>
-      <a href="/analytics/">РђРЅР°Р»РёС‚РёРєР°</a>
-      <a href="/contacts/">РљРѕРЅС‚Р°РєС‚С‹</a>
-      <a href="/moderation/">РњРѕРґРµСЂР°С†РёСЏ</a>
-      <a href="/blog/">РЎС‚Р°С‚СЊРё Рё РЅРѕРІРѕСЃС‚Рё</a>
-      <a href="/add/">Р”РѕР±Р°РІРёС‚СЊ РѕСЂРіР°РЅРёР·Р°С†РёСЋ</a>
-      <div class="mobile-menu-label">РђРєРєР°СѓРЅС‚</div>
-      <a href="/account/">Р’РѕР№С‚Рё</a>
-      <a href="/account/#register">Р РµРіРёСЃС‚СЂР°С†РёСЏ</a>
+      <a href="/">Главная</a>
+      <div class="mobile-menu-label">Услуги</div>
+      <a href="/c/metalworking/">Металлообработка</a>
+      <a href="/c/autoservice/">Автосервис</a>
+      <a href="/c/care/">Патронаж и сиделки</a>
+      <a href="/c/sportwear/">Спортивная одежда</a>
+      <a href="/analytics/">Аналитика</a>
+      <a href="/contacts/">Контакты</a>
+      <a href="/moderation/">Модерация</a>
+      <a href="/blog/">Статьи и новости</a>
+      <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/">Войти</a>
+      <a href="/account/#register">Регистрация</a>
     </div>
   </div>
 
   <section class="section">
     <div class="container">
       <nav class="breadcrumbs">
-        <a href="/">Р“Р»Р°РІРЅР°СЏ</a><span>/</span><span>РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</span>
+        <a href="/">Главная</a><span>/</span><span>Металлообработка</span>
       </nav>
-      <h1 class="section-title">РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</h1>
-      <p class="section-sub">РџСЂРѕРІРµСЂРµРЅРЅС‹Рµ РѕСЂРіР°РЅРёР·Р°С†РёРё РєР°С‚РµРіРѕСЂРёРё В«РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°В». РљРѕРЅС‚Р°РєС‚С‹ Рё РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ РєРѕРјРїР°РЅРёСЏС… вЂ” РІ РєР°СЂС‚РѕС‡РєР°С… РЅРёР¶Рµ.</p>
+      <h1 class="section-title">Металлообработка</h1>
+      <p class="section-sub">Проверенные организации категории «Металлообработка». Контакты и информация о компаниях — в карточках ниже.</p>
 
       <p class="section-sub mt-24 mb-0" style="max-width:640px">
-        Р¤РёР»СЊС‚СЂС‹ РїРѕ СЂРµРіРёРѕРЅСѓ Рё СЂРµР№С‚РёРЅРіСѓ вЂ” РЅР° <a href="/#catalog" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px">РіР»Р°РІРЅРѕР№ СЃС‚СЂР°РЅРёС†Рµ РєР°С‚Р°Р»РѕРіР°</a>.
+        Фильтры по региону и рейтингу — на <a href="/#catalog" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px">главной странице каталога</a>.
       </p>
 
       <div class="catalog-split category-cards-below-intro">
@@ -94,19 +94,19 @@
                 <span class="catalog-slide catalog-slide-photo" style="background-image:url(&quot;/images/portfolio/lazer-rezka/2.jpg&quot;)"></span>
                 <span class="catalog-slide catalog-slide-photo" style="background-image:url(&quot;/images/portfolio/lazer-rezka/3.jpg&quot;)"></span>
                 <span class="catalog-slide catalog-slide-photo" style="background-image:url(&quot;/images/portfolio/lazer-rezka/4.jpg&quot;)"></span>
-                <span class="catalog-media-label">Р¤РѕС‚Рѕ</span>
+                <span class="catalog-media-label">Фото</span>
               </div>
               <div class="catalog-card-content">
                 <div class="tag-row">
-                  <span class="tag">РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</span>
-                  <span class="tag tag-green">РњРѕСЃРєРІР° Рё РњРћ</span>
+                  <span class="tag">Металлообработка</span>
+                  <span class="tag tag-green">Москва и МО</span>
                 </div>
-                <h3 class="card-title">Р¦РµС… Р»Р°Р·РµСЂРЅРѕР№ СЂРµР·РєРё</h3>
-                <p class="catalog-card-text catalog-card-text-main">+7 (985) 456-37-64<br>info@ceh-lazer-rezka.ru<br>РќР°С…Р°Р±РёРЅРѕ, РњРѕСЃРєРѕРІСЃРєР°СЏ РѕР±Р»Р°СЃС‚СЊ<br>Р•Р¶РµРґРЅРµРІРЅРѕ 09:00вЂ“20:00</p>
-                <p class="catalog-card-text catalog-card-about"><strong>Рћ РєРѕРјРїР°РЅРёРё:</strong> Р¦РµС… Р»Р°Р·РµСЂРЅРѕР№ СЂРµР·РєРё Рё РјРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєРё РІ РќР°С…Р°Р±РёРЅРѕ. Р’С‹РїРѕР»РЅСЏРµРј РїРѕР»РЅС‹Р№ С†РёРєР» СЂР°Р±РѕС‚ В«РїРѕРґ РєР»СЋС‡В»: РѕС‚ СЂР°СЃРєСЂРѕСЏ Р»РёСЃС‚РѕРІРѕРіРѕ РјРµС‚Р°Р»Р»Р° РґРѕ РїРѕСЂРѕС€РєРѕРІРѕР№ РїРѕРєСЂР°СЃРєРё РіРѕС‚РѕРІРѕРіРѕ РёР·РґРµР»РёСЏ. Р Р°Р±РѕС‚Р°РµРј СЃ СЋСЂРёРґРёС‡РµСЃРєРёРјРё Рё С„РёР·РёС‡РµСЃРєРёРјРё Р»РёС†Р°РјРё, РїСЂРёРЅРёРјР°РµРј Р·Р°РєР°Р·С‹ РѕС‚ 1 С€С‚СѓРєРё.<br><br>500+ РІС‹РїРѕР»РЅРµРЅРЅС‹С… Р·Р°РєР°Р·РѕРІ. РўРѕС‡РЅРѕСЃС‚СЊ СЂРµР·РєРё В±0.01 РјРј. РЎРѕРІСЂРµРјРµРЅРЅРѕРµ РІРѕР»РѕРєРѕРЅРЅРѕРµ Р»Р°Р·РµСЂРЅРѕРµ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµ. РћРЅР»Р°Р№РЅ-РєРѕРЅСЃСѓР»СЊС‚Р°РЅС‚ 24/7.</p>
+                <h3 class="card-title">Цех лазерной резки</h3>
+                <p class="catalog-card-text catalog-card-text-main">+7 (985) 456-37-64<br>info@ceh-lazer-rezka.ru<br>Нахабино, Московская область<br>Ежедневно 09:00–20:00</p>
+                <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> Цех лазерной резки и металлообработки в Нахабино. Выполняем полный цикл работ «под ключ»: от раскроя листового металла до порошковой покраски готового изделия. Работаем с юридическими и физическими лицами, принимаем заказы от 1 штуки.<br><br>500+ выполненных заказов. Точность резки ±0.01 мм. Современное волоконное лазерное оборудование. Онлайн-консультант 24/7.</p>
                 <div class="catalog-card-footer">
-                  <span class="tag tag-accent">в… 4.9 В· 62 РѕС‚Р·С‹РІР°</span>
-                  <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">РџРѕРґСЂРѕР±РЅРµРµ в†’</a>
+                  <span class="tag tag-accent">? 4.9 · 62 отзыва</span>
+                  <a href="/org/lazer-rezka/" class="btn btn-sm btn-primary">Подробнее ></a>
                 </div>
               </div>
             </div>
@@ -117,86 +117,86 @@
     </div>
   </section>
 
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} РёР· config/site.json С‡РµСЂРµР· scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
         <div class="footer-col">
-          <h4>Рћ РїР»Р°С‚С„РѕСЂРјРµ</h4>
-          <p>РљР°С‚Р°Р»РѕРі СѓСЃР»СѓРі РґР»СЏ Р±РёР·РЅРµСЃР° СЃ РїСЂРѕРІРµСЂРєРѕР№ РґР°РЅРЅС‹С…, РїСЂРѕР·СЂР°С‡РЅС‹Рј СЂРµР№С‚РёРЅРіРѕРј Рё РїСЂСЏРјС‹Рј РєРѕРЅС‚Р°РєС‚РѕРј.</p>
-          <p class="footer-legal-inline"><a href="/privacy/">РљРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕСЃС‚СЊ</a> В· <a href="/terms/">РЈСЃР»РѕРІРёСЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ</a></p>
+          <h4>О платформе</h4>
+          <p>Каталог услуг для бизнеса с проверкой данных, прозрачным рейтингом и прямым контактом.</p>
+          <p class="footer-legal-inline"><a href="/privacy/">Конфиденциальность</a> · <a href="/terms/">Условия использования</a></p>
         </div>
         <div class="footer-col">
-          <h4>РљР°С‚РµРіРѕСЂРёРё</h4>
-          <a href="/categories/">Р’СЃРµ РєР°С‚РµРіРѕСЂРёРё</a>
-          <a href="/c/metalworking/">РњРµС‚Р°Р»Р»РѕРѕР±СЂР°Р±РѕС‚РєР°</a>
-          <a href="/c/autoservice/">РђРІС‚РѕСЃРµСЂРІРёСЃ</a>
-          <a href="/c/care/">РџР°С‚СЂРѕРЅР°Р¶ Рё СЃРёРґРµР»РєРё</a>
-          <a href="/c/sportwear/">РЎРїРѕСЂС‚РёРІРЅР°СЏ РѕРґРµР¶РґР°</a>
+          <h4>Категории</h4>
+          <a href="/categories/">Все категории</a>
+          <a href="/c/metalworking/">Металлообработка</a>
+          <a href="/c/autoservice/">Автосервис</a>
+          <a href="/c/care/">Патронаж и сиделки</a>
+          <a href="/c/sportwear/">Спортивная одежда</a>
         </div>
         <div class="footer-col">
-          <h4>РРЅСЃС‚СЂСѓРјРµРЅС‚С‹</h4>
-          <a href="/analytics/">РђРЅР°Р»РёС‚РёРєР° СЂС‹РЅРєР°</a>
-          <a href="/add/">Р”РѕР±Р°РІРёС‚СЊ РѕСЂРіР°РЅРёР·Р°С†РёСЋ</a>
-          <a href="/moderation/">РњРѕРґРµСЂР°С†РёСЏ</a>
-          <a href="/blog/">РЎС‚Р°С‚СЊРё Рё РЅРѕРІРѕСЃС‚Рё</a>
+          <h4>Инструменты</h4>
+          <a href="/analytics/">Аналитика рынка</a>
+          <a href="/add/">Добавить организацию</a>
+          <a href="/moderation/">Модерация</a>
+          <a href="/blog/">Статьи и новости</a>
         </div>
         <div class="footer-col">
-          <h4>РљРѕРЅС‚Р°РєС‚С‹</h4>
+          <h4>Контакты</h4>
           <p>Email: info@katalog-uslug.pro</p>
-          <p>Р РµР¶РёРј СЂР°Р±РѕС‚С‹: РµР¶РµРґРЅРµРІРЅРѕ 09:00вЂ“20:00</p>
+          <p>Режим работы: ежедневно 09:00–20:00</p>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>В© 2025 katalog-uslug.pro</span>
-        <span>РџР»Р°С‚С„РѕСЂРјР° СѓСЃР»СѓРі РґР»СЏ Р±РёР·РЅРµСЃР°</span>
+        <span>© 2025 katalog-uslug.pro</span>
+        <span>Платформа услуг для бизнеса</span>
       </div>
     </div>
   </footer>
 
   <!-- Consultant widget -->
   <div class="consultant">
-    <button class="consultant-btn" aria-label="РљРѕРЅСЃСѓР»СЊС‚Р°РЅС‚">
+    <button class="consultant-btn" aria-label="Консультант">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </button>
     <div class="consultant-panel">
-      <button class="consultant-close" aria-label="Р—Р°РєСЂС‹С‚СЊ">
+      <button class="consultant-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-      <h4>Р§РµРј РјРѕРіСѓ РїРѕРјРѕС‡СЊ?</h4>
+      <h4>Чем могу помочь?</h4>
       <button class="consultant-btn-sm" data-consult="pick-service">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        РџРѕРґРѕР±СЂР°С‚СЊ СѓСЃР»СѓРіСѓ
+        Подобрать услугу
       </button>
       <button class="consultant-btn-sm" data-consult="filters">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-        РћР±СЉСЏСЃРЅРёС‚СЊ С„РёР»СЊС‚СЂС‹
+        Объяснить фильтры
       </button>
       <button class="consultant-btn-sm" data-consult="compare">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-        РЎСЂР°РІРЅРёС‚СЊ РѕСЂРіР°РЅРёР·Р°С†РёРё
+        Сравнить организации
       </button>
       <button class="consultant-btn-sm" data-consult="free-site">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        РљР°Рє РїРѕР»СѓС‡РёС‚СЊ СЃР°Р№С‚ Р±РµСЃРїР»Р°С‚РЅРѕ
+        Как получить сайт бесплатно
       </button>
       <div class="consultant-answer"></div>
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260517"></script>
+  <script src="/js/main.js?v=20260518"></script>
 </body>
 </html>
