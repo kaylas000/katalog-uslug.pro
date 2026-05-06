@@ -81,8 +81,8 @@ function extractOrgCardContent(orgUrl) {
   if (!rows.length || !paragraphs.length) return null;
 
   return {
-    subtitle: [...rows.slice(0, 4), paragraphs[0]].join('\n'),
-    text: paragraphs[1] || '',
+    subtitle: rows.slice(0, 4).join('\n'),
+    text: paragraphs.join('\n\n'),
   };
 }
 

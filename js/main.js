@@ -312,8 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .filter(Boolean)
         .slice(0, 4);
 
-      const firstText = [...contactRows, firstBlockParagraphs[0]].filter(Boolean).join('\n');
-      const secondText = firstBlockParagraphs[1] || '';
+      const firstText = contactRows.join('\n');
+      const secondText = firstBlockParagraphs.join('\n\n');
       const payload = { firstText, secondText };
       orgCardTextCache.set(orgUrl, payload);
       return payload;
