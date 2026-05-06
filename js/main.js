@@ -281,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Каталог на главной и /r/…/: фильтры сразу по региону, категории, рейтингу и строке поиска */
   initCatalogStaticSliders();
-  hydrateCatalogCardsFromOrgPages();
   initCatalogFilters();
 
   async function loadOrgCardText(orgUrl) {
@@ -430,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       host.innerHTML = items.map(cardHtml).join('\n');
       initAutoSliders();
-      hydrateCatalogCardsFromOrgPages(host);
     }
 
     function applyLocalFilters(catalog) {
