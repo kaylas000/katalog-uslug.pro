@@ -1,14 +1,15 @@
 /**
  * Собирает каталог из data/catalog.json + data/regions.json + config/site.json:
- * — подставляет опции фильтров и карточки в index.html;
- * — те же карточки (одна правда: data/catalog.json + cardHtml) в c/<категория>/index.html;
- * — генерирует статические страницы r/<регион>/index.html (канонический URL для SEO по регионам).
+ * — HTML карточки — только из scripts/lib/catalog-card.mjs (cardHtml);
+ * — данные — data/catalog.json (одна запись на организацию);
+ * — страницы категорий c/<slug>/ — из config/site.json.categories (добавили категорию + шаблон страницы с маркерами).
  *
  * Запуск: npm run build:data
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { buildCardsGridInner, buildCategoryCardsInner, escapeHtml } from './lib/catalog-card.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -28,26 +29,11 @@ const M_GRID_END = '<!-- /katalog:catalog-grid -->';
 const M_CATEGORY_CARDS_START = '<!-- katalog:category-cards -->';
 const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 
-const CATEGORY_PAGE_FILES = [
-  ['metalworking', 'c/metalworking/index.html'],
-  ['autoservice', 'c/autoservice/index.html'],
-  ['care', 'c/care/index.html'],
-  ['sportwear', 'c/sportwear/index.html'],
-];
 const STYLES_VERSION = '20260516';
 const MAIN_JS_VERSION = '20260518';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
-}
-
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function stripTags(html) {
@@ -121,26 +107,6 @@ function extractOrgPageBundle(orgUrl) {
   };
 }
 
-function catalogMediaSlidesHtml(portfolioImages) {
-  const imgs = Array.isArray(portfolioImages) ? portfolioImages.filter(Boolean) : [];
-  const gradients = ['s1', 's2', 's3'];
-  const n = imgs.length === 0 ? 3 : Math.min(4, Math.max(3, imgs.length));
-  const slides = [];
-  for (let i = 0; i < n; i++) {
-    const isActive = i === 0 ? ' is-active' : '';
-    const url = imgs.length ? imgs[i % imgs.length] : null;
-    if (url) {
-      const u = escapeHtml(url);
-      slides.push(
-        `<span class="catalog-slide catalog-slide-photo${isActive}" style="background-image:url(&quot;${u}&quot;)"></span>`
-      );
-    } else {
-      slides.push(`<span class="catalog-slide ${gradients[i % 3]}${isActive}"></span>`);
-    }
-  }
-  return slides.map((s) => `              ${s}`).join('\n');
-}
-
 function replaceBetween(html, startMark, endMark, inner) {
   const a = html.indexOf(startMark);
   const b = html.indexOf(endMark);
@@ -165,73 +131,6 @@ function buildRegionOptions(regions) {
     lines.push(`            <option value="${escapeHtml(r.slug)}">${escapeHtml(r.label)}</option>`);
   }
   return `${lines.join('\n')}\n            `;
-}
-
-function reviewsLabel(n) {
-  const x = Number(n) || 0;
-  const mod10 = x % 10;
-  const mod100 = x % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${x} отзыв`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${x} отзыва`;
-  return `${x} отзывов`;
-}
-
-function cardHtml(item) {
-  const rating = typeof item.rating === 'number' ? item.rating.toFixed(1) : escapeHtml(item.rating);
-  const href = escapeHtml(item.url || '#');
-  const rs = escapeHtml(item.regionSlug || '');
-  const cs = escapeHtml(item.categorySlug || '');
-  const subtitleHtml = escapeHtml(item.subtitle || '').replace(/\n/g, '<br>');
-  const textHtml = escapeHtml(item.text || '').replace(/\n/g, '<br>');
-  return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
-          <div class="catalog-card-layout">
-            <div class="catalog-media" data-auto-slider>
-${catalogMediaSlidesHtml(item.portfolioImages)}
-              <span class="catalog-media-label">Фото</span>
-            </div>
-            <div class="catalog-card-content">
-              <div class="tag-row">
-                <span class="tag">${escapeHtml(item.categoryLabel)}</span>
-                <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
-              </div>
-              <h3 class="card-title">${escapeHtml(item.title)}</h3>
-              <p class="catalog-card-text catalog-card-text-main">${subtitleHtml}</p>
-              <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${textHtml}</p>
-              <div class="catalog-card-footer">
-                <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
-                <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
-              </div>
-            </div>
-          </div>
-        </article>`;
-}
-
-function catalogEmptyInner() {
-  return `        <div class="catalog-empty" role="status">
-          <p class="catalog-empty-title">Ничего не найдено</p>
-          <p class="catalog-empty-text">Смените регион, категорию или поисковый запрос — либо откройте <a href="/regions/">список всех субъектов РФ</a>.</p>
-        </div>`;
-}
-
-function buildCardsGridInner(items) {
-  if (!items.length) {
-    return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${catalogEmptyInner()}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
-  }
-  const cards = items.map(cardHtml).join('\n');
-  return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${cards}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
-}
-
-/** Контент между маркерами katalog:category-cards (тот же cardHtml, что на главной). */
-function buildCategoryCardsInner(items) {
-  if (!items.length) {
-    return `
-          <div class="catalog-empty" role="status">
-          <p class="catalog-empty-title">Пока нет организаций</p>
-          <p class="catalog-empty-text">Откройте <a href="/#catalog">главный каталог</a>.</p>
-        </div>
-        `;
-  }
-  return `\n${items.map(cardHtml).join('\n')}\n        `;
 }
 
 function replaceCategoryCardsBlock(html, inner) {
@@ -414,17 +313,21 @@ function run() {
     console.log(`${path.relative(root, outFp)}: ${items.length} карточек`);
   }
 
-  for (const [catSlug, relPath] of CATEGORY_PAGE_FILES) {
+  for (const cat of categories) {
+    const catSlug = cat.slug;
+    const relPath = `c/${catSlug}/index.html`;
     const fp = path.join(root, ...relPath.split('/'));
     if (!fs.existsSync(fp)) {
-      console.warn(`${relPath}: файл не найден, пропуск`);
+      console.warn(
+        `${relPath}: нет файла страницы категории — создайте шаблон с маркерами ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}, см. другие c/*/index.html`
+      );
       continue;
     }
     let chtml = fs.readFileSync(fp, 'utf8');
     chtml = applyCategoryPageCards(chtml, catSlug, catalog);
     fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
     const n = catalog.filter((i) => i.categorySlug === catSlug).length;
-    console.log(`${relPath}: карточки как на главной (${n})`);
+    console.log(`${relPath}: карточки из catalog-card.mjs (${n})`);
   }
 
   writeRegionsIndex(regions);
