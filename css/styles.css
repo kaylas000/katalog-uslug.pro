@@ -285,7 +285,6 @@ p.card-text:has(.btn-link){
 .catalog-slide.s2{background:linear-gradient(145deg,#bfdbfe,#93c5fd)}
 .catalog-slide.s3{background:linear-gradient(145deg,#fde68a,#fca5a5)}
 .catalog-slide.catalog-slide-photo{background-color:#e2e8f0}
-.catalog-media-label{position:absolute;left:8px;bottom:8px;font-size:11px;font-weight:700;background:rgba(15,23,42,.72);color:#fff;padding:3px 6px;border-radius:999px}
 .catalog-card-content{display:flex;flex-direction:column;min-width:0}
 .catalog-card-content .card-title{font-size:20px}
 .catalog-card-text{color:var(--text-2);font-size:14px;line-height:1.5}

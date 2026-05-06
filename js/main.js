@@ -421,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="catalog-card-layout">
             <div class="catalog-media" data-auto-slider>
 ${catalogMediaSlidesHtml(item)}
-              <span class="catalog-media-label">Фото</span>
             </div>
             <div class="catalog-card-content">
               <div class="tag-row">
