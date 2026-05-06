@@ -25,7 +25,7 @@ const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
 const STYLES_VERSION = '20260516';
-const MAIN_JS_VERSION = '20260516';
+const MAIN_JS_VERSION = '20260517';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));

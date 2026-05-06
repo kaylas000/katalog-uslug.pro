@@ -558,12 +558,19 @@ ${catalogMediaSlidesHtml(item)}
       .trim()
       .replace(/\/$/, '');
     const catalogUrlStatic = '/data/catalog.json';
+    const hasPortfolioImages = (catalog) =>
+      Array.isArray(catalog) &&
+      catalog.some((item) => Array.isArray(item?.portfolioImages) && item.portfolioImages.length > 0);
     const catalogPromise =
       apiBase.length > 0
         ? fetch(`${apiBase}/v1/catalog`, { mode: 'cors', cache: 'no-store' })
             .then((r) => {
               if (!r.ok) throw new Error('api');
               return r.json();
+            })
+            .then((catalog) => {
+              if (!hasPortfolioImages(catalog)) throw new Error('api_stale_catalog');
+              return catalog;
             })
             .catch(() =>
               fetch(catalogUrlStatic, { cache: 'no-store' }).then((r) => {
