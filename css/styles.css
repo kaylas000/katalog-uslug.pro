@@ -42,6 +42,11 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   --container:1200px;
   --page-pad:18px;
   --header-height:64px;
+  /* Единый вертикальный ритм отступов по сайту */
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:16px;
+  --space-lg:24px;
 }
 
 /* ========== UTILITIES ========== */
@@ -97,11 +102,13 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   flex-wrap:wrap;
   align-items:center;
   gap:10px;
-  margin-top:16px;
+  margin-top:var(--space-md);
 }
-/* Не использовать .btn-row.mt-0 — он убивает отступ после текста */
-/* Карточка: после основного текста — следующий блок (кнопки и т.д.) отступает */
-.card-body > .card-text + div{margin-top:14px}
+/* Строка бейджей/меток */
+.tag-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+/* Единые отступы между текстом, блоками и кнопками в карточках */
+.card-body > * + *{margin-top:var(--space-sm)}
+.card-body > .btn-row{margin-top:var(--space-md)}
 /* Сообщения с ссылкой: зазор перед ссылкой */
 .auth-msg a{margin-left:0.35em;text-underline-offset:2px;font-weight:600}
 /* Кнопка как ссылка в одной строке с текстом */
@@ -133,10 +140,9 @@ p.card-text:has(.btn-link){
 .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c6d3e2}
 .card-body{padding:20px}
-.card-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.22;letter-spacing:-0.1px}
-.card-sub{font-size:14px;color:var(--text-2);margin-top:3px;margin-bottom:10px;line-height:1.35}
-.card-sub:last-child{margin-bottom:0}
-.card-text{font-size:14px;color:var(--text-2);margin-top:8px;line-height:1.5;margin-bottom:0}
+.card-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.22;letter-spacing:-0.1px;margin:0}
+.card-sub{font-size:14px;color:var(--text-2);line-height:1.35;margin:0}
+.card-text{font-size:14px;color:var(--text-2);line-height:1.5;margin:0}
 /* Текст карточки не прилипает к полосе с рейтингом и кнопкой */
 .card > .card-body > .card-text:last-child{margin-bottom:18px}
 .card-footer{
@@ -221,12 +227,14 @@ p.card-text:has(.btn-link){
 .section{padding:44px 0}
 .section.bg-surface{background:var(--surface)}
 .section-title{font-size:clamp(22px,3vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.3px}
-.section-sub{font-size:15px;color:var(--text-2);margin-top:8px;margin-bottom:12px;max-width:560px;line-height:1.45}
-.section-sub:last-child{margin-bottom:0}
+.section-sub{font-size:15px;color:var(--text-2);margin:0;max-width:560px;line-height:1.45}
 .section-header{margin-bottom:24px}
-/* /c/… и похожие: сетка карточек после вводных абзацев (часто с mb-0 у последнего) */
-.section > .container > .section-sub + .grid,
-.section > .container > .section-sub + #catalog-cards-host{margin-top:36px}
+/* Единый ритм блоков внутри секции */
+.section > .container > * + *{margin-top:var(--space-md)}
+.section > .container > .grid,
+.section > .container > #catalog-cards-host,
+.section > .container > .card,
+.section > .container > .stub-card{margin-top:var(--space-lg)}
 .section > .container > h1.section-title{margin-bottom:18px}
 .section > .container > .breadcrumbs + h1.section-title{margin-top:2px}
 /* Страницы /c/… — явный зазор (на проде может подтягиваться старый кэш; класс без селектора «+» надёжнее) */
