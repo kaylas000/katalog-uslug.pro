@@ -96,9 +96,10 @@ function extractOrgCardContentFromHtml(html) {
   }
   if (!rows.length || !paragraphs.length) return null;
 
+  // В карточках каталога — только первый абзац из org; остальные <p> остаются на странице организации.
   return {
     subtitle: rows.slice(0, 4).join('\n'),
-    text: paragraphs.join('\n\n'),
+    text: paragraphs[0] || '',
   };
 }
 
