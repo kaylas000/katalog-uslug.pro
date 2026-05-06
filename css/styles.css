@@ -603,6 +603,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   html{scroll-behavior:auto}
   body{min-height:100svh}
   :root{--header-height:56px}
+  /* /account/: убираем слишком большой зазор под фиксированной шапкой */
+  body.account-page main.section{padding-top:14px}
   .nav-desktop{display:none}
   .burger{display:flex}
   .header-inner{height:56px;gap:6px}
