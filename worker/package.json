@@ -6,7 +6,8 @@
     "deploy": "wrangler deploy",
     "types": "wrangler types",
     "db:import": "node import-data-from-json.mjs",
-    "db:migrate": "node apply-migrations.mjs"
+    "db:migrate": "node apply-migrations.mjs",
+    "db:import:locations": "node import-locations.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

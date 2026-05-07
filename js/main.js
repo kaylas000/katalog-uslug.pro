@@ -311,6 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selRating = document.getElementById('filter-rating');
     const selSort = document.getElementById('filter-sort');
     const searchInput = document.getElementById('filter-search');
+    const whereInput = document.getElementById('filter-where');
+    const whereSuggest = document.getElementById('where-suggest');
 
     const pageRegion =
       (section?.getAttribute('data-page-region') || '').trim();
@@ -422,6 +424,10 @@ ${catalogMediaSlidesHtml(item)}
 
     let nextCursor = null;
     let loadingMore = false;
+    let locationSuggestTimer = null;
+    const state = { locationId: null };
+    let locationSuggestItems = [];
+    let locationActiveIndex = -1;
 
     function catalogV2Url(cursor) {
       const u = new URL(`${baseEarly}/v1/catalog`);
@@ -439,6 +445,7 @@ ${catalogMediaSlidesHtml(item)}
       if (minR) u.searchParams.set('minRating', minR);
       const qTerm = ((searchInput && searchInput.value) || '').trim();
       if (qTerm) u.searchParams.set('q', qTerm);
+      if (state.locationId) u.searchParams.set('locationId', state.locationId);
       if (cursor) u.searchParams.set('cursor', cursor);
       return u.toString();
     }
@@ -539,6 +546,119 @@ ${catalogMediaSlidesHtml(item)}
       if (searchInput && qp !== null) {
         searchInput.value = qp;
       }
+      const locationId = (params.get('locationId') || '').trim();
+      if (/^\d+$/.test(locationId)) {
+        state.locationId = locationId;
+      }
+    }
+
+    function hideLocationSuggest() {
+      if (!whereSuggest) return;
+      whereSuggest.hidden = true;
+      whereSuggest.innerHTML = '';
+      locationSuggestItems = [];
+      locationActiveIndex = -1;
+    }
+
+    function setLocation(locationId, label) {
+      state.locationId = locationId ? String(locationId) : null;
+      if (whereInput) whereInput.value = label || '';
+      const u = new URL(window.location.href);
+      if (state.locationId) {
+        u.searchParams.set('locationId', state.locationId);
+      } else {
+        u.searchParams.delete('locationId');
+      }
+      history.replaceState(null, '', u.toString());
+      reloadFirstPage();
+    }
+
+    async function restoreLocationLabel() {
+      if (!whereInput || !state.locationId) return;
+      try {
+        const base = baseEarly.replace(/\/$/, '');
+        const resp = await fetch(
+          `${base}/v1/locations?id=${encodeURIComponent(state.locationId)}`,
+          { cache: 'no-store' }
+        );
+        if (!resp.ok) return;
+        const payload = await resp.json();
+        const item = Array.isArray(payload.items) ? payload.items[0] : null;
+        if (item && item.label) whereInput.value = item.label;
+      } catch {}
+    }
+
+    function renderLocationSuggest(items) {
+      if (!whereSuggest) return;
+      whereSuggest.innerHTML = '';
+      if (!Array.isArray(items) || items.length === 0) {
+        hideLocationSuggest();
+        return;
+      }
+      locationSuggestItems = items.slice(0, 10);
+      locationActiveIndex = -1;
+      locationSuggestItems.forEach((item, idx) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'suggest-item';
+        row.dataset.idx = String(idx);
+        const hint = [item.kind, item.parentLabel, item.regionLabel]
+          .filter(Boolean)
+          .join(' • ');
+        row.innerHTML = `<div class="suggest-title">${esc(item.label || '')}</div><div class="suggest-hint">${esc(hint)}</div>`;
+        row.addEventListener('mouseenter', () => {
+          locationActiveIndex = idx;
+          updateLocationActiveItem();
+        });
+        row.addEventListener('click', () => {
+          hideLocationSuggest();
+          setLocation(item.id, item.label || '');
+        });
+        whereSuggest.appendChild(row);
+      });
+      whereSuggest.hidden = false;
+    }
+
+    function updateLocationActiveItem() {
+      if (!whereSuggest) return;
+      whereSuggest.querySelectorAll('.suggest-item').forEach((el, idx) => {
+        el.classList.toggle('is-active', idx === locationActiveIndex);
+      });
+      if (locationActiveIndex >= 0) {
+        const active = whereSuggest.querySelector(
+          `.suggest-item[data-idx="${locationActiveIndex}"]`
+        );
+        active?.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    async function fetchLocationSuggest() {
+      if (!whereInput) return;
+      const q = (whereInput.value || '').trim();
+      if (q.length < 2) {
+        hideLocationSuggest();
+        return;
+      }
+      try {
+        const p = new URLSearchParams();
+        p.set('q', q);
+        p.set('kinds', 'city,district,region');
+        p.set('limit', '10');
+        const regionSlug = ((selRegion && selRegion.value) || '').trim();
+        if (regionSlug) p.set('regionSlug', regionSlug);
+        const base = baseEarly.replace(/\/$/, '');
+        const r = await fetch(`${base}/v1/locations?${p.toString()}`, {
+          cache: 'no-store',
+        });
+        if (!r.ok) {
+          hideLocationSuggest();
+          return;
+        }
+        const payload = await r.json();
+        renderLocationSuggest(payload.items);
+      } catch {
+        hideLocationSuggest();
+      }
     }
 
     syncFromQueryParams();
@@ -556,6 +676,7 @@ ${catalogMediaSlidesHtml(item)}
     }
 
     reloadFirstPage();
+    restoreLocationLabel();
 
     let searchTimer = null;
     const scheduleReload = () => {
@@ -573,6 +694,73 @@ ${catalogMediaSlidesHtml(item)}
     selSort?.addEventListener('change', () => reloadFirstPage());
     searchInput?.addEventListener('input', scheduleReload);
     searchInput?.addEventListener('change', () => reloadFirstPage());
+    whereInput?.addEventListener('input', () => {
+      if (!whereInput) return;
+      const v = (whereInput.value || '').trim();
+      if (state.locationId && v === '') {
+        setLocation(null, '');
+        return;
+      }
+      window.clearTimeout(locationSuggestTimer);
+      locationSuggestTimer = window.setTimeout(fetchLocationSuggest, 250);
+    });
+    whereInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideLocationSuggest();
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        if (locationSuggestItems.length === 0) return;
+        e.preventDefault();
+        locationActiveIndex =
+          locationActiveIndex < locationSuggestItems.length - 1
+            ? locationActiveIndex + 1
+            : 0;
+        updateLocationActiveItem();
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        if (locationSuggestItems.length === 0) return;
+        e.preventDefault();
+        locationActiveIndex =
+          locationActiveIndex > 0
+            ? locationActiveIndex - 1
+            : locationSuggestItems.length - 1;
+        updateLocationActiveItem();
+        return;
+      }
+      if (e.key === 'Enter' && locationActiveIndex >= 0) {
+        e.preventDefault();
+        const item = locationSuggestItems[locationActiveIndex];
+        if (!item) return;
+        hideLocationSuggest();
+        setLocation(item.id, item.label || '');
+        return;
+      }
+      if (e.key === 'Tab' && locationActiveIndex >= 0) {
+        const item = locationSuggestItems[locationActiveIndex];
+        if (!item) return;
+        e.preventDefault();
+        hideLocationSuggest();
+        setLocation(item.id, item.label || '');
+        const focusables = Array.from(
+          document.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => {
+          const h = el;
+          return !h.hasAttribute('disabled') && !h.getAttribute('aria-hidden');
+        });
+        const idx = focusables.indexOf(whereInput);
+        const next = focusables[idx + 1];
+        if (next && typeof next.focus === 'function') next.focus();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!whereSuggest || !whereInput) return;
+      if (e.target === whereInput || whereSuggest.contains(e.target)) return;
+      hideLocationSuggest();
+    });
   }
 
   /* Toast helper */

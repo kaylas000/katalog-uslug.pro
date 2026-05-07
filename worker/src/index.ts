@@ -2,6 +2,7 @@ import { handleAuth } from "./auth";
 import { decodeCatalogCursor } from "./catalog-cursor";
 import { runCatalogV2 } from "./catalog-v2";
 import { getDbConnectionString, withDbClient } from "./db";
+import { handleLocations } from "./locations";
 import { handleOrgAdmin } from "./org-admin";
 import { getOrgPublicResponse } from "./org-public";
 import type { Env } from "./types";
@@ -243,6 +244,16 @@ export default {
           { status: 502, headers: cors }
         );
       }
+    }
+
+    if (path === "/v1/locations" && request.method === "GET") {
+      if (!getDbConnectionString(env)) {
+        return Response.json(
+          { error: "misconfigured", detail: "db_connection" },
+          { status: 503, headers: cors }
+        );
+      }
+      return handleLocations(request, env, cors);
     }
 
     /** GET /v1/org/:slug (не пересекается с /v1/org/meta, /v1/org/applications) */

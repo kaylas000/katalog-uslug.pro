@@ -15,6 +15,7 @@ export interface CatalogQueryParams {
   sort: SortKey;
   categorySlug: string | null;
   regionSlug: string | null;
+  locationId: string | null;
   minRating: number | null;
   qRaw: string | null;
 }
@@ -38,6 +39,12 @@ function parseFloatOrNull(raw: string | null): number | null {
   return Number.isFinite(x) ? x : null;
 }
 
+function parseLocationId(raw: string | null): string | null {
+  if (!raw) return null;
+  const value = raw.trim();
+  return /^\d+$/.test(value) ? value : null;
+}
+
 /** Паттерн для ILIKE с ESCAPE '\' */
 export function sqlIlike(term: string): string {
   return `%${term.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_")}%`;
@@ -57,6 +64,7 @@ export function parseCatalogV2Query(
       typeof searchParams.get("region") === "string"
         ? (searchParams.get("region") || "").trim() || null
         : null,
+    locationId: parseLocationId(searchParams.get("locationId")),
     minRating: parseFloatOrNull(searchParams.get("minRating")),
     qRaw:
       typeof searchParams.get("q") === "string"
@@ -101,6 +109,24 @@ async function fetchPage(
   }
   if (params.regionSlug) {
     whereParts.push(`r.slug = ${ph(params.regionSlug)}`);
+  }
+  if (params.locationId) {
+    const locA = ph(params.locationId);
+    const locB = ph(params.locationId);
+    const locC = ph(params.locationId);
+    whereParts.push(`(
+      loc_org.id = ${locA}::bigint
+      OR loc_org.ancestor_ids @> ARRAY[${locB}::bigint]
+      OR (
+        loc_org.kind = 'region'
+        AND loc_org.id = (
+          SELECT lf.region_id
+          FROM locations lf
+          WHERE lf.id = ${locC}::bigint
+          LIMIT 1
+        )
+      )
+    )`);
   }
   if (
     params.minRating !== null &&
@@ -181,6 +207,7 @@ async function fetchPage(
   JOIN categories c ON c.id = o.category_id
   JOIN regions r ON r.id = o.region_id
   JOIN organization_profiles p ON p.org_id = o.id
+  LEFT JOIN locations loc_org ON loc_org.id = p.location_id
   WHERE ${whereParts.join(" AND ")}
   ${order}
   LIMIT ${fetchLimit}
@@ -275,6 +302,7 @@ export async function runCatalogV2(
       sort: params.sort,
       category: params.categorySlug,
       region: params.regionSlug,
+      locationId: params.locationId,
       minRating: params.minRating,
       q: params.qRaw,
     },

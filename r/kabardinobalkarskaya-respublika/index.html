@@ -11,7 +11,7 @@
   <!-- /katalog:gen-head-seo -->
   <title>Каталог — Кабардино-Балкарская Республика — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260522">
+  <link rel="stylesheet" href="/css/styles.css?v=20260507-locations">
 </head>
 <body>
 
@@ -109,6 +109,11 @@
         <div class="filter-field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input id="filter-search" type="search" name="q" autocomplete="off" placeholder="Поиск по услуге или названию…">
+        </div>
+        <div class="filter-field filter-field-where">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input id="filter-where" type="search" name="where" autocomplete="off" placeholder="Где? (город или район)">
+          <div id="where-suggest" class="where-suggest" hidden></div>
         </div>
         <div class="filter-field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
@@ -360,6 +365,7 @@
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
@@ -426,6 +432,6 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260522"></script>
+  <script src="/js/main.js?v=20260507-locations"></script>
 </body>
 </html>

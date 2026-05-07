@@ -1,0 +1,572 @@
+[
+  {
+    "kind": "city",
+    "slug": "altayskiy-kray-city",
+    "label": "Алтайский",
+    "parentSlug": "altayskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "amurskaya-oblast-city",
+    "label": "Амурская",
+    "parentSlug": "amurskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "arhangelskaya-oblast-city",
+    "label": "Архангельская",
+    "parentSlug": "arhangelskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "astrahanskaya-oblast-city",
+    "label": "Астраханская",
+    "parentSlug": "astrahanskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "belgorodskaya-oblast-city",
+    "label": "Белгородская",
+    "parentSlug": "belgorodskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "bryanskaya-oblast-city",
+    "label": "Брянская",
+    "parentSlug": "bryanskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "vladimirskaya-oblast-city",
+    "label": "Владимирская",
+    "parentSlug": "vladimirskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "volgogradskaya-oblast-city",
+    "label": "Волгоградская",
+    "parentSlug": "volgogradskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "vologodskaya-oblast-city",
+    "label": "Вологодская",
+    "parentSlug": "vologodskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "voronezhskaya-oblast-city",
+    "label": "Воронежская",
+    "parentSlug": "voronezhskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "rossiya-city",
+    "label": "Россия",
+    "parentSlug": "rossiya"
+  },
+  {
+    "kind": "city",
+    "slug": "donetskaya-narodnaya-respublika-city",
+    "label": "Донецк",
+    "parentSlug": "donetskaya-narodnaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "evreyskaya-avtonomnaya-oblast-city",
+    "label": "Биробиджан",
+    "parentSlug": "evreyskaya-avtonomnaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "zabaykalskiy-kray-city",
+    "label": "Забайкальский",
+    "parentSlug": "zabaykalskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "zaporozhskaya-oblast-city",
+    "label": "Мелитополь",
+    "parentSlug": "zaporozhskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "ivanovskaya-oblast-city",
+    "label": "Ивановская",
+    "parentSlug": "ivanovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "irkutskaya-oblast-city",
+    "label": "Иркутская",
+    "parentSlug": "irkutskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "kabardinobalkarskaya-respublika-city",
+    "label": "Нальчик",
+    "parentSlug": "kabardinobalkarskaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "kaliningradskaya-oblast-city",
+    "label": "Калининградская",
+    "parentSlug": "kaliningradskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "kaluzhskaya-oblast-city",
+    "label": "Калужская",
+    "parentSlug": "kaluzhskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "kamchatskiy-kray-city",
+    "label": "Камчатский",
+    "parentSlug": "kamchatskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "karachaevocherkesskaya-respublika-city",
+    "label": "Черкесск",
+    "parentSlug": "karachaevocherkesskaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "kemerovskaya-oblast-kuzbass-city",
+    "label": "Кемеровская",
+    "parentSlug": "kemerovskaya-oblast-kuzbass"
+  },
+  {
+    "kind": "city",
+    "slug": "kirovskaya-oblast-city",
+    "label": "Кировская",
+    "parentSlug": "kirovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "kostromskaya-oblast-city",
+    "label": "Костромская",
+    "parentSlug": "kostromskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "krasnodarskiy-kray-city",
+    "label": "Краснодарский",
+    "parentSlug": "krasnodarskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "krasnoyarskiy-kray-city",
+    "label": "Красноярский",
+    "parentSlug": "krasnoyarskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "kurganskaya-oblast-city",
+    "label": "Курганская",
+    "parentSlug": "kurganskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "kurskaya-oblast-city",
+    "label": "Курская",
+    "parentSlug": "kurskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "leningradskaya-oblast-city",
+    "label": "Ленинградская",
+    "parentSlug": "leningradskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "lipetskaya-oblast-city",
+    "label": "Липецкая",
+    "parentSlug": "lipetskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "luganskaya-narodnaya-respublika-city",
+    "label": "Луганск",
+    "parentSlug": "luganskaya-narodnaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "magadanskaya-oblast-city",
+    "label": "Магаданская",
+    "parentSlug": "magadanskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "moskva-city",
+    "label": "Москва",
+    "parentSlug": "moskva"
+  },
+  {
+    "kind": "district",
+    "slug": "moskva-tsao",
+    "label": "Москва — ЦАО",
+    "parentSlug": "moskva"
+  },
+  {
+    "kind": "district",
+    "slug": "moskva-svao",
+    "label": "Москва — СВАО",
+    "parentSlug": "moskva"
+  },
+  {
+    "kind": "district",
+    "slug": "moskva-yuao",
+    "label": "Москва — ЮАО",
+    "parentSlug": "moskva"
+  },
+  {
+    "kind": "city",
+    "slug": "zelenograd",
+    "label": "Зеленоград",
+    "parentSlug": "moskva"
+  },
+  {
+    "kind": "city",
+    "slug": "moskovskaya-oblast-city",
+    "label": "Московская",
+    "parentSlug": "moskovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "murmanskaya-oblast-city",
+    "label": "Мурманская",
+    "parentSlug": "murmanskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "nenetskiy-avtonomnyy-okrug-city",
+    "label": "Нарьян-Мар",
+    "parentSlug": "nenetskiy-avtonomnyy-okrug"
+  },
+  {
+    "kind": "city",
+    "slug": "nizhegorodskaya-oblast-city",
+    "label": "Нижегородская",
+    "parentSlug": "nizhegorodskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "novgorodskaya-oblast-city",
+    "label": "Новгородская",
+    "parentSlug": "novgorodskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "novosibirskaya-oblast-city",
+    "label": "Новосибирская",
+    "parentSlug": "novosibirskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "omskaya-oblast-city",
+    "label": "Омская",
+    "parentSlug": "omskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "orenburgskaya-oblast-city",
+    "label": "Оренбургская",
+    "parentSlug": "orenburgskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "orlovskaya-oblast-city",
+    "label": "Орловская",
+    "parentSlug": "orlovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "penzenskaya-oblast-city",
+    "label": "Пензенская",
+    "parentSlug": "penzenskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "permskiy-kray-city",
+    "label": "Пермский",
+    "parentSlug": "permskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "primorskiy-kray-city",
+    "label": "Приморский",
+    "parentSlug": "primorskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "pskovskaya-oblast-city",
+    "label": "Псковская",
+    "parentSlug": "pskovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-adygeya-city",
+    "label": "Майкоп",
+    "parentSlug": "respublika-adygeya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-altay-city",
+    "label": "Горно-Алтайск",
+    "parentSlug": "respublika-altay"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-bashkortostan-city",
+    "label": "Уфа",
+    "parentSlug": "respublika-bashkortostan"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-buryatiya-city",
+    "label": "Улан-Удэ",
+    "parentSlug": "respublika-buryatiya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-dagestan-city",
+    "label": "Махачкала",
+    "parentSlug": "respublika-dagestan"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-ingushetiya-city",
+    "label": "Магас",
+    "parentSlug": "respublika-ingushetiya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-kalmykiya-city",
+    "label": "Элиста",
+    "parentSlug": "respublika-kalmykiya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-kareliya-city",
+    "label": "Петрозаводск",
+    "parentSlug": "respublika-kareliya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-komi-city",
+    "label": "Сыктывкар",
+    "parentSlug": "respublika-komi"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-krym-city",
+    "label": "Симферополь",
+    "parentSlug": "respublika-krym"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-mariy-el-city",
+    "label": "Йошкар-Ола",
+    "parentSlug": "respublika-mariy-el"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-mordoviya-city",
+    "label": "Саранск",
+    "parentSlug": "respublika-mordoviya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-saha-city",
+    "label": "Республика Саха",
+    "parentSlug": "respublika-saha"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-severnaya-osetiya-alaniya-city",
+    "label": "Владикавказ",
+    "parentSlug": "respublika-severnaya-osetiya-alaniya"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-tatarstan-city",
+    "label": "Казань",
+    "parentSlug": "respublika-tatarstan"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-tyva-city",
+    "label": "Кызыл",
+    "parentSlug": "respublika-tyva"
+  },
+  {
+    "kind": "city",
+    "slug": "respublika-hakasiya-city",
+    "label": "Абакан",
+    "parentSlug": "respublika-hakasiya"
+  },
+  {
+    "kind": "city",
+    "slug": "rostovskaya-oblast-city",
+    "label": "Ростовская",
+    "parentSlug": "rostovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "ryazanskaya-oblast-city",
+    "label": "Рязанская",
+    "parentSlug": "ryazanskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "samarskaya-oblast-city",
+    "label": "Самарская",
+    "parentSlug": "samarskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "sankt-peterburg-city",
+    "label": "Санкт-Петербург",
+    "parentSlug": "sankt-peterburg"
+  },
+  {
+    "kind": "district",
+    "slug": "spb-centralnyy",
+    "label": "Санкт-Петербург — Центральный район",
+    "parentSlug": "sankt-peterburg"
+  },
+  {
+    "kind": "city",
+    "slug": "saratovskaya-oblast-city",
+    "label": "Саратовская",
+    "parentSlug": "saratovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "sahalinskaya-oblast-city",
+    "label": "Сахалинская",
+    "parentSlug": "sahalinskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "sverdlovskaya-oblast-city",
+    "label": "Свердловская",
+    "parentSlug": "sverdlovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "sevastopol-city",
+    "label": "Севастополь",
+    "parentSlug": "sevastopol"
+  },
+  {
+    "kind": "city",
+    "slug": "smolenskaya-oblast-city",
+    "label": "Смоленская",
+    "parentSlug": "smolenskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "stavropolskiy-kray-city",
+    "label": "Ставропольский",
+    "parentSlug": "stavropolskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "tambovskaya-oblast-city",
+    "label": "Тамбовская",
+    "parentSlug": "tambovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "tverskaya-oblast-city",
+    "label": "Тверская",
+    "parentSlug": "tverskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "tomskaya-oblast-city",
+    "label": "Томская",
+    "parentSlug": "tomskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "tulskaya-oblast-city",
+    "label": "Тульская",
+    "parentSlug": "tulskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "tyumenskaya-oblast-city",
+    "label": "Тюменская",
+    "parentSlug": "tyumenskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "udmurtskaya-respublika-city",
+    "label": "Ижевск",
+    "parentSlug": "udmurtskaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "ulyanovskaya-oblast-city",
+    "label": "Ульяновская",
+    "parentSlug": "ulyanovskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "habarovskiy-kray-city",
+    "label": "Хабаровский",
+    "parentSlug": "habarovskiy-kray"
+  },
+  {
+    "kind": "city",
+    "slug": "hantymansiyskiy-avtonomnyy-okrug-yugra-city",
+    "label": "Ханты-Мансийск",
+    "parentSlug": "hantymansiyskiy-avtonomnyy-okrug-yugra"
+  },
+  {
+    "kind": "city",
+    "slug": "hersonskaya-oblast-city",
+    "label": "Херсон",
+    "parentSlug": "hersonskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "chelyabinskaya-oblast-city",
+    "label": "Челябинская",
+    "parentSlug": "chelyabinskaya-oblast"
+  },
+  {
+    "kind": "city",
+    "slug": "chechenskaya-respublika-city",
+    "label": "Грозный",
+    "parentSlug": "chechenskaya-respublika"
+  },
+  {
+    "kind": "city",
+    "slug": "chuvashskaya-respublika-chuvashiya-city",
+    "label": "Чувашская Республика — Чувашия",
+    "parentSlug": "chuvashskaya-respublika-chuvashiya"
+  },
+  {
+    "kind": "city",
+    "slug": "chukotskiy-avtonomnyy-okrug-city",
+    "label": "Анадырь",
+    "parentSlug": "chukotskiy-avtonomnyy-okrug"
+  },
+  {
+    "kind": "city",
+    "slug": "yamalonenetskiy-avtonomnyy-okrug-city",
+    "label": "Салехард",
+    "parentSlug": "yamalonenetskiy-avtonomnyy-okrug"
+  },
+  {
+    "kind": "city",
+    "slug": "yaroslavskaya-oblast-city",
+    "label": "Ярославская",
+    "parentSlug": "yaroslavskaya-oblast"
+  }
+]

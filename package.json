@@ -1,18 +1,21 @@
 {
     "name":  "katalog-uslug.pro",
     "private":  true,
-    "description":  "РЎС‚Р°С‚РёС‡РµСЃРєРёР№ РєР°С‚Р°Р»РѕРі СѓСЃР»СѓРі; С€Р°РїРєР°/РїРѕРґРІР°Р» СЃРѕР±РёСЂР°СЋС‚СЃСЏ РёР· partials",
+    "description":  "Р РЋРЎвЂљР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘Р в„– Р С”Р В°РЎвЂљР В°Р В»Р С•Р С– РЎС“РЎРѓР В»РЎС“Р С–; РЎв‚¬Р В°Р С—Р С”Р В°/Р С—Р С•Р Т‘Р Р†Р В°Р В» РЎРѓР С•Р В±Р С‘РЎР‚Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ Р С‘Р В· partials",
     "scripts":  {
+                    "build:partials":  "node scripts/generate-partials.mjs",
                     "build:data":  "node scripts/generate-regions-json.mjs \u0026\u0026 node scripts/build-from-data.mjs",
-                    "build:site":  "npm run build:data \u0026\u0026 npm run build:partials \u0026\u0026 npm run build:layout",
-                    "db:import":  "npm run db:import --prefix worker",
-                    "neon:paste":  "node scripts/apply-neon-paste.mjs",
+                    "verify:locations":  "node scripts/verify-locations.mjs",
                     "worker:deploy":  "npm run deploy --prefix worker",
+                    "build:site":  "npm run build:data \u0026\u0026 npm run build:partials \u0026\u0026 npm run build:layout",
                     "verify:migration":  "node scripts/verify-migration.mjs",
-                    "db:migrate":  "npm run db:migrate --prefix worker",
-                    "build:layout":  "node scripts/inject-layout.mjs",
+                    "db:import":  "npm run db:import --prefix worker",
                     "worker:dev":  "npm run dev --prefix worker",
+                    "build:layout":  "node scripts/inject-layout.mjs",
+                    "neon:paste":  "node scripts/apply-neon-paste.mjs",
                     "verify:worker":  "npm run build:partials \u0026\u0026 npm run build:layout \u0026\u0026 cd worker \u0026\u0026 npx tsc --noEmit",
-                    "build:partials":  "node scripts/generate-partials.mjs"
+                    "db:migrate":  "npm run db:migrate --prefix worker",
+                    "db:import:locations":  "npm run db:import:locations --prefix worker",
+                    "locations:seed": "node scripts/generate-locations-seed.mjs"
                 }
 }

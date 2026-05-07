@@ -247,6 +247,13 @@ p.card-text:has(.btn-link){
 .filter-field svg{width:18px;height:18px;color:var(--text-2);flex-shrink:0}
 .filter-field input,.filter-field select{background:transparent;border:none;outline:none;width:100%;font-size:14px;color:var(--text)}
 .filter-field select{cursor:pointer;appearance:none;-webkit-appearance:none}
+.filter-field-where{position:relative}
+.where-suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:40;max-height:320px;overflow:auto}
+.where-suggest[hidden]{display:none}
+.suggest-item{display:block;width:100%;text-align:left;padding:8px 10px;border:0;background:#fff;cursor:pointer}
+.suggest-item:hover,.suggest-item.is-active{background:#f3f6fb}
+.suggest-title{font-size:14px;color:var(--text)}
+.suggest-hint{font-size:12px;color:var(--text-2)}
 
 .region-seo-nav{font-size:13px;color:var(--text-2);line-height:1.5;margin-top:12px;max-width:720px}
 .region-seo-nav a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
