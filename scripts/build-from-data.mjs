@@ -31,8 +31,8 @@ const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
 const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
-const STYLES_VERSION = '20260507-locations';
-const MAIN_JS_VERSION = '20260507-locations';
+const STYLES_VERSION = '20260507-locations-v2';
+const MAIN_JS_VERSION = '20260507-locations-v2';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
