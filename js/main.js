@@ -661,6 +661,38 @@ ${catalogMediaSlidesHtml(item)}
       }
     }
 
+    async function tryResolveLocationFromInput() {
+      if (!whereInput) return false;
+      const q = (whereInput.value || '').trim();
+      if (q.length < 2) return false;
+      const p = new URLSearchParams();
+      p.set('q', q);
+      p.set('kinds', 'city,district,region');
+      p.set('limit', '10');
+      const regionSlug = ((selRegion && selRegion.value) || '').trim();
+      if (regionSlug) p.set('regionSlug', regionSlug);
+      const base = baseEarly.replace(/\/$/, '');
+      try {
+        const r = await fetch(`${base}/v1/locations?${p.toString()}`, {
+          cache: 'no-store',
+        });
+        if (!r.ok) return false;
+        const payload = await r.json();
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        if (!items.length) return false;
+        const exact = items.find(
+          (it) => String(it.label || '').trim().toLowerCase() === q.toLowerCase()
+        );
+        const pick = exact || (items.length === 1 ? items[0] : null);
+        if (!pick) return false;
+        hideLocationSuggest();
+        setLocation(pick.id, pick.label || '');
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     syncFromQueryParams();
     if (pageRegion && selRegion) {
       const hasOpt = Array.from(selRegion.options).some(
@@ -684,8 +716,12 @@ ${catalogMediaSlidesHtml(item)}
       searchTimer = window.setTimeout(() => reloadFirstPage(), 280);
     };
 
-    filterApply?.addEventListener('click', (e) => {
+    filterApply?.addEventListener('click', async (e) => {
       e.preventDefault();
+      if (!state.locationId && whereInput && whereInput.value.trim()) {
+        const resolved = await tryResolveLocationFromInput();
+        if (resolved) return;
+      }
       reloadFirstPage();
     });
     selRegion?.addEventListener('change', () => reloadFirstPage());
@@ -704,7 +740,7 @@ ${catalogMediaSlidesHtml(item)}
       window.clearTimeout(locationSuggestTimer);
       locationSuggestTimer = window.setTimeout(fetchLocationSuggest, 250);
     });
-    whereInput?.addEventListener('keydown', (e) => {
+    whereInput?.addEventListener('keydown', async (e) => {
       if (e.key === 'Escape') {
         hideLocationSuggest();
         return;
@@ -735,6 +771,14 @@ ${catalogMediaSlidesHtml(item)}
         if (!item) return;
         hideLocationSuggest();
         setLocation(item.id, item.label || '');
+        return;
+      }
+      if (e.key === 'Enter' && locationActiveIndex < 0) {
+        if (!state.locationId && whereInput && whereInput.value.trim()) {
+          e.preventDefault();
+          const resolved = await tryResolveLocationFromInput();
+          if (!resolved) reloadFirstPage();
+        }
         return;
       }
       if (e.key === 'Tab' && locationActiveIndex >= 0) {
