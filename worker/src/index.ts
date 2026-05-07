@@ -5,6 +5,7 @@ import { getDbConnectionString, withDbClient } from "./db";
 import { handleLocations } from "./locations";
 import { handleOrgAdmin } from "./org-admin";
 import { getOrgPublicResponse } from "./org-public";
+import { getApplicationForUser, submitOrganizationApplication, type SubmitPayload } from "./org-submit";
 import type { Env } from "./types";
 
 export type { Env } from "./types";
@@ -100,16 +101,6 @@ async function getSessionUserId(
     );
     return r.rows[0]?.id || null;
   });
-}
-
-function normalizeSlug(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9а-яё-]+/gi, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80);
 }
 
 /**
@@ -339,134 +330,6 @@ export default {
       }
     }
 
-    if (path === "/v1/org/applications" && request.method === "POST") {
-      const userId = await getSessionUserId(request, env);
-      if (!userId) {
-        return Response.json(
-          { error: "unauthorized", message: "Нужен вход в аккаунт." },
-          { status: 401, headers: cors }
-        );
-      }
-      let payload: {
-        orgTitle?: string;
-        orgSlug?: string;
-        categorySlug?: string;
-        regionSlug?: string;
-        websiteUrl?: string;
-        publicDescription?: string;
-        publicContacts?: string;
-        ownerPhone?: string;
-        moderationNote?: string;
-      };
-      try {
-        payload = (await request.json()) as typeof payload;
-      } catch {
-        return Response.json(
-          { error: "invalid_json" },
-          { status: 400, headers: cors }
-        );
-      }
-      const orgTitle = (payload.orgTitle || "").trim();
-      const categorySlug = (payload.categorySlug || "").trim();
-      const regionSlug = (payload.regionSlug || "").trim();
-      const websiteUrl = (payload.websiteUrl || "").trim();
-      const publicDescription = (payload.publicDescription || "").trim();
-      const publicContacts = (payload.publicContacts || "").trim();
-      const ownerPhone = (payload.ownerPhone || "").trim();
-      const moderationNote = (payload.moderationNote || "").trim();
-      const orgSlug = normalizeSlug(payload.orgSlug || orgTitle);
-
-      if (orgTitle.length < 3 || orgTitle.length > 140) {
-        return Response.json(
-          { error: "invalid_org_title", message: "Название 3-140 символов." },
-          { status: 400, headers: cors }
-        );
-      }
-      if (!orgSlug || orgSlug.length < 2) {
-        return Response.json(
-          { error: "invalid_org_slug", message: "Укажите корректный slug." },
-          { status: 400, headers: cors }
-        );
-      }
-      if (publicDescription.length < 20 || publicDescription.length > 4000) {
-        return Response.json(
-          {
-            error: "invalid_description",
-            message: "Описание 20-4000 символов.",
-          },
-          { status: 400, headers: cors }
-        );
-      }
-      if (websiteUrl && !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(websiteUrl)) {
-        return Response.json(
-          { error: "invalid_website", message: "Сайт должен начинаться с http(s)." },
-          { status: 400, headers: cors }
-        );
-      }
-
-      try {
-        const inserted = await withDbClient(env, async (c) => {
-          const [cat, reg] = await Promise.all([
-            c.query(`SELECT slug FROM categories WHERE slug = $1`, [categorySlug]),
-            c.query(`SELECT slug FROM regions WHERE slug = $1`, [regionSlug]),
-          ]);
-          if (!cat.rows.length) {
-            return { kind: "err" as const, code: "invalid_category" };
-          }
-          if (!reg.rows.length) {
-            return { kind: "err" as const, code: "invalid_region" };
-          }
-          const r = await c.query<{ id: string }>(
-            `INSERT INTO organization_applications
-              (applicant_user_id, org_slug, org_title, category_slug, region_slug, website_url, public_payload, private_payload, status)
-             VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, 'pending_moderation')
-             RETURNING id`,
-            [
-              userId,
-              orgSlug,
-              orgTitle,
-              categorySlug,
-              regionSlug,
-              websiteUrl || null,
-              JSON.stringify({
-                title: orgTitle,
-                slug: orgSlug,
-                description: publicDescription,
-                contacts: publicContacts,
-                websiteUrl: websiteUrl || null,
-              }),
-              JSON.stringify({
-                ownerPhone: ownerPhone || null,
-                moderationNote: moderationNote || null,
-              }),
-            ]
-          );
-          return { kind: "ok" as const, id: r.rows[0].id };
-        });
-        if (inserted.kind === "err") {
-          return Response.json(
-            { error: inserted.code },
-            { status: 400, headers: cors }
-          );
-        }
-        return Response.json(
-          {
-            ok: true,
-            applicationId: inserted.id,
-            status: "pending_moderation",
-            message: "Заявка отправлена. После модерации появится публикация.",
-          },
-          { status: 201, headers: cors }
-        );
-      } catch (e) {
-        const message = e instanceof Error ? e.message : "db_error";
-        return Response.json(
-          { error: "application_create_failed", message },
-          { status: 502, headers: cors }
-        );
-      }
-    }
-
     if (path === "/v1/org/applications/mine" && request.method === "GET") {
       const userId = await getSessionUserId(request, env);
       if (!userId) {
@@ -492,6 +355,87 @@ export default {
         const message = e instanceof Error ? e.message : "db_error";
         return Response.json(
           { error: "applications_unavailable", message },
+          { status: 502, headers: cors }
+        );
+      }
+    }
+
+    const oneApplication =
+      /^\/v1\/org\/applications\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.exec(
+        path
+      );
+    if (oneApplication && request.method === "GET") {
+      const userId = await getSessionUserId(request, env);
+      if (!userId) {
+        return Response.json(
+          { error: "unauthorized", message: "Нужен вход в аккаунт." },
+          { status: 401, headers: cors }
+        );
+      }
+      const appId = oneApplication[1];
+      try {
+        const row = await withDbClient(env, async (c) =>
+          getApplicationForUser(c, appId, userId)
+        );
+        if (!row) {
+          return Response.json({ error: "not_found" }, { status: 404, headers: cors });
+        }
+        return Response.json(row, { headers: cors });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "db_error";
+        return Response.json(
+          { error: "application_unavailable", message },
+          { status: 502, headers: cors }
+        );
+      }
+    }
+
+    if (path === "/v1/org/applications" && request.method === "POST") {
+      const userId = await getSessionUserId(request, env);
+      if (!userId) {
+        return Response.json(
+          { error: "unauthorized", message: "Нужен вход в аккаунт." },
+          { status: 401, headers: cors }
+        );
+      }
+      let payload: SubmitPayload;
+      try {
+        payload = (await request.json()) as SubmitPayload;
+      } catch {
+        return Response.json(
+          { error: "invalid_json" },
+          { status: 400, headers: cors }
+        );
+      }
+      const submitterIp =
+        request.headers.get("CF-Connecting-IP")?.trim() ||
+        request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
+        null;
+      try {
+        const inserted = await withDbClient(env, async (c) =>
+          submitOrganizationApplication(c, userId, payload, submitterIp)
+        );
+        if (inserted.kind === "err") {
+          return Response.json(
+            { error: inserted.code, message: inserted.message },
+            { status: inserted.status ?? 400, headers: cors }
+          );
+        }
+        return Response.json(
+          {
+            ok: true,
+            applicationId: inserted.applicationId,
+            orgId: inserted.orgId,
+            slug: inserted.slug,
+            status: inserted.status,
+            message: "Заявка отправлена. После модерации появится публикация.",
+          },
+          { status: 201, headers: cors }
+        );
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "db_error";
+        return Response.json(
+          { error: "application_create_failed", message },
           { status: 502, headers: cors }
         );
       }

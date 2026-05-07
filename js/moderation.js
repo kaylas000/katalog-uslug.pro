@@ -78,7 +78,7 @@
         return;
       }
       out.innerHTML = '<p class="section-sub" role="status">Загрузка…</p>';
-      const u = new URL(`${base}/v1/admin/org-applications`);
+        const u = new URL(`${base}/v1/admin/applications`);
       const st = String(statusEl?.value || '').trim();
       if (st) u.searchParams.set('status', st);
       try {
@@ -135,7 +135,7 @@
       if (approveId) {
         t.setAttribute('disabled', '');
         try {
-          await fetchJson(`${base}/v1/admin/org-applications/${encodeURIComponent(approveId)}/approve`, {
+          await fetchJson(`${base}/v1/admin/applications/${encodeURIComponent(approveId)}/approve`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${key}` },
             cache: 'no-store',
@@ -152,7 +152,7 @@
         if (!reason) return;
         t.setAttribute('disabled', '');
         try {
-          await fetchJson(`${base}/v1/admin/org-applications/${encodeURIComponent(rejectId)}/reject`, {
+          await fetchJson(`${base}/v1/admin/applications/${encodeURIComponent(rejectId)}/reject`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${key}`,
