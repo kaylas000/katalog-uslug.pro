@@ -141,6 +141,15 @@ window.bindPortfolioWidgets =
   };
 
 document.addEventListener('DOMContentLoaded', () => {
+  const orgPathMatch = window.location.pathname.match(/^\/org\/([^/]+)\/?$/);
+  if (orgPathMatch && !window.location.pathname.startsWith('/org/index.html')) {
+    const slug = decodeURIComponent(orgPathMatch[1] || '').trim();
+    if (slug) {
+      window.location.replace(`/org/index.html?slug=${encodeURIComponent(slug)}`);
+      return;
+    }
+  }
+
   /* Mobile menu */
   const burger = document.querySelector('.burger');
   const mobileNav = document.querySelector('.mobile-nav');

@@ -23,6 +23,10 @@
   }
 
   function orgSlugFromPath() {
+    const fromQuery = new URLSearchParams(window.location.search).get('slug');
+    if (fromQuery && fromQuery.trim()) {
+      return decodeURIComponent(fromQuery.trim());
+    }
     const seg = window.location.pathname.split('/').filter(Boolean);
     const i = seg.indexOf('org');
     if (i === -1) return '';
