@@ -6,3 +6,7 @@ You MUST follow:
 
 Task: Implement the ТЗ completely. Do not stop until all acceptance criteria in the ТЗ are satisfied.
 If something breaks, fix it and continue.
+
+## Locations feature (районы/города)
+You MUST implement this specification fully:
+@docs/TZ_LOCATIONS_FILTERS.md

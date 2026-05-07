@@ -40,6 +40,53 @@ function parseArgs() {
   return out;
 }
 
+async function upsertRows(client, rows) {
+  const chunkSize = 400;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    const values = [];
+    const params = [];
+    let n = 0;
+    for (const r of chunk) {
+      values.push(`($${++n}::text,$${++n}::text,$${++n}::text,$${++n}::text)`);
+      params.push(r.kind, r.slug, r.label, r.label_norm);
+    }
+    await client.query(
+      `
+      INSERT INTO locations (kind, slug, label, label_norm)
+      VALUES ${values.join(",")}
+      ON CONFLICT (slug) DO UPDATE
+        SET kind=EXCLUDED.kind, label=EXCLUDED.label, label_norm=EXCLUDED.label_norm
+      `,
+      params
+    );
+  }
+}
+
+async function applyParents(client, rel) {
+  const chunkSize = 400;
+  for (let i = 0; i < rel.length; i += chunkSize) {
+    const chunk = rel.slice(i, i + chunkSize);
+    const values = [];
+    const params = [];
+    let n = 0;
+    for (const r of chunk) {
+      values.push(`($${++n}::text,$${++n}::text)`);
+      params.push(r.child, r.parent);
+    }
+    await client.query(
+      `
+      UPDATE locations c
+      SET parent_id = p.id
+      FROM (VALUES ${values.join(",")}) AS x(child_slug, parent_slug)
+      JOIN locations p ON p.slug = x.parent_slug
+      WHERE c.slug = x.child_slug
+      `,
+      params
+    );
+  }
+}
+
 async function main() {
   const { file } = parseArgs();
   const repoRoot = path.join(__dirname, "..");
@@ -96,33 +143,13 @@ async function main() {
         return { kind, slug, label, label_norm: normLabel(label), parentSlug };
       });
 
-      for (const r of rows) {
-        await client.query(
-          `
-          INSERT INTO locations (kind, slug, label, label_norm)
-          VALUES ($1::text, $2::text, $3::text, $4::text)
-          ON CONFLICT (slug) DO UPDATE
-            SET kind=EXCLUDED.kind, label=EXCLUDED.label, label_norm=EXCLUDED.label_norm
-          `,
-          [r.kind, r.slug, r.label, r.label_norm]
-        );
-      }
+      await upsertRows(client, rows);
 
       // parent_id по parentSlug
       const rel = rows
         .filter((x) => x.parentSlug)
         .map((x) => ({ child: x.slug, parent: x.parentSlug }));
-      for (const x of rel) {
-        await client.query(
-          `
-          UPDATE locations c
-          SET parent_id = p.id
-          FROM locations p
-          WHERE c.slug=$1::text AND p.slug=$2::text
-          `,
-          [x.child, x.parent]
-        );
-      }
+      await applyParents(client, rel);
       await client.query(
         `
         UPDATE locations c
