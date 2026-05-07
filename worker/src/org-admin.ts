@@ -3,6 +3,24 @@ import type { Env } from "./types";
 
 const ADMIN_BASE = "/v1/admin/org-applications";
 
+function splitLines(s: string): string[] {
+  return s
+    .split(/\r?\n/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function guessContactType(
+  value: string
+): "phone" | "email" | "website" | "messenger" | "social" {
+  const v = value.trim();
+  if (/^https?:\/\//i.test(v)) return "website";
+  if (v.includes("@")) return "email";
+  if (/[0-9][0-9\s()+-]{6,}/.test(v)) return "phone";
+  return "messenger";
+}
+
 function timingSafeEqualUtf8(a: string, b: string): boolean {
   const enc = new TextEncoder();
   const ae = enc.encode(a);
@@ -144,25 +162,31 @@ export async function handleOrgAdmin(
               ? listingTextRaw.trim()
               : app.org_title;
 
+          const contactsRaw = payload.contacts;
+          const contactLines =
+            typeof contactsRaw === "string" ? splitLines(contactsRaw) : [];
+          const subtitle = contactLines.slice(0, 4).join("\n");
+
           const existing = await c.query(`SELECT id FROM organizations WHERE id = $1`, [orgId]);
           if (!existing.rows.length) {
             await c.query(
               `INSERT INTO organizations
                 (id, title, subtitle, listing_text, category_id, region_id, rating, reviews, published, created_at, updated_at)
-               VALUES ($1, $2, '', $3, $4::bigint, $5::bigint, 0, 0, true, now(), now())`,
-              [orgId, app.org_title, listingText, categoryId, regionId]
+               VALUES ($1, $2, $3, $4, $5::bigint, $6::bigint, 0, 0, true, now(), now())`,
+              [orgId, app.org_title, subtitle, listingText, categoryId, regionId]
             );
           } else {
             await c.query(
               `UPDATE organizations
                SET title = $2,
-                   listing_text = $3,
-                   category_id = $4::bigint,
-                   region_id = $5::bigint,
+                   subtitle = $3,
+                   listing_text = $4,
+                   category_id = $5::bigint,
+                   region_id = $6::bigint,
                    published = true,
                    updated_at = now()
                WHERE id = $1`,
-              [orgId, app.org_title, listingText, categoryId, regionId]
+              [orgId, app.org_title, subtitle, listingText, categoryId, regionId]
             );
           }
 
@@ -179,6 +203,22 @@ export async function handleOrgAdmin(
                updated_at = now()`,
             [orgId, listingText, app.website_url]
           );
+
+          if (contactLines.length > 0) {
+            for (let i = 0; i < contactLines.length; i += 1) {
+              const v = contactLines[i]!;
+              const t = guessContactType(v);
+              await c.query(
+                `INSERT INTO organization_public_contacts
+                  (org_id, contact_type, contact_value, contact_label, is_primary, sort_order)
+                 VALUES ($1, $2, $3, NULL, $4, $5)
+                 ON CONFLICT (org_id, contact_type, contact_value) DO UPDATE SET
+                   sort_order = LEAST(organization_public_contacts.sort_order, EXCLUDED.sort_order),
+                   is_primary = organization_public_contacts.is_primary OR EXCLUDED.is_primary`,
+                [orgId, t, v, i === 0, 100 + i]
+              );
+            }
+          }
 
           await c.query(
             `UPDATE organization_applications
