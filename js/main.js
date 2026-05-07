@@ -13,7 +13,18 @@ window.bindPortfolioWidgets =
       if (!source || !hero || !deskSide || !mobStrip) return;
 
       const meta = Array.from(source.querySelectorAll('button[type="button"]'));
-      if (meta.length === 0) return;
+      if (meta.length === 0) {
+        root.classList.add('org-portfolio-wrap--empty');
+        root.dataset.portfolioBound = '1';
+        if (hero) {
+          hero.setAttribute(
+            'aria-label',
+            'Фотографии не указаны'
+          );
+        }
+        return;
+      }
+      root.classList.remove('org-portfolio-wrap--empty');
       root.dataset.portfolioBound = '1';
       const n = meta.length;
       const captions = meta.map((btn, i) => btn.getAttribute('data-slide-caption') || `Слайд ${i + 1}`);

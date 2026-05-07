@@ -348,6 +348,8 @@ p.card-text:has(.btn-link){
 /* Портфолио + контакты + верификация — один блок, три колонки (орг-страницы) */
 .org-portfolio-slot{width:100%;margin-bottom:0}
 .org-portfolio-wrap{width:100%}
+.org-portfolio-wrap--empty .org-showcase--layout > .org-showcase-minis{display:none !important;width:0;flex:0 0 0 !important;min-width:0;margin:0;padding:0;overflow:hidden;border:0}
+.org-portfolio-wrap--empty .org-showcase-mob{display:none !important}
 .org-showcase.org-showcase--layout{
   display:flex;
   flex-direction:row;
@@ -504,6 +506,10 @@ p.card-text:has(.btn-link){
   .org-showcase-aside{height:auto}
   .org-showcase-aside .sidebar-card{max-width:none}
   .org-showcase-aside .sidebar-row{flex-wrap:wrap;min-width:0;overflow-wrap:anywhere}
+  .org-portfolio-wrap--empty .org-showcase-card--hero > .portfolio-pixel-hero{
+    aspect-ratio:4/3;
+    max-height:min(220px, 55vw);
+  }
 }
 
 .content-block h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}

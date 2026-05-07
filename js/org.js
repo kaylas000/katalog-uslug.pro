@@ -261,8 +261,7 @@ ${tagsMetaRow(payload)}
 </section>
 <section class="org-body">
 <div class="container">
-${btnHtml
-  ? `<div class="org-portfolio-slot" aria-labelledby="org-portfolio-sr-heading"><h2 id="org-portfolio-sr-heading" class="sr-only">Портфолио организации</h2>
+<div class="org-portfolio-slot" aria-labelledby="org-portfolio-sr-heading"><h2 id="org-portfolio-sr-heading" class="sr-only">Портфолио организации</h2>
 <div data-portfolio class="org-portfolio-wrap">
 <div class="org-showcase org-showcase--layout">
 <div class="org-showcase-card org-showcase-card--hero">
@@ -280,8 +279,7 @@ ${btnHtml
 <aside class="org-showcase-aside sidebar">${contactsAside}</aside>
 </div>
 <div data-portfolio-source hidden>${btnHtml}</div>
-</div></div>`
-  : `<aside class="org-showcase-aside sidebar" style="max-width:560px">${contactsAside}</aside>`}
+</div></div>
 ${articleBlocks(payload)}
 </div>
 </section>
