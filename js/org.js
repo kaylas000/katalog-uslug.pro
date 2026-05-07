@@ -87,7 +87,7 @@
         if (type === 'phone') {
           const href = telHref(v);
           const btn = href
-            ? `<a href="${esc(href)}" class="btn btn-primary">${esc(v)}</a>`
+            ? `<a href="${esc(href)}" class="btn btn-primary" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a>`
             : withBreaks(v);
           const inner =
             lb && lb !== v
@@ -110,7 +110,7 @@
         const th = telHref(s);
         if (th) {
           rows.push(
-            `<div class="sidebar-row sidebar-row--stack"><a href="${esc(th)}" class="btn btn-primary">${esc(s)}</a></div>`
+            `<div class="sidebar-row sidebar-row--stack"><a href="${esc(th)}" class="btn btn-primary" aria-label="Позвонить: ${esc(s)}">${esc(s)}</a></div>`
           );
         } else {
           rows.push(`<div class="sidebar-row">${withBreaks(s)}</div>`);
