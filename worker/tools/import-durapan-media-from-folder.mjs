@@ -56,6 +56,8 @@ function resolveSourceDir() {
   const candidates = [
     path.join(repoRoot, "дюропан"),
     path.join(repoRoot, "durapan"),
+    path.join(path.dirname(repoRoot), "дюропан"),
+    path.join(path.dirname(repoRoot), "durapan"),
   ];
   for (const dir of candidates) {
     if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) return dir;
