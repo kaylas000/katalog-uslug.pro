@@ -37,6 +37,18 @@
     return `Изображение ${i + 1}`;
   }
 
+  function contactValueRaw(c) {
+    if (!c || typeof c !== 'object') return '';
+    const v = c.contactValue ?? c.contact_value;
+    return typeof v === 'string' ? v.trim() : '';
+  }
+
+  function contactLabelRaw(c) {
+    if (!c || typeof c !== 'object') return '';
+    const v = c.contactLabel ?? c.contact_label;
+    return typeof v === 'string' ? v.trim() : '';
+  }
+
   function contactAsideHtml(payload) {
     if (
       typeof payload.legacy?.sidebarHtml === 'string' &&
@@ -48,10 +60,14 @@
     const list = Array.isArray(payload.contacts) ? payload.contacts : [];
     if (list.length > 0) {
       list.forEach((c) => {
-        const v =
-          typeof c.contactValue === 'string' ? c.contactValue.trim() : '';
+        const v = contactValueRaw(c);
         if (!v) return;
-        rows.push(`<div class="sidebar-row">${withBreaks(v)}</div>`);
+        const lb = contactLabelRaw(c);
+        const line =
+          lb && lb !== v
+            ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ${withBreaks(v)}`
+            : withBreaks(v);
+        rows.push(`<div class="sidebar-row">${line}</div>`);
       });
     } else if (typeof payload.subtitle === 'string' && payload.subtitle.trim()) {
       payload.subtitle.split('\n').forEach((ln) => {

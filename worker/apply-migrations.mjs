@@ -1,8 +1,8 @@
 /**
  * Накатывает SQL из ../db/migrations/*.sql по имени (как job «Neon DB migrations» в GitHub Actions).
  *
- * Строка подключения: NEON_DATABASE_URL или DATABASE_URL, либо файл ../neon.local.txt
- * (одна строка postgresql://… из Neon).
+ * Строка подключения: NEON_DATABASE_URL или DATABASE_URL, либо файл neon.local.txt
+ * в корне репозитория или worker/neon.local.txt (одна строка postgresql://… из Neon).
  */
 import fs from 'fs';
 import path from 'path';
@@ -13,14 +13,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
 function readNeonLocalFile() {
-  const p = path.join(root, 'neon.local.txt');
-  if (!fs.existsSync(p)) return null;
-  const line = fs
-    .readFileSync(p, 'utf8')
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .find((l) => l.startsWith('postgres://') || l.startsWith('postgresql://'));
-  return line || null;
+  const candidates = [
+    path.join(root, 'neon.local.txt'),
+    path.join(root, 'worker', 'neon.local.txt'),
+  ];
+  for (const p of candidates) {
+    if (!fs.existsSync(p)) continue;
+    const line = fs
+      .readFileSync(p, 'utf8')
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .find((l) => l.startsWith('postgres://') || l.startsWith('postgresql://'));
+    if (line) return line;
+  }
+  return null;
 }
 
 const connectionString =
