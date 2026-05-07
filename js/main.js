@@ -642,7 +642,7 @@ ${catalogMediaSlidesHtml(item)}
       try {
         const p = new URLSearchParams();
         p.set('q', q);
-        p.set('kinds', 'city,district,region');
+        p.set('kinds', 'city,settlement,district,region');
         p.set('limit', '10');
         const regionSlug = ((selRegion && selRegion.value) || '').trim();
         if (regionSlug) p.set('regionSlug', regionSlug);
@@ -667,7 +667,7 @@ ${catalogMediaSlidesHtml(item)}
       if (q.length < 2) return false;
       const p = new URLSearchParams();
       p.set('q', q);
-      p.set('kinds', 'city,district,region');
+      p.set('kinds', 'city,settlement,district,region');
       p.set('limit', '10');
       const regionSlug = ((selRegion && selRegion.value) || '').trim();
       if (regionSlug) p.set('regionSlug', regionSlug);

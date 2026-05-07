@@ -113,19 +113,9 @@ async function fetchPage(
   if (params.locationId) {
     const locA = ph(params.locationId);
     const locB = ph(params.locationId);
-    const locC = ph(params.locationId);
     whereParts.push(`(
       loc_org.id = ${locA}::bigint
       OR loc_org.ancestor_ids @> ARRAY[${locB}::bigint]
-      OR (
-        loc_org.kind = 'region'
-        AND loc_org.id = (
-          SELECT lf.region_id
-          FROM locations lf
-          WHERE lf.id = ${locC}::bigint
-          LIMIT 1
-        )
-      )
     )`);
   }
   if (
