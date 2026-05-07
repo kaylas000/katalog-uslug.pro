@@ -49,6 +49,25 @@
     return typeof v === 'string' ? v.trim() : '';
   }
 
+  function contactTypeRaw(c) {
+    const t = c.contactType ?? c.contact_type;
+    return typeof t === 'string' ? t.trim().toLowerCase() : '';
+  }
+
+  /** Для ссылки tel: оставляем + и только цифры (например +7 … → tel:+7495…) */
+  function telHref(display) {
+    const raw = String(display ?? '').trim();
+    if (!raw) return '';
+    const compact = raw.replace(/[^\d+]/g, '');
+    if (!compact) return '';
+    let num = compact.startsWith('+')
+      ? '+' + compact.slice(1).replace(/\D/g, '')
+      : compact.replace(/\D/g, '');
+    const digits = num.startsWith('+') ? num.slice(1) : num;
+    if (digits.length < 10) return '';
+    return num.startsWith('+') ? `tel:${num}` : `tel:${num}`;
+  }
+
   function contactAsideHtml(payload) {
     if (
       typeof payload.legacy?.sidebarHtml === 'string' &&
@@ -63,6 +82,21 @@
         const v = contactValueRaw(c);
         if (!v) return;
         const lb = contactLabelRaw(c);
+        const type = contactTypeRaw(c);
+
+        if (type === 'phone') {
+          const href = telHref(v);
+          const btn = href
+            ? `<a href="${esc(href)}" class="btn btn-primary">${esc(v)}</a>`
+            : withBreaks(v);
+          const inner =
+            lb && lb !== v
+              ? `<strong class="sidebar-contact-label">${esc(lb)}</strong>${btn}`
+              : btn;
+          rows.push(`<div class="sidebar-row sidebar-row--stack">${inner}</div>`);
+          return;
+        }
+
         const line =
           lb && lb !== v
             ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ${withBreaks(v)}`
@@ -72,7 +106,15 @@
     } else if (typeof payload.subtitle === 'string' && payload.subtitle.trim()) {
       payload.subtitle.split('\n').forEach((ln) => {
         const s = ln.trim();
-        if (s) rows.push(`<div class="sidebar-row">${withBreaks(s)}</div>`);
+        if (!s) return;
+        const th = telHref(s);
+        if (th) {
+          rows.push(
+            `<div class="sidebar-row sidebar-row--stack"><a href="${esc(th)}" class="btn btn-primary">${esc(s)}</a></div>`
+          );
+        } else {
+          rows.push(`<div class="sidebar-row">${withBreaks(s)}</div>`);
+        }
       });
     }
 

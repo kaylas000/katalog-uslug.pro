@@ -521,6 +521,8 @@ p.card-text:has(.btn-link){
 .sidebar-card h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
 .sidebar-row{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-2);padding:8px 0;border-bottom:1px solid var(--border)}
 .sidebar-row:last-child{border:none}
+.sidebar-row--stack{flex-direction:column;align-items:stretch;gap:10px}
+.sidebar-row--stack .sidebar-contact-label{align-self:flex-start}
 .sidebar-row svg{width:18px;height:18px;color:var(--primary);flex-shrink:0}
 .sidebar .btn{width:100%}
 
