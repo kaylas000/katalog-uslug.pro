@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.join(__dirname, "..");
 
 const GEO_URL = "https://download.geonames.org/export/dump/RU.zip";
+const RU_CITIES_URL = "https://raw.githubusercontent.com/pensnarik/russian-cities/master/russian-cities.json";
 const MIN_POPULATION = 3000;
 const IMPORTANT_SETTLEMENTS = new Set(["чемодановка", "chemodanovka"]);
 const MANUAL_OVERRIDES = [
@@ -132,6 +133,21 @@ function shouldIncludePlace(row) {
   return row.population >= MIN_POPULATION;
 }
 
+function hasCyrillic(text) {
+  return /[а-яё]/i.test(String(text || ""));
+}
+
+function pickRussianLabel(row) {
+  const base = String(row.name || "").trim();
+  if (hasCyrillic(base)) return base;
+  const alts = String(row.alternates || "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const ru = alts.find((x) => hasCyrillic(x) && x.length >= 2);
+  return ru || base;
+}
+
 async function main() {
   const regions = JSON.parse(
     fs.readFileSync(path.join(repoRoot, "data", "regions.json"), "utf8")
@@ -172,7 +188,7 @@ async function main() {
   for (const d of adm2Rows) {
     const regionSlug = admin1ToRegionSlug.get(d.admin1);
     if (!regionSlug || !d.admin2) continue;
-    let label = d.name.trim();
+    let label = pickRussianLabel(d);
     if (!/район|округ/i.test(label)) label = `${label} район`;
     const slug = uniqSlug(
       `${regionSlug}-${slugifyRu(label)}`,
@@ -194,21 +210,69 @@ async function main() {
     if (!regionSlug) continue;
     const key = `${p.admin1}:${p.admin2 || ""}`;
     const parentSlug = districtByAdmin.get(key) || regionSlug;
-    const n = norm(p.name);
+    const label = pickRussianLabel(p);
+    const n = norm(label);
     const isSettlement =
       /поселок|пгт|рабочий/.test(n) || (p.population < 15000 && p.featureCode === "PPL");
     const kind = isSettlement ? "settlement" : "city";
     const slug = uniqSlug(
-      `${regionSlug}-${slugifyRu(p.name)}`,
+      `${regionSlug}-${slugifyRu(label)}`,
       usedSlugs,
       `${regionSlug}-${p.geonameId}`
     );
     out.push({
       kind,
       slug,
-      label: p.name,
+      label,
       parentSlug,
     });
+  }
+
+  const byNormRegion = new Map(
+    regions.map((r) => [normCompact(r.label), r.slug])
+  );
+  const regionAliases = new Map([
+    ["чувашия", "chuvashskaya-respublika-chuvashiya"],
+    ["саха", "respublika-saha"],
+    ["удмуртия", "udmurtskaya-respublika"],
+    ["марийэл", "respublika-mariy-el"],
+    ["карачаевочеркесия", "karachaevocherkesskaya-respublika"],
+    ["кабардинобалкария", "kabardinobalkarskaya-respublika"],
+    ["севернаяосетия", "respublika-severnaya-osetiya-alaniya"],
+    ["хантымансийскийао", "hantymansiyskiy-avtonomnyy-okrug-yugra"],
+    ["ямалоненецкийао", "yamalonenetskiy-avtonomnyy-okrug"],
+    ["ненецкийао", "nenetskiy-avtonomnyy-okrug"],
+    ["чукотскийао", "chukotskiy-avtonomnyy-okrug"],
+    ["санктпетербург", "sankt-peterburg"],
+    ["севастополь", "sevastopol"],
+  ]);
+
+  console.log("Downloading Russian cities list...");
+  const citiesResp = await fetch(RU_CITIES_URL);
+  if (citiesResp.ok) {
+    const cities = await citiesResp.json();
+    for (const c of cities) {
+      const label = String(c?.name || "").trim();
+      if (!label) continue;
+      const pop = Number.parseInt(String(c?.population || "0"), 10) || 0;
+      if (pop < MIN_POPULATION && !IMPORTANT_SETTLEMENTS.has(norm(label))) continue;
+      const subj = String(c?.subject || "").trim();
+      if (!subj) continue;
+      const k = normCompact(subj);
+      const regionSlug = byNormRegion.get(k) || regionAliases.get(k);
+      if (!regionSlug) continue;
+      const slug = uniqSlug(
+        `${regionSlug}-${slugifyRu(label)}`,
+        usedSlugs,
+        `${regionSlug}-${Math.random().toString(36).slice(2, 8)}`
+      );
+      out.push({
+        kind: "city",
+        slug,
+        label,
+        parentSlug: regionSlug,
+      });
+    }
   }
 
   out.sort((a, b) => {
