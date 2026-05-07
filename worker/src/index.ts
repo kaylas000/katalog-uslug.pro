@@ -111,20 +111,24 @@ function normalizeSlug(raw: string): string {
     .slice(0, 80);
 }
 
-function corsHeaders(env: Env, request: Request): HeadersInit {
-  const origin = request.headers.get("Origin") || "";
-  const allowed =
-    env.ALLOWED_ORIGIN ||
-    "https://katalog-uslug.pro";
+/**
+ * Публичные маршруты (каталог, регионы, карточка org) вызываются с фронта другого origin
+ * (GitHub Pages, *.pages.dev, localhost). Старый фикс на ALLOWED_ORIGIN ломал CORS: браузер
+ * требует точного совпадения Access-Control-Allow-Origin с Origin страницы.
+ * Auth остаётся на строгом списке в auth.ts (credentials: include).
+ */
+function corsHeaders(_env: Env, request: Request): HeadersInit {
+  const o = request.headers.get("Origin")?.trim();
   const allow =
-    origin === allowed || origin === "https://www.katalog-uslug.pro"
-      ? origin
-      : allowed;
+    o && (o.startsWith("http://") || o.startsWith("https://"))
+      ? o
+      : "*";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
     "Access-Control-Max-Age": "86400",
+    Vary: "Origin",
   };
 }
 
