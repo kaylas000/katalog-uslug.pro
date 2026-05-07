@@ -1,7 +1,7 @@
 /**
  * Собирает каталог из data/catalog.json + data/regions.json + config/site.json:
- * — HTML карточки — только из scripts/lib/catalog-card.mjs (cardHtml);
- * — данные — data/catalog.json (одна запись на организацию);
+ * — сетка каталога — пустой shell (данные только из API Worker);
+ * — data/catalog.json — источник для импорта в Postgres (npm run db:import);
  * — страницы категорий c/<slug>/ — из config/site.json.categories (добавили категорию + шаблон страницы с маркерами).
  *
  * Запуск: npm run build:data
@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildCardsGridInner, buildCategoryCardsInner, escapeHtml } from './lib/catalog-card.mjs';
+import { buildCardsGridInner, escapeHtml } from './lib/catalog-card.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -31,82 +31,18 @@ const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
 const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
-const STYLES_VERSION = '20260521';
-const MAIN_JS_VERSION = '20260521';
+const STYLES_VERSION = '20260522';
+const MAIN_JS_VERSION = '20260522';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
 }
 
-function stripTags(html) {
-  return String(html || '')
-    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function extractOrgPortfolioImagesFromHtml(html) {
-  const start = html.indexOf('data-portfolio-source');
-  if (start === -1) return [];
-  const chunk = html.slice(start, start + 12000);
-  const re = /data-slide-src="([^"]+)"/gi;
-  const urls = [];
-  let m;
-  while ((m = re.exec(chunk)) !== null) {
-    if (!urls.includes(m[1])) urls.push(m[1]);
-  }
-  return urls;
-}
-
-function extractOrgCardContentFromHtml(html) {
-  const contactsMatch = html.match(
-    /<div class="sidebar-card">\s*<h3>Контакты<\/h3>([\s\S]*?)<\/div>\s*<div class="sidebar-card">/i
-  );
-  const firstBlockMatch = html.match(
-    /<div class="org-article">[\s\S]*?<div class="content-block">([\s\S]*?)<\/div>/i
-  );
-  if (!contactsMatch || !firstBlockMatch) return null;
-
-  const rowRe = /<div class="sidebar-row">([\s\S]*?)<\/div>/gi;
-  const rows = [];
-  let rowMatch;
-  while ((rowMatch = rowRe.exec(contactsMatch[1])) !== null) {
-    const t = stripTags(rowMatch[1]);
-    if (t) rows.push(t);
-  }
-  const pRe = /<p>([\s\S]*?)<\/p>/gi;
-  const paragraphs = [];
-  let pMatch;
-  while ((pMatch = pRe.exec(firstBlockMatch[1])) !== null) {
-    const t = stripTags(pMatch[1]);
-    if (t) paragraphs.push(t);
-  }
-  if (!rows.length || !paragraphs.length) return null;
-
-  // В карточках каталога — только первый абзац из org; остальные <p> остаются на странице организации.
-  return {
-    subtitle: rows.slice(0, 4).join('\n'),
-    text: paragraphs[0] || '',
-  };
-}
-
-function extractOrgPageBundle(orgUrl) {
-  if (!orgUrl || !orgUrl.startsWith('/org/')) return null;
-  const parts = orgUrl.split('/').filter(Boolean);
-  const slug = parts[1];
-  if (!slug) return null;
-  const fp = path.join(root, 'org', slug, 'index.html');
-  if (!fs.existsSync(fp)) return null;
-
-  const html = fs.readFileSync(fp, 'utf8');
-  const portfolioImages = extractOrgPortfolioImagesFromHtml(html);
-  const card = extractOrgCardContentFromHtml(html);
-  if (!card && !portfolioImages.length) return null;
-  return {
-    ...(card || {}),
-    portfolioImages,
-  };
+function versionStaticAssets(html, v) {
+  return html
+    .replace(/href="\/css\/styles\.css\?v=[^"]*"/g, `href="/css/styles.css?v=${v}"`)
+    .replace(/src="\/js\/main\.js\?v=[^"]*"/g, `src="/js/main.js?v=${v}"`)
+    .replace(/src="\/js\/org\.js\?v=[^"]*"/g, `src="/js/org.js?v=${v}"`);
 }
 
 function replaceBetween(html, startMark, endMark, inner) {
@@ -181,22 +117,24 @@ function ensureCategoryIntroMarkers(html, relPathForError) {
   );
 }
 
-function applyCategoryPageCards(html, categorySlug, catalog) {
-  const items = catalog.filter((i) => i.categorySlug === categorySlug);
-  const inner = buildCategoryCardsInner(items);
-  if (html.includes(M_CATEGORY_CARDS_START)) {
-    return replaceCategoryCardsBlock(html, inner);
-  }
-  const migrated = html.replace(
-    /<div class="catalog-main">\s*<article\b[\s\S]*?<\/article>\s*<\/div>(\s*<aside class="catalog-side">)/,
-    `<div class="catalog-main">\n${M_CATEGORY_CARDS_START}${inner}${M_CATEGORY_CARDS_END}\n        </div>$1`
-  );
-  if (migrated === html) {
+function applyCategoryEmptyCatalogHost(html) {
+  let out = html;
+  if (out.includes(M_CATEGORY_CARDS_START)) {
+    out = replaceCategoryCardsBlock(out, '\n        ');
+  } else {
     throw new Error(
-      `Не удалось вставить карточки категории ${categorySlug}: ожидается <div class="catalog-main"> с одним <article> перед <aside class="catalog-side">. Добавьте маркеры ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}.`
+      `нет маркеров категории: ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}`
     );
   }
-  return migrated;
+  out = out.replace(
+    '<div class="catalog-split category-cards-below-intro">\n        <div class="catalog-main">\n',
+    '<div class="catalog-split category-cards-below-intro">\n        <div class="catalog-main" id="catalog-cards-host">\n'
+  );
+  out = out.replace(
+    /<div class="catalog-main">\s*\n\s*<!-- katalog:category-cards -->/,
+    `<div class="catalog-main" id="catalog-cards-host">\n<!-- katalog:category-cards -->`
+  );
+  return out;
 }
 
 function headSeoBlock({ description, canonical, jsonLd }) {
@@ -249,9 +187,21 @@ function setPageRegionAttr(html, regionSlug) {
   );
 }
 
+function setPageCategoryAttr(html, categorySlug) {
+  if (!categorySlug) return html;
+  const esc = escapeHtml(categorySlug);
+  if (/data-page-category="/.test(html)) {
+    return html.replace(/data-page-category="[^"]*"/g, `data-page-category="${esc}"`);
+  }
+  return html.replace(
+    '<section class="section">',
+    `<section class="section" id="catalog" data-catalog-section data-page-category="${esc}">`
+  );
+}
+
 function run() {
   const indexPath = path.join(root, 'index.html');
-  let tpl = fs.readFileSync(indexPath, 'utf8');
+  let tpl = versionStaticAssets(fs.readFileSync(indexPath, 'utf8'), STYLES_VERSION);
   if (!tpl.includes(M_GRID_START)) {
     throw new Error('В index.html нет маркеров каталога (katalog:catalog-grid).');
   }
@@ -259,22 +209,7 @@ function run() {
   const site = readJson(path.join(root, 'config', 'site.json'));
   const regions = readJson(path.join(root, 'data', 'regions.json'));
   const catalogPath = path.join(root, 'data', 'catalog.json');
-  const catalogRaw = readJson(catalogPath);
-  const catalog = catalogRaw.map((item) => {
-    const bundle = extractOrgPageBundle(item.url);
-    if (!bundle) return item;
-    const next = { ...item };
-    if (bundle.subtitle && bundle.text) {
-      next.subtitle = bundle.subtitle;
-      next.text = bundle.text;
-    }
-    if (bundle.portfolioImages?.length) {
-      next.portfolioImages = bundle.portfolioImages;
-    }
-    return next;
-  });
-  fs.writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
-  console.log('data/catalog.json: тексты и portfolioImages синхронизированы со страницами org');
+  const catalog = readJson(catalogPath);
   const categories = Array.isArray(site.categories) ? site.categories : [];
 
   const catOpts = buildCategoryOptions(categories);
@@ -298,6 +233,7 @@ function run() {
   homeHtml = replaceBetween(homeHtml, M_REGION_NAV_START, M_REGION_NAV_END, '\n        ');
   homeHtml = replaceBetween(homeHtml, M_GRID_START, M_GRID_END, buildCardsGridInner(catalog));
   homeHtml = setPageRegionAttr(homeHtml, '');
+  homeHtml = versionStaticAssets(homeHtml, STYLES_VERSION);
   fs.writeFileSync(indexPath, homeHtml.replace(/\r\n/g, '\n'), 'utf8');
   console.log('index.html: опции фильтров, SEO в <head>, карточки каталога');
 
@@ -337,13 +273,16 @@ function run() {
     page = replaceBetween(page, M_REGION_NAV_START, M_REGION_NAV_END, regionSeoNavHtml());
     page = replaceBetween(page, M_GRID_START, M_GRID_END, buildCardsGridInner(items));
     page = setPageRegionAttr(page, slug);
+    page = versionStaticAssets(page, STYLES_VERSION);
     page = page.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
 
     const dir = path.join(rRoot, slug);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const outFp = path.join(dir, 'index.html');
     fs.writeFileSync(outFp, page.replace(/\r\n/g, '\n'), 'utf8');
-    console.log(`${path.relative(root, outFp)}: ${items.length} карточек`);
+    console.log(
+      `${path.relative(root, outFp)}: пустая сетка (в JSON для региона: ${items.length})`
+    );
   }
 
   for (const cat of categories) {
@@ -370,10 +309,12 @@ function run() {
       M_CATEGORY_INTRO_END,
       buildCategoryIntroInner(catLabel)
     );
-    chtml = applyCategoryPageCards(chtml, catSlug, catalog);
+    chtml = applyCategoryEmptyCatalogHost(chtml);
+    chtml = setPageCategoryAttr(chtml, catSlug);
+    chtml = versionStaticAssets(chtml, STYLES_VERSION);
     fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
     const n = catalog.filter((i) => i.categorySlug === catSlug).length;
-    console.log(`${relPath}: карточки из catalog-card.mjs (${n})`);
+    console.log(`${relPath}: пустой host каталога (в БД ~${n} записей)`);
   }
 
   writeRegionsIndex(regions);

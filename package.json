@@ -1,17 +1,18 @@
 {
-  "name": "katalog-uslug.pro",
-  "private": true,
-  "description": "Статический каталог услуг; шапка/подвал собираются из partials",
-  "scripts": {
-    "verify:worker": "npm run build:partials && npm run build:layout && cd worker && npx tsc --noEmit",
-    "neon:paste": "node scripts/apply-neon-paste.mjs",
-    "db:import": "npm run db:import --prefix worker",
-    "db:migrate": "npm run db:migrate --prefix worker",
-    "worker:dev": "npm run dev --prefix worker",
-    "worker:deploy": "npm run deploy --prefix worker",
-    "build:data": "node scripts/generate-regions-json.mjs && node scripts/build-from-data.mjs",
-    "build:partials": "node scripts/generate-partials.mjs",
-    "build:layout": "node scripts/inject-layout.mjs",
-    "build:site": "npm run build:data && npm run build:partials && npm run build:layout"
-  }
+    "name":  "katalog-uslug.pro",
+    "private":  true,
+    "description":  "РЎС‚Р°С‚РёС‡РµСЃРєРёР№ РєР°С‚Р°Р»РѕРі СѓСЃР»СѓРі; С€Р°РїРєР°/РїРѕРґРІР°Р» СЃРѕР±РёСЂР°СЋС‚СЃСЏ РёР· partials",
+    "scripts":  {
+                    "build:data":  "node scripts/generate-regions-json.mjs \u0026\u0026 node scripts/build-from-data.mjs",
+                    "build:site":  "npm run build:data \u0026\u0026 npm run build:partials \u0026\u0026 npm run build:layout",
+                    "db:import":  "npm run db:import --prefix worker",
+                    "neon:paste":  "node scripts/apply-neon-paste.mjs",
+                    "worker:deploy":  "npm run deploy --prefix worker",
+                    "verify:migration":  "node scripts/verify-migration.mjs",
+                    "db:migrate":  "npm run db:migrate --prefix worker",
+                    "build:layout":  "node scripts/inject-layout.mjs",
+                    "worker:dev":  "npm run dev --prefix worker",
+                    "verify:worker":  "npm run build:partials \u0026\u0026 npm run build:layout \u0026\u0026 cd worker \u0026\u0026 npx tsc --noEmit",
+                    "build:partials":  "node scripts/generate-partials.mjs"
+                }
 }

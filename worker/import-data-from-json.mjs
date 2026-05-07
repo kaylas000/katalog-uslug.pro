@@ -119,6 +119,27 @@ try {
         Number(o.reviews) || 0,
       ]
     );
+
+    await client.query(
+      `INSERT INTO organization_profiles
+         (org_id, slug, description_md, website_url, moderation_status, published_at, portfolio_images)
+       VALUES ($1, $2, $3::text, NULL::text, 'published', now(), COALESCE($4::jsonb, '[]'::jsonb))
+       ON CONFLICT (org_id) DO UPDATE SET
+         slug = EXCLUDED.slug,
+         description_md = EXCLUDED.description_md,
+         moderation_status = 'published',
+         portfolio_images = EXCLUDED.portfolio_images,
+         updated_at = now(),
+         published_at = COALESCE(organization_profiles.published_at, now())`,
+      [
+        o.id,
+        String(o.id).trim(),
+        o.text ?? "",
+        JSON.stringify(
+          Array.isArray(o.portfolioImages) ? o.portfolioImages : []
+        ),
+      ]
+    );
   }
   console.log(`organizations: ${catalog.length}`);
 

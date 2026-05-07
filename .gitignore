@@ -4,3 +4,8 @@ node_modules/
 
 # Строка из Neon — только у тебя на диске, не в git
 neon.local.txt
+
+package.json.bak-*
+neon.local.txt
+worker/neon.local.txt
+

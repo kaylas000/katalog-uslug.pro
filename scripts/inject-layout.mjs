@@ -111,6 +111,7 @@ function listLayoutHtmlFiles() {
   }
   const orgRoot = path.join(root, 'org');
   if (fs.existsSync(orgRoot)) {
+    add(path.join(orgRoot, 'index.html'));
     for (const ent of fs.readdirSync(orgRoot, { withFileTypes: true })) {
       if (!ent.isDirectory()) continue;
       add(path.join(orgRoot, ent.name, 'index.html'));

@@ -1,14 +1,146 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const orgCardTextCache = new Map();
-  const escHtml = (value) =>
-    String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  const withBreaks = (value) => escHtml(value).replace(/\n/g, '<br>');
+window.bindPortfolioWidgets =
+  window.bindPortfolioWidgets ||
+  function bindPortfolioWidgets(scope = document) {
+    scope.querySelectorAll('[data-portfolio]').forEach((root) => {
+      if (root.dataset.portfolioBound === '1') return;
+      const source = root.querySelector('[data-portfolio-source]');
+      const hero = root.querySelector('[data-portfolio-hero]');
+      const deskSide = root.querySelector('[data-portfolio-desk-side]');
+      const mobStrip = root.querySelector('[data-portfolio-mob-strip]');
+      const mobPrev = root.querySelector('[data-portfolio-mob-prev]');
+      const mobNext = root.querySelector('[data-portfolio-mob-next]');
+      const mobIndicator = root.querySelector('[data-portfolio-mob-indicator]');
+      if (!source || !hero || !deskSide || !mobStrip) return;
 
+      const meta = Array.from(source.querySelectorAll('button[type="button"]'));
+      if (meta.length === 0) return;
+      root.dataset.portfolioBound = '1';
+      const n = meta.length;
+      const captions = meta.map((btn, i) => btn.getAttribute('data-slide-caption') || `Слайд ${i + 1}`);
+
+      const slideSrc = (i) => {
+        const raw = meta[i]?.getAttribute?.('data-slide-src');
+        let t = raw?.trim() || '';
+        if (t.startsWith('images/')) t = `/${t}`;
+        return t;
+      };
+
+      const applyPortfolioBg = (el, url) => {
+        if (!(el instanceof HTMLElement)) return;
+        if (url) {
+          const escURI = encodeURI(url.trim());
+          el.classList.add('portfolio-pixel--photo');
+          el.style.setProperty('background-image', `url("${escURI}")`, 'important');
+          el.style.setProperty('background-size', 'cover', 'important');
+          el.style.setProperty('background-position', 'center', 'important');
+          el.style.setProperty('background-repeat', 'no-repeat', 'important');
+        } else {
+          el.classList.remove('portfolio-pixel--photo');
+          el.style.removeProperty('background-image');
+          el.style.removeProperty('background-size');
+          el.style.removeProperty('background-position');
+          el.style.removeProperty('background-repeat');
+        }
+      };
+
+      mobStrip.innerHTML = '';
+      const mobSlides = meta.map((_btn, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'portfolio-pixel portfolio-pixel-slide';
+        b.dataset.slideIndex = String(i);
+        b.setAttribute('aria-label', captions[i]);
+        b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
+        mobStrip.appendChild(b);
+        applyPortfolioBg(b, slideSrc(i));
+        return b;
+      });
+
+      let idx = 0;
+      let suppressScrollEmit = false;
+      let scrollTimer = null;
+
+      const syncHero = () => {
+        if (!hero) return;
+        hero.removeAttribute('aria-hidden');
+        hero.setAttribute('role', 'img');
+        hero.setAttribute('aria-label', captions[idx] || `Фото ${idx + 1}`);
+        hero.dataset.activeSlide = String(idx);
+        hero.classList.add('is-current');
+        applyPortfolioBg(hero, slideSrc(idx));
+      };
+
+      const rebuildDesktopRail = () => {
+        deskSide.innerHTML = '';
+        for (let j = 0; j < n; j += 1) {
+          if (j === idx) continue;
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className =
+            'org-showcase-card org-showcase-card--mini portfolio-pixel portfolio-pixel-mini';
+          b.dataset.slideTarget = String(j);
+          b.setAttribute('aria-label', captions[j] || `Фото ${j + 1}`);
+          b.addEventListener('click', (e) => {
+            e.preventDefault();
+            setIdx(j, { scrollMob: true });
+          });
+          applyPortfolioBg(b, slideSrc(j));
+          deskSide.appendChild(b);
+        }
+      };
+
+      const syncMobScroll = () => {
+        const slide = mobSlides[idx];
+        if (!slide || mobStrip.clientHeight < 2) return;
+        suppressScrollEmit = true;
+        slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        window.setTimeout(() => { suppressScrollEmit = false; }, 420);
+      };
+
+      const setIdx = (next, opts = {}) => {
+        idx = ((next % n) + n) % n;
+        syncHero();
+        rebuildDesktopRail();
+        mobSlides.forEach((el, i2) => el.classList.toggle('is-current', i2 === idx));
+        if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
+        if (opts.scrollMob) syncMobScroll();
+      };
+
+      mobPrev?.addEventListener('click', () => setIdx(idx - 1, { scrollMob: true }));
+      mobNext?.addEventListener('click', () => setIdx(idx + 1, { scrollMob: true }));
+
+      mobStrip.addEventListener('scroll', () => {
+        if (mobStrip.clientHeight < 2) return;
+        if (suppressScrollEmit) return;
+        if (scrollTimer) window.clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(() => {
+          const stripMid = mobStrip.getBoundingClientRect().left + mobStrip.clientWidth / 2;
+          let best = 0;
+          let bestDist = Infinity;
+          mobSlides.forEach((el, i2) => {
+            const r = el.getBoundingClientRect();
+            const mid = r.left + r.width / 2;
+            const d = Math.abs(mid - stripMid);
+            if (d < bestDist) {
+              bestDist = d;
+              best = i2;
+            }
+          });
+          if (best !== idx) {
+            idx = best;
+            syncHero();
+            rebuildDesktopRail();
+            mobSlides.forEach((el, i2) => el.classList.toggle('is-current', i2 === idx));
+            if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
+          }
+        }, 96);
+      }, { passive: true });
+
+      setIdx(0, { scrollMob: false });
+    });
+  };
+
+document.addEventListener('DOMContentLoaded', () => {
   /* Mobile menu */
   const burger = document.querySelector('.burger');
   const mobileNav = document.querySelector('.mobile-nav');
@@ -60,147 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* Portfolio: desktop = 1 квадрат + 3 мини; mobile = квадратный слайдер */
-  document.querySelectorAll('[data-portfolio]').forEach((root) => {
-    const source = root.querySelector('[data-portfolio-source]');
-    const hero = root.querySelector('[data-portfolio-hero]');
-    const deskSide = root.querySelector('[data-portfolio-desk-side]');
-    const mobStrip = root.querySelector('[data-portfolio-mob-strip]');
-    const mobPrev = root.querySelector('[data-portfolio-mob-prev]');
-    const mobNext = root.querySelector('[data-portfolio-mob-next]');
-    const mobIndicator = root.querySelector('[data-portfolio-mob-indicator]');
-    if (!source || !hero || !deskSide || !mobStrip) return;
-
-    const meta = Array.from(source.querySelectorAll('button[type="button"]'));
-    if (meta.length === 0) return;
-    const n = meta.length;
-    const captions = meta.map((btn, i) => btn.getAttribute('data-slide-caption') || `Слайд ${i + 1}`);
-
-    const slideSrc = (i) => {
-      const raw = meta[i]?.getAttribute?.('data-slide-src');
-      let t = raw?.trim() || '';
-      /* Страницы в подпапках: относительный images/… иначе указывает на slug/images/… */
-      if (t.startsWith('images/')) t = `/${t}`;
-      return t;
-    };
-
-    const applyPortfolioBg = (el, url) => {
-      if (!(el instanceof HTMLElement)) return;
-      if (url) {
-        const esc = encodeURI(url.trim());
-        el.classList.add('portfolio-pixel--photo');
-        /* !important — иначе шортхэнд `background:` и hover-кнопки перебивают фото в части браузеров */
-        el.style.setProperty('background-image', `url("${esc}")`, 'important');
-        el.style.setProperty('background-size', 'cover', 'important');
-        el.style.setProperty('background-position', 'center', 'important');
-        el.style.setProperty('background-repeat', 'no-repeat', 'important');
-      } else {
-        el.classList.remove('portfolio-pixel--photo');
-        el.style.removeProperty('background-image');
-        el.style.removeProperty('background-size');
-        el.style.removeProperty('background-position');
-        el.style.removeProperty('background-repeat');
-      }
-    };
-
-    mobStrip.innerHTML = '';
-    const mobSlides = meta.map((_btn, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'portfolio-pixel portfolio-pixel-slide';
-      b.dataset.slideIndex = String(i);
-      b.setAttribute('aria-label', captions[i]);
-      b.addEventListener('click', () => setIdx(i, { scrollMob: true }));
-      mobStrip.appendChild(b);
-      applyPortfolioBg(b, slideSrc(i));
-      return b;
-    });
-
-    let idx = 0;
-    let suppressScrollEmit = false;
-    let scrollTimer = null;
-
-    const syncHero = () => {
-      if (!hero) return;
-      hero.removeAttribute('aria-hidden');
-      hero.setAttribute('role', 'img');
-      hero.setAttribute('aria-label', captions[idx] || `Фото ${idx + 1}`);
-      hero.dataset.activeSlide = String(idx);
-      hero.classList.add('is-current');
-      applyPortfolioBg(hero, slideSrc(idx));
-    };
-
-    const rebuildDesktopRail = () => {
-      deskSide.innerHTML = '';
-      for (let i = 0; i < n; i += 1) {
-        if (i === idx) continue;
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className =
-          'org-showcase-card org-showcase-card--mini portfolio-pixel portfolio-pixel-mini';
-        b.dataset.slideTarget = String(i);
-        b.setAttribute('aria-label', captions[i] || `Фото ${i + 1}`);
-        /* Вся карточка — одна большая цель для клика (без обёртки-div) */
-        b.addEventListener('click', (e) => {
-          e.preventDefault();
-          setIdx(i, { scrollMob: true });
-        });
-        applyPortfolioBg(b, slideSrc(i));
-        deskSide.appendChild(b);
-      }
-    };
-
-    const syncMobScroll = () => {
-      const slide = mobSlides[idx];
-      /* На мобилке лента скрыта CSS — не вызывать scrollIntoView по скрытому ряду */
-      if (!slide || mobStrip.clientHeight < 2) return;
-      suppressScrollEmit = true;
-      slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      window.setTimeout(() => { suppressScrollEmit = false; }, 420);
-    };
-
-    const setIdx = (next, opts = {}) => {
-      idx = ((next % n) + n) % n;
-      syncHero();
-      rebuildDesktopRail();
-      mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
-      if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
-      if (opts.scrollMob) syncMobScroll();
-    };
-
-    mobPrev?.addEventListener('click', () => setIdx(idx - 1, { scrollMob: true }));
-    mobNext?.addEventListener('click', () => setIdx(idx + 1, { scrollMob: true }));
-
-    mobStrip.addEventListener('scroll', () => {
-      if (mobStrip.clientHeight < 2) return;
-      if (suppressScrollEmit) return;
-      if (scrollTimer) window.clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => {
-        const stripMid = mobStrip.getBoundingClientRect().left + mobStrip.clientWidth / 2;
-        let best = 0;
-        let bestDist = Infinity;
-        mobSlides.forEach((el, i) => {
-          const r = el.getBoundingClientRect();
-          const mid = r.left + r.width / 2;
-          const d = Math.abs(mid - stripMid);
-          if (d < bestDist) {
-            bestDist = d;
-            best = i;
-          }
-        });
-        if (best !== idx) {
-          idx = best;
-          syncHero();
-          rebuildDesktopRail();
-          mobSlides.forEach((el, i) => el.classList.toggle('is-current', i === idx));
-          if (mobIndicator) mobIndicator.textContent = `${idx + 1}/${n}`;
-        }
-      }, 96);
-    }, { passive: true });
-
-    /* При загрузке не дергать scrollIntoView — иначе «прыжок» и лишнее пустое место в потоке */
-    setIdx(0, { scrollMob: false });
-  });
+  window.bindPortfolioWidgets(document);
 
   /* Desktop submenu */
   const submenuToggle = document.querySelector('.nav-submenu-toggle');
@@ -283,63 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initCatalogStaticSliders();
   initCatalogFilters();
 
-  async function loadOrgCardText(orgUrl) {
-    if (!orgUrl) return null;
-    if (orgCardTextCache.has(orgUrl)) return orgCardTextCache.get(orgUrl);
-    try {
-      const res = await fetch(orgUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error('org_fetch');
-      const html = await res.text();
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const article = doc.querySelector('.org-article');
-      if (!article) {
-        orgCardTextCache.set(orgUrl, null);
-        return null;
-      }
-      const firstBlock = article.querySelector('.content-block');
-      const firstBlockParagraphs = firstBlock
-        ? Array.from(firstBlock.querySelectorAll('p'))
-            .map((p) => (p.textContent || '').trim())
-            .filter(Boolean)
-        : [];
-      if (firstBlockParagraphs.length === 0) {
-        orgCardTextCache.set(orgUrl, null);
-        return null;
-      }
-      const contactRows = Array.from(doc.querySelectorAll('.org-showcase-aside .sidebar-card .sidebar-row'))
-        .map((row) => (row.textContent || '').replace(/\s+/g, ' ').trim())
-        .filter(Boolean)
-        .slice(0, 4);
-
-      const firstText = contactRows.join('\n');
-      const secondText = firstBlockParagraphs.join('\n\n');
-      const payload = { firstText, secondText };
-      orgCardTextCache.set(orgUrl, payload);
-      return payload;
-    } catch {
-      orgCardTextCache.set(orgUrl, null);
-      return null;
-    }
-  }
-
-  async function hydrateCatalogCardsFromOrgPages(root = document) {
-    const cards = Array.from(root.querySelectorAll('.catalog-card-wide[data-org-url]'));
-    for (const card of cards) {
-      const url = card.getAttribute('data-org-url') || '';
-      if (!url) continue;
-      const txt = await loadOrgCardText(url);
-      if (!txt) continue;
-      const intro = card.querySelector('.catalog-card-text-main');
-      const about = card.querySelector('.catalog-card-about');
-      if (intro && txt.firstText) {
-        intro.innerHTML = withBreaks(txt.firstText);
-      }
-      if (about && txt.secondText) {
-        about.innerHTML = `<strong>О компании:</strong> ${withBreaks(txt.secondText)}`;
-      }
-    }
-  }
-
   function initCatalogStaticSliders() {
     document.querySelectorAll('[data-auto-slider]').forEach((media) => {
       if (media.dataset.sliderReady === '1') return;
@@ -356,21 +291,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function initCatalogFilters() {
-    const section = document.querySelector('[data-catalog-section]');
     const host = document.getElementById('catalog-cards-host');
+    if (!host) return;
+    const section =
+      host.closest('[data-catalog-section]') ||
+      document.querySelector('[data-catalog-section]');
     const filterApply = document.querySelector('[data-filter-apply]');
     const selRegion = document.getElementById('filter-region');
     const selCategory = document.getElementById('filter-category');
     const selRating = document.getElementById('filter-rating');
+    const selSort = document.getElementById('filter-sort');
     const searchInput = document.getElementById('filter-search');
-    if (!section || !host) return;
 
-    const pageRegion = (section.getAttribute('data-page-region') || '').trim();
+    const pageRegion =
+      (section?.getAttribute('data-page-region') || '').trim();
+    const pageCategory =
+      (section?.getAttribute('data-page-category') || '').trim();
 
     const EMPTY_BLOCK = `<div class="catalog-empty" role="status">
           <p class="catalog-empty-title">Ничего не найдено</p>
           <p class="catalog-empty-text">Попробуйте другой регион, категорию или запрос. <a href="/regions/">Все субъекты РФ</a>.</p>
         </div>`;
+
+    const baseEarly = (
+      document
+        .querySelector('meta[name="katalog-catalog-api"]')
+        ?.getAttribute('content')
+        ?.trim()
+        .replace(/\/$/, '') || ''
+    );
+
+    const ERR_UNAVAILABLE = `<div class="catalog-empty" role="status">
+          <p class="catalog-empty-title">Каталог недоступен</p>
+          <p class="catalog-empty-text">Проверьте деплой API и наличие meta <strong>katalog-catalog-api</strong> в шапке страницы.</p>
+        </div>`;
+
+    if (!baseEarly) {
+      host.innerHTML = ERR_UNAVAILABLE;
+      return;
+    }
 
     function reviewsLabelRu(n) {
       const x = Number(n) || 0;
@@ -441,41 +400,116 @@ ${catalogMediaSlidesHtml(item)}
 
     const initAutoSliders = initCatalogStaticSliders;
 
-    function renderCards(items) {
-      if (items.length === 0) {
-        host.innerHTML = EMPTY_BLOCK;
+    let loadMoreBtn = host.nextElementSibling;
+    if (!(loadMoreBtn instanceof HTMLButtonElement) || loadMoreBtn.id !== 'catalog-load-more') {
+      loadMoreBtn = document.createElement('button');
+      loadMoreBtn.type = 'button';
+      loadMoreBtn.id = 'catalog-load-more';
+      loadMoreBtn.className = 'btn btn-outline mt-24';
+      loadMoreBtn.textContent = 'Показать ещё';
+      loadMoreBtn.hidden = true;
+      host.parentElement?.appendChild(loadMoreBtn);
+    }
+
+    let nextCursor = null;
+    let loadingMore = false;
+
+    function catalogV2Url(cursor) {
+      const u = new URL(`${baseEarly}/v1/catalog`);
+      u.searchParams.set('v', '2');
+      u.searchParams.set('limit', '24');
+      const sort = ((selSort && selSort.value) || 'title').trim();
+      u.searchParams.set('sort', sort || 'title');
+      const region =
+        ((selRegion && selRegion.value) || '').trim() || pageRegion || '';
+      if (region) u.searchParams.set('region', region);
+      const category =
+        ((selCategory && selCategory.value) || '').trim() || pageCategory || '';
+      if (category) u.searchParams.set('category', category);
+      const minR = selRating?.value?.trim?.() ?? '';
+      if (minR) u.searchParams.set('minRating', minR);
+      const qTerm = ((searchInput && searchInput.value) || '').trim();
+      if (qTerm) u.searchParams.set('q', qTerm);
+      if (cursor) u.searchParams.set('cursor', cursor);
+      return u.toString();
+    }
+
+    async function fetchPage(cursor) {
+      const r = await fetch(catalogV2Url(cursor || null), { cache: 'no-store' });
+      if (!r.ok) throw new Error('catalog_http');
+      return r.json();
+    }
+
+    function renderAppend(items, replace) {
+      if (!Array.isArray(items) || items.length === 0) {
+        if (replace) {
+          host.innerHTML = EMPTY_BLOCK;
+        }
         return;
       }
-      host.innerHTML = items.map(cardHtml).join('\n');
+      const frag = replace
+        ? items.map(cardHtml).join('\n')
+        : `\n${items.map(cardHtml).join('\n')}`;
+      if (replace) {
+        host.innerHTML = frag;
+      } else {
+        host.insertAdjacentHTML('beforeend', frag);
+      }
       initAutoSliders();
     }
 
-    function applyLocalFilters(catalog) {
-      let items = catalog.slice();
-      const regSel = (selRegion?.value || '').trim();
-      if (regSel) {
-        items = items.filter((i) => i.regionSlug === regSel);
-      } else if (pageRegion) {
-        items = items.filter((i) => i.regionSlug === pageRegion);
+    async function reloadFirstPage() {
+      nextCursor = null;
+      loadingMore = true;
+      host.innerHTML =
+        '<p class="catalog-card-text-main" role="status">Загрузка каталога…</p>';
+      loadMoreBtn.hidden = true;
+      try {
+        const payload = await fetchPage(null);
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        nextCursor =
+          typeof payload.nextCursor === 'string' ? payload.nextCursor : null;
+        if (items.length === 0) {
+          renderAppend([], true);
+        } else {
+          renderAppend(items, true);
+        }
+        loadMoreBtn.hidden = !nextCursor;
+      } catch {
+        host.innerHTML = ERR_UNAVAILABLE;
+      } finally {
+        loadingMore = false;
       }
-      const cat = selCategory?.value || '';
-      if (cat) items = items.filter((i) => i.categorySlug === cat);
-      const minR = parseFloat(selRating?.value || '');
-      if (!Number.isNaN(minR) && minR > 0) {
-        items = items.filter((i) => (Number(i.rating) || 0) >= minR);
-      }
-      const q = (searchInput?.value || '').trim().toLowerCase();
-      if (q) {
-        items = items.filter((i) => {
-          const blob = [i.title, i.subtitle, i.text, i.categoryLabel, i.regionLabel]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-          return blob.includes(q);
-        });
-      }
-      renderCards(items);
     }
+
+    async function appendNext() {
+      if (!nextCursor || loadingMore) return;
+      loadingMore = true;
+      loadMoreBtn.disabled = true;
+      try {
+        const payload = await fetchPage(nextCursor);
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        nextCursor =
+          typeof payload.nextCursor === 'string'
+            ? payload.nextCursor
+            : null;
+        renderAppend(items, false);
+        loadMoreBtn.hidden = !nextCursor;
+      } catch {
+        loadMoreBtn.textContent = 'Повторить';
+      } finally {
+        loadMoreBtn.disabled = false;
+        loadingMore = false;
+      }
+    }
+
+    loadMoreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (loadMoreBtn.textContent === 'Повторить') {
+        loadMoreBtn.textContent = 'Показать ещё';
+      }
+      appendNext();
+    });
 
     function syncFromQueryParams() {
       const params = new URLSearchParams(window.location.search);
@@ -484,98 +518,52 @@ ${catalogMediaSlidesHtml(item)}
         const opt = Array.from(selCategory.options).some((o) => o.value === cat);
         if (opt) selCategory.value = cat;
       }
-    }
-
-    function bindAndRun(catalog) {
-      if (!Array.isArray(catalog)) return;
-      syncFromQueryParams();
-      if (pageRegion && selRegion) {
-        const hasOpt = Array.from(selRegion.options).some((o) => o.value === pageRegion);
-        if (hasOpt) selRegion.value = pageRegion;
+      const sortParam = params.get('sort');
+      if (
+        selSort &&
+        sortParam &&
+        ['title', 'rating', 'updated'].includes(sortParam)
+      ) {
+        selSort.value = sortParam;
       }
-
-      let searchTimer = null;
-      const scheduleSearch = () => {
-        if (searchTimer) window.clearTimeout(searchTimer);
-        searchTimer = window.setTimeout(() => applyLocalFilters(catalog), 220);
-      };
-
-      filterApply?.addEventListener('click', (e) => {
-        e.preventDefault();
-        applyLocalFilters(catalog);
-      });
-
-      selRegion?.addEventListener('change', () => applyLocalFilters(catalog));
-      selCategory?.addEventListener('change', () => applyLocalFilters(catalog));
-      selRating?.addEventListener('change', () => applyLocalFilters(catalog));
-      searchInput?.addEventListener('input', scheduleSearch);
-      searchInput?.addEventListener('change', () => applyLocalFilters(catalog));
-
-      applyLocalFilters(catalog);
-    }
-
-    function domOnlyFilter() {
-      const cards = host.querySelectorAll('.card');
-      if (cards.length === 0) return;
-      const regSel = (selRegion?.value || '').trim();
-      const cat = selCategory?.value || '';
-      const minR = parseFloat(selRating?.value || '');
-      const q = (searchInput?.value || '').trim().toLowerCase();
-      let visible = 0;
-      cards.forEach((card) => {
-        const rs = (card.getAttribute('data-region-slug') || '').trim();
-        const cs = (card.getAttribute('data-category-slug') || '').trim();
-        const ratingEl = card.querySelector('.tag-accent');
-        const textBlob = card.textContent.toLowerCase();
-        let ok = true;
-        if (rs) {
-          if (regSel && rs !== regSel) ok = false;
-          else if (!regSel && pageRegion && rs !== pageRegion) ok = false;
-        }
-        if (ok && cat && cs && cs !== cat) ok = false;
-        if (ok && !Number.isNaN(minR) && minR > 0) {
-          const m = (ratingEl?.textContent || '').match(/★\s*([\d.,]+)/);
-          const val = m ? parseFloat(m[1].replace(',', '.')) : 0;
-          if (val < minR) ok = false;
-        }
-        if (ok && q && !textBlob.includes(q)) ok = false;
-        card.hidden = !ok;
-        if (ok) visible += 1;
-      });
-      host.querySelector('.catalog-empty--dom')?.remove();
-      if (visible === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'catalog-empty catalog-empty--dom';
-        empty.setAttribute('role', 'status');
-        empty.innerHTML =
-          '<p class="catalog-empty-title">Ничего не найдено</p><p class="catalog-empty-text">Проверьте фильтры. Если список не обновляется, обновите страницу — возможно, не загрузился файл каталога.</p>';
-        host.appendChild(empty);
+      const qp = params.get('q');
+      if (searchInput && qp !== null) {
+        searchInput.value = qp;
       }
     }
 
-    const catalogUrlStatic = '/data/catalog.json';
-    const catalogPromise = fetch(catalogUrlStatic, { cache: 'no-store' }).then((r) => {
-      if (!r.ok) throw new Error('catalog');
-      return r.json();
+    syncFromQueryParams();
+    if (pageRegion && selRegion) {
+      const hasOpt = Array.from(selRegion.options).some(
+        (o) => o.value === pageRegion
+      );
+      if (hasOpt) selRegion.value = pageRegion;
+    }
+    if (pageCategory && selCategory) {
+      const catOpt = Array.from(selCategory.options).some(
+        (o) => o.value === pageCategory
+      );
+      if (catOpt) selCategory.value = pageCategory;
+    }
+
+    reloadFirstPage();
+
+    let searchTimer = null;
+    const scheduleReload = () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => reloadFirstPage(), 280);
+    };
+
+    filterApply?.addEventListener('click', (e) => {
+      e.preventDefault();
+      reloadFirstPage();
     });
-
-    catalogPromise
-      .then((catalog) => bindAndRun(catalog))
-      .catch(() => {
-        if (!host.querySelector('.card')) return;
-        filterApply?.addEventListener('click', (e) => {
-          e.preventDefault();
-          domOnlyFilter();
-        });
-        selRegion?.addEventListener('change', domOnlyFilter);
-        selCategory?.addEventListener('change', domOnlyFilter);
-        selRating?.addEventListener('change', domOnlyFilter);
-        searchInput?.addEventListener('input', () => {
-          window.clearTimeout(domOnlyFilter._t);
-          domOnlyFilter._t = window.setTimeout(domOnlyFilter, 220);
-        });
-        domOnlyFilter();
-      });
+    selRegion?.addEventListener('change', () => reloadFirstPage());
+    selCategory?.addEventListener('change', () => reloadFirstPage());
+    selRating?.addEventListener('change', () => reloadFirstPage());
+    selSort?.addEventListener('change', () => reloadFirstPage());
+    searchInput?.addEventListener('input', scheduleReload);
+    searchInput?.addEventListener('change', () => reloadFirstPage());
   }
 
   /* Toast helper */

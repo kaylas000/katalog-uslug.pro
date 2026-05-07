@@ -83,12 +83,10 @@ export function catalogEmptyInner() {
         </div>`;
 }
 
-export function buildCardsGridInner(items) {
-  if (!items.length) {
-    return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${catalogEmptyInner()}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
-  }
-  const cards = items.map(cardHtml).join('\n');
-  return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n${cards}\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
+/** Пустой контейнер каталога — карточки подгружает API `/v1/catalog?v=2`. */
+export function buildCardsGridInner(_items) {
+  void _items;
+  return `\n      <div class="catalog-split">\n        <div class="catalog-main" id="catalog-cards-host">\n        </div>\n        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>\n      </div>\n      `;
 }
 
 /** Контент между маркерами katalog:category-cards (тот же cardHtml). */

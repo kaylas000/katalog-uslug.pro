@@ -1,6 +1,9 @@
 import { handleAuth } from "./auth";
+import { decodeCatalogCursor } from "./catalog-cursor";
+import { runCatalogV2 } from "./catalog-v2";
 import { getDbConnectionString, withDbClient } from "./db";
 import { handleOrgAdmin } from "./org-admin";
+import { getOrgPublicResponse } from "./org-public";
 import type { Env } from "./types";
 
 export type { Env } from "./types";
@@ -192,6 +195,37 @@ export default {
           { status: 503, headers: cors }
         );
       }
+      if (url.searchParams.get("v") === "2") {
+        const curRaw = url.searchParams.get("cursor");
+        const decoded = decodeCatalogCursor(curRaw);
+        try {
+          const payload = await runCatalogV2(
+            env,
+            url.searchParams,
+            decoded
+          );
+          return Response.json(payload, {
+            headers: {
+              ...cors,
+              "Cache-Control": "public, max-age=30",
+            },
+          });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "db_error";
+          const st =
+            e instanceof Error ? (e as { status?: number }).status : undefined;
+          if (msg === "cursor_mismatch" || st === 400) {
+            return Response.json(
+              { error: "bad_cursor", message: "cursor does not match query." },
+              { status: 400, headers: cors }
+            );
+          }
+          return Response.json(
+            { error: "catalog_unavailable", message: msg },
+            { status: 502, headers: cors }
+          );
+        }
+      }
       try {
         const rows = await withDbClient(env, async (c) => {
           const r = await c.query(CATALOG_SQL);
@@ -202,6 +236,42 @@ export default {
         const message = e instanceof Error ? e.message : "db_error";
         return Response.json(
           { error: "catalog_unavailable", message },
+          { status: 502, headers: cors }
+        );
+      }
+    }
+
+    /** GET /v1/org/:slug (не пересекается с /v1/org/meta, /v1/org/applications) */
+    const orgDetail = /^\/v1\/org\/([^/]+)$/.exec(path);
+    const orgDetailReserved = new Set(["meta", "applications"]);
+    if (
+      orgDetail &&
+      !orgDetailReserved.has(orgDetail[1] || "") &&
+      request.method === "GET"
+    ) {
+      if (!getDbConnectionString(env)) {
+        return Response.json(
+          { error: "misconfigured", detail: "db_connection" },
+          { status: 503, headers: cors }
+        );
+      }
+      try {
+        const res = await getOrgPublicResponse(
+          env,
+          decodeURIComponent(orgDetail[1] || "")
+        );
+        return Response.json(res.body, {
+          status: res.status,
+          headers: {
+            ...cors,
+            "Cache-Control":
+              res.status === 200 ? "public, max-age=120" : "no-store",
+          },
+        });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "db_error";
+        return Response.json(
+          { error: "org_detail_unavailable", message },
           { status: 502, headers: cors }
         );
       }

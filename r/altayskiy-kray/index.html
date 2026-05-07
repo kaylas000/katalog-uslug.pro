@@ -11,7 +11,7 @@
   <!-- /katalog:gen-head-seo -->
   <title>Каталог — Алтайский край — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260521">
+  <link rel="stylesheet" href="/css/styles.css?v=20260522">
 </head>
 <body>
 
@@ -229,16 +229,20 @@
             <option value="3.5">3.5 и выше</option>
           </select>
         </div>
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M8 12h8M10 18h4"/></svg>
+          <select id="filter-sort" name="sort" aria-label="Сортировка">
+            <option value="title">По названию</option>
+            <option value="rating">По рейтингу</option>
+            <option value="updated">По дате обновления</option>
+          </select>
+        </div>
         <button class="btn btn-primary" data-filter-apply>Применить</button>
       </div>
 
       <!-- katalog:catalog-grid -->
       <div class="catalog-split">
         <div class="catalog-main" id="catalog-cards-host">
-        <div class="catalog-empty" role="status">
-          <p class="catalog-empty-title">Ничего не найдено</p>
-          <p class="catalog-empty-text">Смените регион, категорию или поисковый запрос — либо откройте <a href="/regions/">список всех субъектов РФ</a>.</p>
-        </div>
         </div>
         <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>
       </div>
@@ -352,6 +356,9 @@
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
@@ -418,6 +425,6 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260521"></script>
+  <script src="/js/main.js?v=20260522"></script>
 </body>
 </html>
