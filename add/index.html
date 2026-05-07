@@ -164,16 +164,50 @@
                 </select>
               </div>
               <div class="org-apply-field full">
-                <label for="org-site">Сайт организации</label>
-                <input id="org-site" type="url" placeholder="https://example.ru">
+                <label for="org-site">Сайт организации *</label>
+                <input id="org-site" type="url" required placeholder="https://example.ru">
+              </div>
+              <div class="org-apply-field full filter-field-where">
+                <label for="org-where">Населённый пункт *</label>
+                <input type="hidden" id="org-location-id" value="">
+                <input id="org-where" autocomplete="off" required placeholder="Начните вводить город или район">
+                <div id="org-where-suggest" class="where-suggest" hidden></div>
               </div>
               <div class="org-apply-field full">
                 <label for="org-description">Публичное описание *</label>
                 <textarea id="org-description" required maxlength="4000" placeholder="Чем занимается организация, какие услуги и в каких регионах работает"></textarea>
               </div>
               <div class="org-apply-field full">
-                <label for="org-contacts">Публичные контакты</label>
-                <textarea id="org-contacts" maxlength="1000" placeholder="Телефон, email, мессенджеры (только то, что можно публиковать)"></textarea>
+                <label for="org-contacts">Публичные контакты * (телефон и/или email)</label>
+                <textarea id="org-contacts" required maxlength="1000" placeholder="Телефон, email — только то, что можно показывать посетителям"></textarea>
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-address">Фактический адрес (необязательно)</label>
+                <input id="org-address" maxlength="500" placeholder="Улица, дом, офис">
+                <label class="org-apply-check" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start;font-size:13px;">
+                  <input type="checkbox" id="org-address-public" checked style="margin-top:3px;">
+                  Показывать адрес на публичной странице
+                </label>
+              </div>
+              <div class="org-apply-field">
+                <label for="org-legal-form">Форма (не публикуется)</label>
+                <input id="org-legal-form" maxlength="32" placeholder="ИП / ООО">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-inn">ИНН (не публикуется)</label>
+                <input id="org-inn" maxlength="20" placeholder="ИНН">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-ogrn">ОГРН / ОГРНИП (не публикуется)</label>
+                <input id="org-ogrn" maxlength="20">
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-legal-address">Юр. адрес (не публикуется)</label>
+                <input id="org-legal-address" maxlength="500">
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-contact-person">Контактное лицо, ФИО (не публикуется)</label>
+                <input id="org-contact-person" maxlength="200">
               </div>
               <div class="org-apply-field">
                 <label for="org-owner-phone">Телефон для модерации</label>
@@ -182,6 +216,12 @@
               <div class="org-apply-field">
                 <label for="org-note">Комментарий модератору</label>
                 <input id="org-note" maxlength="280" placeholder="Например, срочная публикация">
+              </div>
+              <div class="org-apply-field full">
+                <label class="org-apply-check" style="display:flex;gap:8px;align-items:flex-start;font-size:14px;">
+                  <input type="checkbox" id="org-consent" required style="margin-top:3px;">
+                  Согласен(на) на обработку персональных данных и публикацию указанных контактов организации *
+                </label>
               </div>
               <div class="org-apply-field full">
                 <button type="submit" class="btn btn-primary">Отправить заявку</button>
@@ -289,6 +329,6 @@
   </div>
 
   <script src="/js/main.js?v=20260521"></script>
-  <script src="/js/add.js?v=20260505-2" defer></script>
+  <script src="/js/add.js?v=20260508-moderation" defer></script>
 </body>
 </html>
