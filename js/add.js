@@ -355,6 +355,9 @@
         showMsg(msg, "Нужно согласие на обработку данных и публикацию контактов.", "err");
         return;
       }
+      const addrPubEl = document.getElementById("org-address-public");
+      const addressIsPublic =
+        addrPubEl instanceof HTMLInputElement ? addrPubEl.checked : true;
       const payload = {
         orgTitle: document.getElementById("org-title")?.value || "",
         orgSlug: document.getElementById("org-slug")?.value || "",
@@ -365,10 +368,7 @@
         publicDescription: document.getElementById("org-description")?.value || "",
         publicContacts: document.getElementById("org-contacts")?.value || "",
         addressText: document.getElementById("org-address")?.value || "",
-        addressIsPublic:
-          document.getElementById("org-address-public") instanceof HTMLInputElement
-            ? document.getElementById("org-address-public").checked
-            : true,
+        addressIsPublic,
         legalForm: document.getElementById("org-legal-form")?.value || "",
         inn: document.getElementById("org-inn")?.value || "",
         ogrn: document.getElementById("org-ogrn")?.value || "",
