@@ -211,10 +211,22 @@ function findHeaderSliceStart(html) {
 function findFooterSliceStart(html, hEnd) {
   const footerIdx = html.indexOf('<footer class="site-footer">');
   if (footerIdx === -1) throw new Error('Нет <footer class="site-footer">');
-  const before = html.slice(0, footerIdx);
-  const c = before.lastIndexOf('<!-- Footer -->');
-  if (c !== -1 && footerIdx - c < 160) return trimHorizontalSpaceBefore(html, hEnd, c);
-  return trimHorizontalSpaceBefore(html, hEnd, footerIdx);
+  /** Убираем цепочки `<!-- Footer … -->` перед подвалом — иначе при legacy-инжекте они копятся между прогонами. */
+  let cut = footerIdx;
+  while (cut > hEnd) {
+    let p = cut;
+    while (p > hEnd && /\s/.test(html[p - 1])) p -= 1;
+    if (p <= hEnd) break;
+    const lineEnd = p;
+    const lineStart = Math.max(hEnd, html.lastIndexOf('\n', p - 1) + 1);
+    const line = html.slice(lineStart, lineEnd + 1).trim();
+    if (/^<!--[\s\S]*\bFooter\b[\s\S]*-->$/.test(line)) {
+      cut = lineStart;
+      continue;
+    }
+    break;
+  }
+  return trimHorizontalSpaceBefore(html, hEnd, cut);
 }
 
 /** Только до подвала: после .mobile-nav убираем лишние \\n (не трогать .consultant с тем же паттерном </div>) */

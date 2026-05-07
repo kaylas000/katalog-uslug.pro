@@ -86,14 +86,21 @@ function replaceCategoryCardsBlock(html, inner) {
   return html.slice(0, afterStart) + inner + html.slice(endIdx);
 }
 
-/** Хлебные крошки, h1, абзацы c/* — из label (UTF-8 из site.json); не редактировать вручную в HTML. */
-function buildCategoryIntroInner(label) {
+/**
+ * Хлебные крошки, h1, абзацы c/* — из label (UTF-8 из site.json).
+ * introLead — необязательный первый абзац (иначе шаблон с «Проверенные организации…»).
+ */
+function buildCategoryIntroInner(label, introLead) {
   const L = escapeHtml(label);
+  const lead =
+    typeof introLead === 'string' && introLead.trim()
+      ? escapeHtml(introLead.trim())
+      : `Проверенные организации категории «${L}». Контакты и информация о компаниях — в карточках ниже.`;
   return `\n      <nav class="breadcrumbs">
         <a href="/">Главная</a><span>/</span><span>${L}</span>
       </nav>
       <h1 class="section-title">${L}</h1>
-      <p class="section-sub">Проверенные организации категории «${L}». Контакты и информация о компаниях — в карточках ниже.</p>
+      <p class="section-sub">${lead}</p>
 
       <p class="section-sub mt-24 mb-0" style="max-width:640px">
         Фильтры по регионам и рейтингу — на <a href="/#catalog" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px">главной странице каталога</a>.
@@ -303,11 +310,13 @@ function run() {
       `<title>${escapeHtml(pageTitle)}</title>`
     );
     chtml = ensureCategoryIntroMarkers(chtml, relPath);
+    const introLead =
+      typeof cat.introLead === 'string' ? cat.introLead : '';
     chtml = replaceBetween(
       chtml,
       M_CATEGORY_INTRO_START,
       M_CATEGORY_INTRO_END,
-      buildCategoryIntroInner(catLabel)
+      buildCategoryIntroInner(catLabel, introLead)
     );
     chtml = applyCategoryEmptyCatalogHost(chtml);
     chtml = setPageCategoryAttr(chtml, catSlug);
