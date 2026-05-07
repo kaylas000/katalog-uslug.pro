@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirect…</title>
+</head>
+<body>
+<script>
+(function () {
+  var p = location.pathname || "/";
+  // /org/<slug>/  или /org/<slug>
+  var m = p.match(/^\/org\/([^\/]+)\/?$/);
+  if (m && m[1]) {
+    location.replace("/org/index.html?slug=" + encodeURIComponent(m[1]));
+    return;
+  }
+  // остальные 404 ведём на главную
+  location.replace("/");
+})();
+</script>
+</body>
+</html>
