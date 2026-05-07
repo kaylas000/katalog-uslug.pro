@@ -20,6 +20,22 @@ export async function getOrgPublicResponse(
 
   try {
     const data = await withDbClient(env, async (c) => {
+      const cols = await c.query<{ has_legacy: boolean }>(
+        `SELECT EXISTS (
+           SELECT 1
+           FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = 'organization_profiles'
+             AND column_name = 'legacy_article_html'
+         ) AS has_legacy`
+      );
+      const hasLegacy = Boolean(cols.rows[0]?.has_legacy);
+      const legacySelect = hasLegacy
+        ? `, p.legacy_article_html AS "legacyArticleHtml",
+           p.legacy_sidebar_html AS "legacySidebarHtml"`
+        : `, ''::text AS "legacyArticleHtml",
+           ''::text AS "legacySidebarHtml"`;
+
       const core = await c.query(
         `SELECT
            o.id,
@@ -43,6 +59,7 @@ export async function getOrgPublicResponse(
            p.verification_status AS "verificationStatus",
            p.moderation_status AS "moderationStatus",
            coalesce(p.portfolio_images, '[]'::jsonb) AS "portfolioImages"
+           ${legacySelect}
          FROM organizations o
          JOIN categories c ON c.id = o.category_id
          JOIN regions r ON r.id = o.region_id
@@ -122,6 +139,16 @@ export async function getOrgPublicResponse(
           verificationStatus: row.verificationStatus,
           moderationStatus: row.moderationStatus,
           portfolioImages,
+        },
+        legacy: {
+          articleHtml:
+            typeof row.legacyArticleHtml === "string"
+              ? row.legacyArticleHtml
+              : "",
+          sidebarHtml:
+            typeof row.legacySidebarHtml === "string"
+              ? row.legacySidebarHtml
+              : "",
         },
         contacts: contactsRes.rows,
         services: servicesRes.rows,

@@ -5,6 +5,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 import pg from "pg";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,6 +38,42 @@ const catalogPath = path.join(root, "data", "catalog.json");
 
 const regions = JSON.parse(fs.readFileSync(regionsPath, "utf8"));
 const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+
+function readLegacyOrgHtml(slug) {
+  const fp = path.join(root, "org", slug, "index.html");
+  if (fs.existsSync(fp)) {
+    return fs.readFileSync(fp, "utf8");
+  }
+  try {
+    return execSync(`git show dee7fc3:org/${slug}/index.html`, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+  } catch {
+    return "";
+  }
+}
+
+function extractLegacyBlocks(html) {
+  if (!html) {
+    return { articleHtml: "", sidebarHtml: "", websiteUrl: null };
+  }
+  const sidebarMatch = html.match(
+    /<aside class="org-showcase-aside sidebar">([\s\S]*?)<\/aside>/i
+  );
+  const articleMatch = html.match(
+    /<div class="org-article">([\s\S]*?)<\/div>\s*<\/div>\s*<\/section>\s*<!-- Footer/i
+  );
+  const websiteMatch = html.match(
+    /<a href="(https?:\/\/[^"]+)"[^>]*class="btn btn-primary mt-16"/i
+  );
+  return {
+    articleHtml: articleMatch ? `<div class="org-article">${articleMatch[1]}</div>` : "",
+    sidebarHtml: sidebarMatch ? sidebarMatch[1].trim() : "",
+    websiteUrl: websiteMatch ? websiteMatch[1] : null,
+  };
+}
 
 const client = new pg.Client({
   connectionString,
@@ -120,24 +157,39 @@ try {
       ]
     );
 
+    const legacyHtml = readLegacyOrgHtml(String(o.id).trim());
+    const legacy = extractLegacyBlocks(legacyHtml);
+
     await client.query(
       `INSERT INTO organization_profiles
-         (org_id, slug, description_md, website_url, moderation_status, published_at, portfolio_images)
-       VALUES ($1, $2, $3::text, NULL::text, 'published', now(), COALESCE($4::jsonb, '[]'::jsonb))
+         (org_id, slug, description_md, website_url, moderation_status, published_at, portfolio_images, legacy_article_html, legacy_sidebar_html)
+       VALUES ($1, $2, $3::text, $4::text, 'published', now(), COALESCE($5::jsonb, '[]'::jsonb), $6::text, $7::text)
        ON CONFLICT (org_id) DO UPDATE SET
          slug = EXCLUDED.slug,
          description_md = EXCLUDED.description_md,
+         website_url = COALESCE(EXCLUDED.website_url, organization_profiles.website_url),
          moderation_status = 'published',
          portfolio_images = EXCLUDED.portfolio_images,
+         legacy_article_html = CASE
+           WHEN EXCLUDED.legacy_article_html <> '' THEN EXCLUDED.legacy_article_html
+           ELSE organization_profiles.legacy_article_html
+         END,
+         legacy_sidebar_html = CASE
+           WHEN EXCLUDED.legacy_sidebar_html <> '' THEN EXCLUDED.legacy_sidebar_html
+           ELSE organization_profiles.legacy_sidebar_html
+         END,
          updated_at = now(),
          published_at = COALESCE(organization_profiles.published_at, now())`,
       [
         o.id,
         String(o.id).trim(),
         o.text ?? "",
+        legacy.websiteUrl,
         JSON.stringify(
           Array.isArray(o.portfolioImages) ? o.portfolioImages : []
         ),
+        legacy.articleHtml,
+        legacy.sidebarHtml,
       ]
     );
   }

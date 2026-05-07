@@ -38,6 +38,12 @@
   }
 
   function contactAsideHtml(payload) {
+    if (
+      typeof payload.legacy?.sidebarHtml === 'string' &&
+      payload.legacy.sidebarHtml.trim()
+    ) {
+      return payload.legacy.sidebarHtml;
+    }
     const rows = [];
     const list = Array.isArray(payload.contacts) ? payload.contacts : [];
     if (list.length > 0) {
@@ -89,6 +95,12 @@
   }
 
   function articleBlocks(payload) {
+    if (
+      typeof payload.legacy?.articleHtml === 'string' &&
+      payload.legacy.articleHtml.trim()
+    ) {
+      return payload.legacy.articleHtml;
+    }
     const md =
       typeof payload.profile?.descriptionMd === 'string'
         ? payload.profile.descriptionMd.trim()
