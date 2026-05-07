@@ -177,6 +177,9 @@ async function fetchPage(
 
   const order = orderClause(params.sort);
   const fetchLimit = params.limit + 1;
+  const locationJoin = params.locationId
+    ? "LEFT JOIN locations loc_org ON loc_org.id = p.location_id"
+    : "";
 
   const sql = `
   SELECT
@@ -197,7 +200,7 @@ async function fetchPage(
   JOIN categories c ON c.id = o.category_id
   JOIN regions r ON r.id = o.region_id
   JOIN organization_profiles p ON p.org_id = o.id
-  LEFT JOIN locations loc_org ON loc_org.id = p.location_id
+  ${locationJoin}
   WHERE ${whereParts.join(" AND ")}
   ${order}
   LIMIT ${fetchLimit}
