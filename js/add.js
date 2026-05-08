@@ -74,8 +74,9 @@
 
   const MAX_PHOTOS = 4;
   const MAX_FILE_BYTES = 8 * 1024 * 1024;
-  const MIN_WIDTH = 800;
-  const MIN_HEIGHT = 600;
+  /** Не ниже типичного превью в каталоге; 800×600 — ориентир, не жёсткий порог. */
+  const MIN_WIDTH = 600;
+  const MIN_HEIGHT = 450;
   const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 
   /** Браузеры и ОС часто отдают пустой `file.type` или `image/jpg` — проверяем по имени файла. */
