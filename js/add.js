@@ -529,8 +529,8 @@
         ogrn: document.getElementById("org-ogrn")?.value || "",
         legalAddress: document.getElementById("org-legal-address")?.value || "",
         contactPersonName: document.getElementById("org-contact-person")?.value || "",
-        ownerPhone: document.getElementById("org-owner-phone")?.value || "",
-        moderationNote: document.getElementById("org-note")?.value || "",
+        ownerPhone: "",
+        moderationNote: "",
         portfolioImages: selectedPhotos.map((p) => ({
           name: p.name,
           contentType: p.contentType,
