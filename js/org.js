@@ -54,6 +54,59 @@
     return typeof t === 'string' ? t.trim().toLowerCase() : '';
   }
 
+  /** Подписи вроде «Телефон» / «E-mail» дублируют тип — не показываем, как у карточек без structured labels. */
+  function isRedundantContactLabel(lb, type) {
+    const n = String(lb ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+    if (!n) return true;
+    const t = String(type ?? '').toLowerCase();
+    const phoneHints = [
+      'телефон',
+      'тел.',
+      'тел',
+      'phone',
+      'моб.',
+      'мобильный',
+      'факс',
+      'fax',
+    ];
+    const emailHints = ['e-mail', 'email', 'e‑mail', 'почта', 'электронная почта'];
+    const webHints = ['сайт', 'website', 'веб-сайт', 'веб', 'url', 'интернет-сайт'];
+    const matches = (hints) =>
+      hints.some((h) => n === h || n.startsWith(`${h} `) || n.startsWith(`${h}.`));
+    if (t === 'phone' && matches(phoneHints)) return true;
+    if (t === 'email' && matches(emailHints)) return true;
+    if (t === 'website' && matches(webHints)) return true;
+    return false;
+  }
+
+  function effectiveContactLabel(lb, value, type) {
+    const v = String(value ?? '').trim();
+    const s = typeof lb === 'string' ? lb.trim() : '';
+    if (!s || s === v) return '';
+    if (isRedundantContactLabel(s, type)) return '';
+    return s;
+  }
+
+  function addressAlreadyInPlainLines(addrNorm, payload) {
+    const list = Array.isArray(payload.contacts) ? payload.contacts : [];
+    for (const c of list) {
+      const v = contactValueRaw(c).trim().toLowerCase();
+      if (!v) continue;
+      if (v === addrNorm || v.includes(addrNorm) || addrNorm.includes(v)) return true;
+    }
+    if (list.length > 0) return false;
+    const sub = typeof payload.subtitle === 'string' ? payload.subtitle : '';
+    for (const ln of sub.split('\n')) {
+      const s = ln.trim().toLowerCase();
+      if (!s) continue;
+      if (s === addrNorm || s.includes(addrNorm) || addrNorm.includes(s)) return true;
+    }
+    return false;
+  }
+
   /** Для ссылки tel: оставляем + и только цифры (например +7 … → tel:+7495…) */
   function telHref(display) {
     const raw = String(display ?? '').trim();
@@ -140,13 +193,13 @@
   function contactRowHtml(c) {
     const v = contactValueRaw(c);
     if (!v) return '';
-    const lb = contactLabelRaw(c);
+    const lbRaw = contactLabelRaw(c);
     const type = contactTypeRaw(c);
-    const labelPrefix =
-      lb && lb !== v ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ` : '';
+    const lb = effectiveContactLabel(lbRaw, v, type);
+    const labelPrefix = lb ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ` : '';
 
     if (type === 'phone') {
-      return phoneStackRow(v, lb && lb !== v ? lb : '');
+      return phoneStackRow(v, lb);
     }
     if (type === 'email') {
       const href = mailtoHref(v);
@@ -168,7 +221,7 @@
       return `<div class="sidebar-row">${labelPrefix}<a href="${esc(mh)}" class="sidebar-contact-link">${esc(v)}</a></div>`;
     }
     if (telHref(v)) {
-      return phoneStackRow(v, lb && lb !== v ? lb : '');
+      return phoneStackRow(v, lb);
     }
     if (/^https?:\/\//i.test(v)) {
       return `<div class="sidebar-row">${labelPrefix}<a href="${esc(v)}" target="_blank" rel="noopener" class="sidebar-contact-link">${esc(v)}</a></div>`;
@@ -191,6 +244,18 @@
         const fake = { contactValue: s, contact_type: '', contactType: '' };
         rows.push(contactRowHtml(fake));
       });
+    }
+
+    const addrRaw =
+      typeof payload.profile?.addressText === 'string'
+        ? payload.profile.addressText.trim()
+        : '';
+    const addrPublic = payload.profile?.addressIsPublic !== false;
+    if (addrRaw && addrPublic) {
+      const addrNorm = addrRaw.toLowerCase();
+      if (!addressAlreadyInPlainLines(addrNorm, payload)) {
+        rows.push(`<div class="sidebar-row">${withBreaks(addrRaw)}</div>`);
+      }
     }
 
     let websiteBtn = '';

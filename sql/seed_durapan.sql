@@ -28,7 +28,8 @@ INSERT INTO organizations (
 SELECT
   'durapan',
   'Penrod — материалы из ценных пород',
-  '+7 (495) 663-93-29' || E'\n' || 'penrod@penrod.ru' || E'\n' || 'Москва',
+  '+7 (495) 663-93-29' || E'\n' || 'penrod@penrod.ru' || E'\n' ||
+    'г. Железнодорожный, ул. Гидрогородок д.15',
   'Поставки материалов и комплектующих из древесины ценных пород для производителей мебели и дверей по РФ. Ассортимент: шпон, фанера, пиломатериалы, фанерованное МДФ, декинг.',
   cat.id,
   reg.id,
@@ -63,7 +64,7 @@ VALUES (
   'Компания Penrod — поставщик шпона, фанеры, пиломатериалов, фанерованного МДФ и террасного декинга из древесины ценных пород. Работаем с производителями мебели и дверей по всей России: консультируем по подбору материала, обеспечиваем стабильные поставки.',
   'https://www.durapan.ru/',
   NULL,
-  'Москва',
+  'г. Железнодорожный, ул. Гидрогородок д.15',
   'published',
   'unverified',
   now(),
@@ -88,9 +89,9 @@ DELETE FROM organization_public_contacts WHERE org_id='durapan';
 INSERT INTO organization_public_contacts
 (org_id, contact_type, contact_value, contact_label, is_primary, sort_order)
 VALUES
-('durapan','phone','+7 (495) 663-93-29','РўРµР»РµС„РѕРЅ', true, 10),
-('durapan','email','penrod@penrod.ru','E-mail', false, 20),
-('durapan','website','https://www.durapan.ru/','РЎР°Р№С‚', false, 30);
+('durapan','phone','+7 (495) 663-93-29',NULL, true, 10),
+('durapan','email','penrod@penrod.ru',NULL, false, 20),
+('durapan','website','https://www.durapan.ru/',NULL, false, 30);
 
 -- РђСЃСЃРѕСЂС‚РёРјРµРЅС‚ РєР°Рє offers (С‡РµСЂРµР· organization_services)
 DELETE FROM organization_services WHERE org_id='durapan';
