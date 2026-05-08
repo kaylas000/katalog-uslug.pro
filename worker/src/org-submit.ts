@@ -24,6 +24,16 @@ function splitLines(s: string): string[] {
     .slice(0, 24);
 }
 
+function guessContactType(
+  value: string
+): "phone" | "email" | "website" | "messenger" | "social" {
+  const v = value.trim();
+  if (/^https?:\/\//i.test(v)) return "website";
+  if (v.includes("@")) return "email";
+  if (/[0-9][0-9\s()+-]{6,}/.test(v)) return "phone";
+  return "messenger";
+}
+
 /** At least one phone or email in free-text or structured list. */
 export function hasEmailOrPhoneInContacts(
   publicContactsText: string,
@@ -179,6 +189,13 @@ export async function submitOrganizationApplication(
     };
   }
 
+  const legalInfoProvided =
+    legalForm.length > 0 &&
+    inn.length > 0 &&
+    ogrn.length > 0 &&
+    legalAddress.length > 0 &&
+    contactPersonName.length > 0;
+
   const locRes = await client.query(`SELECT id FROM locations WHERE id = $1::bigint`, [
     locationRaw,
   ]);
@@ -263,6 +280,22 @@ export async function submitOrganizationApplication(
 
   await client.query("BEGIN");
   try {
+    const userVerify = await client.query<{
+      email_verified_at: string | null;
+      phone_verified_at: string | null;
+    }>(
+      `SELECT email_verified_at, phone_verified_at
+       FROM users
+       WHERE id = $1::uuid
+       LIMIT 1`,
+      [userId]
+    );
+    const userRow = userVerify.rows[0];
+    const userVerified = Boolean(
+      userRow?.email_verified_at && userRow?.phone_verified_at
+    );
+    const autoPublish = userVerified && legalInfoProvided;
+
     const pubCheck = await client.query<{ published: boolean }>(
       `SELECT published FROM organizations WHERE id = $1 FOR UPDATE`,
       [orgSlug]
@@ -289,7 +322,7 @@ export async function submitOrganizationApplication(
              private_payload = $7::jsonb,
              location_id = $8::bigint,
              submitter_ip = COALESCE($9, submitter_ip),
-             status = 'pending_moderation',
+            status = $10,
              rejection_reason = NULL,
              updated_at = now()
          WHERE id = $1::uuid
@@ -304,6 +337,7 @@ export async function submitOrganizationApplication(
           JSON.stringify(privJson),
           locationRaw,
           submitterIp,
+          autoPublish ? "published" : "pending_moderation",
         ]
       );
       applicationId = upd.rows[0].id;
@@ -312,7 +346,7 @@ export async function submitOrganizationApplication(
         `INSERT INTO organization_applications
           (applicant_user_id, org_slug, org_title, category_slug, region_slug, website_url,
            public_payload, private_payload, status, location_id, submitter_ip)
-         VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, 'pending_moderation', $9::bigint, $10)
+         VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $11, $9::bigint, $10)
          RETURNING id`,
         [
           userId,
@@ -325,6 +359,7 @@ export async function submitOrganizationApplication(
           JSON.stringify(privJson),
           locationRaw,
           submitterIp,
+          autoPublish ? "published" : "pending_moderation",
         ]
       );
       applicationId = ins.rows[0].id;
@@ -333,15 +368,25 @@ export async function submitOrganizationApplication(
     await client.query(
       `INSERT INTO organizations
         (id, title, subtitle, listing_text, category_id, region_id, rating, reviews, published, created_at, updated_at)
-       VALUES ($1, $2, '', $3, $4::bigint, $5::bigint, 0, 0, false, now(), now())
+       VALUES ($1, $2, $6, $3, $4::bigint, $5::bigint, 0, 0, $7, now(), now())
        ON CONFLICT (id) DO UPDATE SET
          title = EXCLUDED.title,
+         subtitle = EXCLUDED.subtitle,
          listing_text = EXCLUDED.listing_text,
          category_id = EXCLUDED.category_id,
          region_id = EXCLUDED.region_id,
+         published = EXCLUDED.published,
          updated_at = now()
        WHERE organizations.published = false`,
-      [orgSlug, orgTitle, publicDescription, categoryId, regionId]
+      [
+        orgSlug,
+        orgTitle,
+        publicDescription,
+        categoryId,
+        regionId,
+        splitLines(publicContacts).slice(0, 4).join("\n"),
+        autoPublish,
+      ]
     );
 
     const orgStillPublished = await client.query<{ published: boolean }>(
@@ -364,18 +409,19 @@ export async function submitOrganizationApplication(
     await client.query(
       `INSERT INTO organization_profiles
         (org_id, slug, description_md, website_url, moderation_status, location_id, address_text, address_is_public, published_at, updated_at)
-       VALUES ($1, $1, $2, $3, 'pending', $4::bigint, $5, $6, NULL, now())
+       VALUES ($1, $1, $2, $3, $7, $4::bigint, $5, $6, $8, now())
        ON CONFLICT (org_id) DO UPDATE SET
          slug = EXCLUDED.slug,
          description_md = EXCLUDED.description_md,
          website_url = EXCLUDED.website_url,
          moderation_status = CASE
            WHEN organization_profiles.moderation_status = 'published' THEN organization_profiles.moderation_status
-           ELSE 'pending'
+           ELSE EXCLUDED.moderation_status
          END,
          location_id = EXCLUDED.location_id,
          address_text = EXCLUDED.address_text,
          address_is_public = EXCLUDED.address_is_public,
+         published_at = COALESCE(organization_profiles.published_at, EXCLUDED.published_at),
          updated_at = now()`,
       [
         orgSlug,
@@ -384,8 +430,42 @@ export async function submitOrganizationApplication(
         locationRaw,
         addressText || null,
         addressIsPublic,
+        autoPublish ? "published" : "pending",
+        autoPublish ? new Date().toISOString() : null,
       ]
     );
+
+    if (autoPublish) {
+      const contactLines = splitLines(publicContacts);
+      await client.query(`DELETE FROM organization_public_contacts WHERE org_id = $1`, [
+        orgSlug,
+      ]);
+      for (let i = 0; i < contactLines.length; i += 1) {
+        const v = contactLines[i]!;
+        const t = guessContactType(v);
+        await client.query(
+          `INSERT INTO organization_public_contacts
+            (org_id, contact_type, contact_value, contact_label, is_primary, sort_order)
+           VALUES ($1, $2, $3, NULL, $4, $5)
+           ON CONFLICT (org_id, contact_type, contact_value) DO UPDATE SET
+             sort_order = LEAST(organization_public_contacts.sort_order, EXCLUDED.sort_order),
+             is_primary = organization_public_contacts.is_primary OR EXCLUDED.is_primary`,
+          [orgSlug, t, v, i === 0, 100 + i]
+        );
+      }
+      await client.query(
+        `UPDATE organization_applications
+         SET result_org_id = $2,
+             updated_at = now()
+         WHERE id = $1::uuid`,
+        [applicationId, orgSlug]
+      );
+      await client.query(
+        `INSERT INTO moderation_events (entity_type, entity_id, action, actor_user_id, payload)
+         VALUES ('application', $1, 'approve', NULL, $2::jsonb)`,
+        [applicationId, JSON.stringify({ orgSlug, source: "auto_moderator" })]
+      );
+    }
 
     await client.query(
       `INSERT INTO moderation_events (entity_type, entity_id, action, actor_user_id, payload)
@@ -399,7 +479,7 @@ export async function submitOrganizationApplication(
       applicationId,
       orgId: orgSlug,
       slug: orgSlug,
-      status: "pending_moderation",
+      status: autoPublish ? "published" : "pending_moderation",
     };
   } catch (e) {
     await client.query("ROLLBACK");
