@@ -7,7 +7,8 @@
     "types": "wrangler types",
     "db:import": "node import-data-from-json.mjs",
     "db:migrate": "node apply-migrations.mjs",
-    "db:import:locations": "node import-locations.mjs"
+    "db:import:locations": "node import-locations.mjs",
+    "db:media:backfill": "node backfill-org-media-db.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

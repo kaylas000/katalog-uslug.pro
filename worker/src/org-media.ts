@@ -21,11 +21,11 @@ export function mediaUrlsFor(slug: string, rawUrls: string[]): string[] {
   return clean.map((_src, i) => mediaPathFor(slug, i));
 }
 
-export async function resolveOrgMediaSource(
+export async function getOrgMediaBlob(
   env: Env,
   slugRaw: string,
   imageIndexOneBased: number
-): Promise<string | null> {
+): Promise<{ contentType: string; data: Uint8Array } | null> {
   const slug = slugRaw.trim();
   if (!slug || slug.length > 96) return null;
   if (!Number.isInteger(imageIndexOneBased) || imageIndexOneBased < 1) {
@@ -34,40 +34,34 @@ export async function resolveOrgMediaSource(
 
   const row = await withDbClient(env, async (c) => {
     const r = await c.query<{
-      org_id: string;
-      portfolio_images: unknown;
-      cover_url: string | null;
+      content_type: string;
+      data: Uint8Array;
     }>(
       `SELECT
-         o.id AS org_id,
-         COALESCE(p.portfolio_images, '[]'::jsonb) AS portfolio_images,
-         p.cover_url
+         b.content_type,
+         b.data
        FROM organizations o
        JOIN categories c2 ON c2.id = o.category_id
        JOIN regions r2 ON r2.id = o.region_id
        JOIN organization_profiles p ON p.org_id = o.id
+       JOIN organization_media_blobs b ON b.org_id = o.id
        WHERE COALESCE(NULLIF(trim(p.slug), ''), o.id) = $1
+         AND b.media_index = $2
          AND o.published = true
          AND c2.is_public = true
          AND r2.is_active = true
          AND p.moderation_status = 'published'
        LIMIT 1`,
-      [slug]
+      [slug, imageIndexOneBased]
     );
     return r.rows[0];
   });
   if (!row) return null;
-
-  const rawPortfolio = Array.isArray(row.portfolio_images)
-    ? row.portfolio_images
-    : [];
-  const portfolio = rawPortfolio
-    .map((v) => normalizeMediaUrl(v))
-    .filter((v): v is string => Boolean(v));
-  const all = portfolio.length > 0 ? portfolio : [normalizeMediaUrl(row.cover_url)].filter((v): v is string => Boolean(v));
-  if (all.length === 0) return null;
-
-  const idx = imageIndexOneBased - 1;
-  if (idx < 0 || idx >= all.length) return null;
-  return all[idx];
+  return {
+    contentType:
+      typeof row.content_type === "string" && row.content_type.trim()
+        ? row.content_type.trim()
+        : "application/octet-stream",
+    data: row.data,
+  };
 }

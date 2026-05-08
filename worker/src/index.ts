@@ -4,7 +4,7 @@ import { runCatalogV2 } from "./catalog-v2";
 import { getDbConnectionString, withDbClient } from "./db";
 import { handleLocations } from "./locations";
 import { handleOrgAdmin } from "./org-admin";
-import { resolveOrgMediaSource } from "./org-media";
+import { getOrgMediaBlob } from "./org-media";
 import { getOrgPublicResponse } from "./org-public";
 import { getApplicationForUser, submitOrganizationApplication, type SubmitPayload } from "./org-submit";
 import type { Env } from "./types";
@@ -260,29 +260,30 @@ export default {
       try {
         const slug = decodeURIComponent(orgMedia[1] || "");
         const idx = Number.parseInt(orgMedia[2] || "", 10);
-        const src = await resolveOrgMediaSource(env, slug, idx);
-        if (!src) {
+        const blob = await getOrgMediaBlob(env, slug, idx);
+        if (!blob) {
           return Response.json({ error: "not_found" }, { status: 404, headers: cors });
         }
-        const upstream = await fetch(src, { cf: { cacheTtl: 300 } as Record<string, unknown> });
-        if (!upstream.ok) {
-          return Response.json(
-            { error: "media_unavailable", status: upstream.status },
-            { status: 502, headers: cors }
-          );
-        }
-        const h = new Headers(upstream.headers);
+        const h = new Headers();
         const origin = request.headers.get("Origin")?.trim();
         const allowOrigin =
           origin && (origin.startsWith("http://") || origin.startsWith("https://"))
             ? origin
             : "*";
         h.set("Cache-Control", "public, max-age=300");
+        h.set("Content-Type", blob.contentType);
         h.set("Access-Control-Allow-Origin", allowOrigin);
         h.set("Access-Control-Allow-Methods", "GET, OPTIONS");
         h.set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
         h.set("Vary", "Origin");
-        return new Response(upstream.body, { status: 200, headers: h });
+        const bytes =
+          blob.data instanceof Uint8Array
+            ? blob.data
+            : new Uint8Array(blob.data as ArrayBuffer);
+        return new Response(bytes as unknown as BodyInit, {
+          status: 200,
+          headers: h,
+        });
       } catch (e) {
         const message = e instanceof Error ? e.message : "media_error";
         return Response.json(
