@@ -82,6 +82,20 @@
     return `https://${raw.replace(/^\/+/, '')}`;
   }
 
+  /** Телефон всегда основной кнопкой (единый вид для всех организаций). */
+  function phoneStackRow(value, label) {
+    const v = String(value ?? '').trim();
+    if (!v) return '';
+    const href = telHref(v);
+    const lb = typeof label === 'string' ? label.trim() : '';
+    const labelBlock =
+      lb && lb !== v ? `<strong class="sidebar-contact-label">${esc(lb)}</strong>` : '';
+    if (!href) {
+      return `<div class="sidebar-row sidebar-row--stack">${labelBlock}${withBreaks(v)}</div>`;
+    }
+    return `<div class="sidebar-row sidebar-row--stack">${labelBlock}<a href="${esc(href)}" class="btn btn-primary" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a></div>`;
+  }
+
   function verificationAsideHtml(profile) {
     const raw =
       typeof profile?.verificationStatus === 'string'
@@ -132,11 +146,7 @@
       lb && lb !== v ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ` : '';
 
     if (type === 'phone') {
-      const href = telHref(v);
-      const body = href
-        ? `<a href="${esc(href)}" class="sidebar-contact-link" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a>`
-        : withBreaks(v);
-      return `<div class="sidebar-row">${labelPrefix}${body}</div>`;
+      return phoneStackRow(v, lb && lb !== v ? lb : '');
     }
     if (type === 'email') {
       const href = mailtoHref(v);
@@ -157,9 +167,8 @@
     if (mh) {
       return `<div class="sidebar-row">${labelPrefix}<a href="${esc(mh)}" class="sidebar-contact-link">${esc(v)}</a></div>`;
     }
-    const th = telHref(v);
-    if (th) {
-      return `<div class="sidebar-row">${labelPrefix}<a href="${esc(th)}" class="sidebar-contact-link" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a></div>`;
+    if (telHref(v)) {
+      return phoneStackRow(v, lb && lb !== v ? lb : '');
     }
     if (/^https?:\/\//i.test(v)) {
       return `<div class="sidebar-row">${labelPrefix}<a href="${esc(v)}" target="_blank" rel="noopener" class="sidebar-contact-link">${esc(v)}</a></div>`;
@@ -168,17 +177,6 @@
   }
 
   function contactAsideHtml(payload) {
-    const legacyRaw =
-      typeof payload.legacy?.sidebarHtml === 'string'
-        ? payload.legacy.sidebarHtml.trim()
-        : '';
-    if (legacyRaw) {
-      const hasVerification = /Статус\s+верификации/i.test(legacyRaw);
-      return hasVerification
-        ? legacyRaw
-        : `${legacyRaw}${verificationAsideHtml(payload.profile)}`;
-    }
-
     const rows = [];
     const list = Array.isArray(payload.contacts) ? payload.contacts : [];
     if (list.length > 0) {
