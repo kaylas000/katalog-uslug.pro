@@ -1,5 +1,6 @@
 import type { Env } from "./types";
 import { withDbClient } from "./db";
+import { mediaUrlsFor } from "./org-media";
 
 function jsonPortfolio(imgs: unknown): string[] {
   if (Array.isArray(imgs)) {
@@ -110,6 +111,16 @@ export async function getOrgPublicResponse(
 
       const publicSlug = String(row.slug ?? orgId);
       const portfolioImages = jsonPortfolio(row.portfolioImages);
+      const mediaUrls = mediaUrlsFor(publicSlug, portfolioImages);
+      const coverFromDb =
+        typeof row.coverUrl === "string" ? row.coverUrl.trim() : "";
+      const mediaWithCover =
+        mediaUrls.length > 0
+          ? mediaUrls
+          : coverFromDb
+            ? [`/v1/org/${encodeURIComponent(publicSlug)}/media/1`]
+            : [];
+      const coverUrl = mediaWithCover[0] || null;
 
       return {
         id: orgId,
@@ -132,13 +143,13 @@ export async function getOrgPublicResponse(
           descriptionMd: row.descriptionMd ?? "",
           websiteUrl: row.websiteUrl ?? null,
           logoUrl: row.logoUrl ?? null,
-          coverUrl: row.coverUrl ?? null,
+          coverUrl,
           addressText: row.addressText ?? null,
           addressIsPublic: row.addressIsPublic !== false,
           workHours: row.workHours ?? [],
           verificationStatus: row.verificationStatus,
           moderationStatus: row.moderationStatus,
-          portfolioImages,
+          portfolioImages: mediaWithCover,
         },
         legacy: {
           articleHtml:
@@ -153,7 +164,7 @@ export async function getOrgPublicResponse(
         contacts: contactsRes.rows,
         services: servicesRes.rows,
         tags: tagsRes.rows,
-        media: portfolioImages.map((src) => ({ kind: "image", url: src })),
+        media: mediaWithCover.map((src) => ({ kind: "image", url: src })),
       } as Record<string, unknown>;
     });
 

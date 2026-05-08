@@ -1,5 +1,6 @@
 import type { Env } from "./types";
 import { withDbClient } from "./db";
+import { mediaUrlsFor } from "./org-media";
 import {
   encodeCatalogCursor,
   type CatalogCursor,
@@ -240,7 +241,7 @@ function mapItem(row: Record<string, unknown>): Record<string, unknown> {
     rating: row.rating,
     reviews: row.reviews,
     url: `/org/${slug}/`,
-    portfolioImages,
+    portfolioImages: mediaUrlsFor(slug, portfolioImages),
   };
 }
 
