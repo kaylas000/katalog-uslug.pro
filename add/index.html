@@ -12,6 +12,10 @@
       max-width: 900px;
       margin: 0 auto;
     }
+    /* У body уже padding под фикс. шапку — здесь только небольшой зазор до карточки */
+    .org-apply-section.section {
+      padding: 28px 0 56px;
+    }
     /*
       Нативный выпадающий список <select> у .card в styles.css ломается:
       у предка overflow:hidden и hover transform — список регионов может
@@ -85,6 +89,9 @@
       display: block;
     }
     @media (max-width: 900px) {
+      .org-apply-section.section {
+        padding: 16px 0 40px;
+      }
       .org-apply-grid {
         grid-template-columns: 1fr;
       }
@@ -159,7 +166,7 @@
     </div>
   </div>
 
-  <section class="section" style="padding-top:80px;padding-bottom:80px;">
+  <section class="section org-apply-section">
     <div class="container org-apply-wrap">
       <div class="card" style="margin-bottom:16px;">
         <div class="card-body">
