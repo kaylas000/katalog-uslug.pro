@@ -62,6 +62,7 @@ export type SubmitPayload = {
   orgTitle?: string;
   orgSlug?: string;
   categorySlug?: string;
+  categoryNewLabel?: string;
   regionSlug?: string;
   locationId?: string | number;
   websiteUrl?: string;
@@ -99,7 +100,9 @@ export async function submitOrganizationApplication(
   submitterIp: string | null
 ): Promise<SubmitOk | SubmitErr> {
   const orgTitle = (payload.orgTitle || "").trim();
-  const categorySlug = (payload.categorySlug || "").trim();
+  const categorySlugRaw = (payload.categorySlug || "").trim();
+  const categoryNewLabel = (payload.categoryNewLabel || "").trim().slice(0, 80);
+  const categorySlug = categorySlugRaw === "__new__" ? "" : categorySlugRaw;
   const regionSlug = (payload.regionSlug || "").trim();
   const websiteUrl = (payload.websiteUrl || "").trim();
   const publicDescription = (payload.publicDescription || "").trim();
@@ -263,17 +266,10 @@ export async function submitOrganizationApplication(
     return { kind: "err", code: "invalid_location", message: "Локация не найдена.", status: 400 };
   }
 
-  const [cat, reg] = await Promise.all([
-    client.query(`SELECT id::text FROM categories WHERE slug = $1`, [categorySlug]),
-    client.query(`SELECT id::text FROM regions WHERE slug = $1`, [regionSlug]),
-  ]);
-  if (!cat.rows.length) {
-    return { kind: "err", code: "invalid_category", status: 400 };
-  }
+  const reg = await client.query(`SELECT id::text FROM regions WHERE slug = $1`, [regionSlug]);
   if (!reg.rows.length) {
     return { kind: "err", code: "invalid_region", status: 400 };
   }
-  const categoryId = cat.rows[0].id;
   const regionId = reg.rows[0].id;
 
   const dupPending = await client.query<{ id: string; applicant_user_id: string }>(
@@ -343,6 +339,69 @@ export async function submitOrganizationApplication(
 
   await client.query("BEGIN");
   try {
+    let effectiveCategorySlug = categorySlug;
+    let categoryId = "";
+    if (effectiveCategorySlug) {
+      const cat = await client.query(`SELECT id::text FROM categories WHERE slug = $1`, [
+        effectiveCategorySlug,
+      ]);
+      if (!cat.rows.length) {
+        await client.query("ROLLBACK");
+        return { kind: "err", code: "invalid_category", status: 400 };
+      }
+      categoryId = String(cat.rows[0].id);
+    } else {
+      if (!categoryNewLabel || categoryNewLabel.length < 2) {
+        await client.query("ROLLBACK");
+        return {
+          kind: "err",
+          code: "invalid_category",
+          message: "Укажите название новой категории (минимум 2 символа).",
+          status: 400,
+        };
+      }
+      const baseSlug = normalizeOrgSlug(categoryNewLabel).slice(0, 48) || "new-category";
+      let candidate = baseSlug;
+      let catIns: { id: string; slug: string } | null = null;
+      for (let i = 0; i < 20; i += 1) {
+        const suffix = i === 0 ? "" : `-${i + 1}`;
+        candidate = `${baseSlug}${suffix}`.slice(0, 64);
+        const ins = await client.query<{ id: string; slug: string }>(
+          `INSERT INTO categories (slug, label, is_public, sort_order, updated_at)
+           VALUES ($1, $2, true, 100, now())
+           ON CONFLICT (slug) DO NOTHING
+           RETURNING id::text, slug`,
+          [candidate, categoryNewLabel]
+        );
+        if (ins.rows.length) {
+          catIns = { id: ins.rows[0].id, slug: ins.rows[0].slug };
+          break;
+        }
+        const ex = await client.query<{ id: string; slug: string }>(
+          `SELECT id::text, slug FROM categories WHERE slug = $1`,
+          [candidate]
+        );
+        if (ex.rows.length) {
+          categoryId = String(ex.rows[0].id);
+          effectiveCategorySlug = String(ex.rows[0].slug);
+          break;
+        }
+      }
+      if (catIns) {
+        categoryId = catIns.id;
+        effectiveCategorySlug = catIns.slug;
+      }
+      if (!categoryId) {
+        await client.query("ROLLBACK");
+        return {
+          kind: "err",
+          code: "category_create_failed",
+          message: "Не удалось создать новую категорию. Повторите попытку.",
+          status: 500,
+        };
+      }
+    }
+
     const userVerify = await client.query<{
       email_verified_at: string | null;
       phone_verified_at: string | null;
@@ -393,7 +452,7 @@ export async function submitOrganizationApplication(
         [
           dupPending.rows[0].id,
           orgTitle,
-          categorySlug,
+          effectiveCategorySlug,
           regionSlug,
           websiteUrl || null,
           JSON.stringify(pubJson),
@@ -415,7 +474,7 @@ export async function submitOrganizationApplication(
           userId,
           orgSlug,
           orgTitle,
-          categorySlug,
+          effectiveCategorySlug,
           regionSlug,
           websiteUrl || null,
           JSON.stringify(pubJson),

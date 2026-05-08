@@ -421,6 +421,8 @@
     if (meta.r.ok) {
       const catEl = document.getElementById("org-category");
       regEl = document.getElementById("org-region");
+      const catNewWrap = document.getElementById("org-category-new-wrap");
+      const catNewInput = document.getElementById("org-category-new");
       if (catEl && Array.isArray(meta.body.categories)) {
         catEl.innerHTML = '<option value="">Выберите категорию</option>';
         for (const c of meta.body.categories) {
@@ -429,6 +431,18 @@
           opt.textContent = c.label;
           catEl.appendChild(opt);
         }
+        const createOpt = document.createElement("option");
+        createOpt.value = "__new__";
+        createOpt.textContent = "Другая категория (создать новую)";
+        catEl.appendChild(createOpt);
+        catEl.addEventListener("change", () => {
+          const isNew = catEl.value === "__new__";
+          if (catNewWrap) catNewWrap.style.display = isNew ? "" : "none";
+          if (catNewInput instanceof HTMLInputElement) {
+            catNewInput.required = isNew;
+            if (!isNew) catNewInput.value = "";
+          }
+        });
       }
       if (regEl && Array.isArray(meta.body.regions)) {
         regEl.innerHTML = '<option value="">Выберите регион</option>';
@@ -468,6 +482,7 @@
         orgTitle: document.getElementById("org-title")?.value || "",
         orgSlug: document.getElementById("org-slug")?.value || "",
         categorySlug: document.getElementById("org-category")?.value || "",
+        categoryNewLabel: document.getElementById("org-category-new")?.value || "",
         regionSlug: document.getElementById("org-region")?.value || "",
         locationId,
         websiteUrl: document.getElementById("org-site")?.value || "",
