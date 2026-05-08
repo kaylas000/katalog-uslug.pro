@@ -507,6 +507,13 @@
         showMsg(msg, "Нужно согласие на обработку данных и публикацию контактов.", "err");
         return;
       }
+      const pubPhone = (document.getElementById("org-contact-phone")?.value || "").trim();
+      const pubEmail = (document.getElementById("org-contact-email")?.value || "").trim();
+      if (!pubPhone && !pubEmail) {
+        showMsg(msg, "Укажите публичный телефон и/или email.", "err");
+        return;
+      }
+      const publicContacts = [pubPhone, pubEmail].filter(Boolean).join("\n");
       const payload = {
         orgTitle: document.getElementById("org-title")?.value || "",
         categorySlug: document.getElementById("org-category")?.value || "",
@@ -514,7 +521,7 @@
         locationId,
         websiteUrl: document.getElementById("org-site")?.value || "",
         publicDescription: document.getElementById("org-description")?.value || "",
-        publicContacts: document.getElementById("org-contacts")?.value || "",
+        publicContacts,
         addressText: document.getElementById("org-address")?.value || "",
         addressIsPublic: true,
         legalForm: document.getElementById("org-legal-form")?.value || "",

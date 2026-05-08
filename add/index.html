@@ -214,9 +214,13 @@
                 <label for="org-description">Публичное описание *</label>
                 <textarea id="org-description" required maxlength="4000" placeholder="Чем занимается организация, какие услуги и в каких регионах работает"></textarea>
               </div>
-              <div class="org-apply-field full">
-                <label for="org-contacts">Публичные контакты * (телефон и/или email)</label>
-                <textarea id="org-contacts" required maxlength="1000" placeholder="Телефон, email — только то, что можно показывать посетителям"></textarea>
+              <div class="org-apply-field">
+                <label for="org-contact-phone">Телефон (публикуется)</label>
+                <input id="org-contact-phone" type="tel" maxlength="80" autocomplete="tel" placeholder="+7 …">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-contact-email">Email (публикуется)</label>
+                <input id="org-contact-email" type="email" maxlength="320" autocomplete="email" placeholder="info@example.ru">
               </div>
               <div class="org-apply-field full">
                 <label for="org-photos">Фотографии организации (до 4 шт.)</label>
@@ -312,6 +316,6 @@
   </footer>
 
   <script src="/js/main.js?v=20260521"></script>
-  <script src="/js/add.js?v=20260512-add-no-address-toggle" defer></script>
+  <script src="/js/add.js?v=20260512-add-contact-phone-email" defer></script>
 </body>
 </html>
