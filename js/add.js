@@ -512,7 +512,6 @@
         addrPubEl instanceof HTMLInputElement ? addrPubEl.checked : true;
       const payload = {
         orgTitle: document.getElementById("org-title")?.value || "",
-        orgSlug: document.getElementById("org-slug")?.value || "",
         categorySlug: document.getElementById("org-category")?.value || "",
         categoryNewLabel: document.getElementById("org-category-new")?.value || "",
         locationId,

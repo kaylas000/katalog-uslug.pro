@@ -186,7 +186,11 @@
             </div>
             <div id="org-apply-msg" class="auth-msg" style="display:none;margin-top:14px;"></div>
             <form id="org-apply-form" class="org-apply-grid" style="margin-top:16px;">
-              <div class="org-apply-field full">
+              <div class="org-apply-field">
+                <label for="org-title">Название организации *</label>
+                <input id="org-title" required maxlength="140" placeholder="ООО Пример / Мастерская Пример">
+              </div>
+              <div class="org-apply-field">
                 <label for="org-category">Выберите категорию *</label>
                 <select id="org-category" required>
                   <option value="">Выберите категорию</option>
@@ -195,14 +199,6 @@
               <div id="org-category-new-wrap" class="org-apply-field full" style="display:none;">
                 <label for="org-category-new">Новая категория *</label>
                 <input id="org-category-new" maxlength="80" placeholder="Например: Ремонт спецтехники">
-              </div>
-              <div class="org-apply-field">
-                <label for="org-title">Название организации *</label>
-                <input id="org-title" required maxlength="140" placeholder="ООО Пример / Мастерская Пример">
-              </div>
-              <div class="org-apply-field">
-                <label for="org-slug">Slug (необязательно)</label>
-                <input id="org-slug" maxlength="80" placeholder="primer-company">
               </div>
               <div class="org-apply-field full">
                 <label for="org-site">Сайт организации *</label>
@@ -320,6 +316,6 @@
   </footer>
 
   <script src="/js/main.js?v=20260521"></script>
-  <script src="/js/add.js?v=20260512-add-no-consultant" defer></script>
+  <script src="/js/add.js?v=20260512-add-row-title-category" defer></script>
 </body>
 </html>
