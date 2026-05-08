@@ -68,53 +68,130 @@
     return num.startsWith('+') ? `tel:${num}` : `tel:${num}`;
   }
 
-  function contactAsideHtml(payload) {
-    if (
-      typeof payload.legacy?.sidebarHtml === 'string' &&
-      payload.legacy.sidebarHtml.trim()
-    ) {
-      return payload.legacy.sidebarHtml;
+  function mailtoHref(display) {
+    const raw = String(display ?? '').trim();
+    if (!raw) return '';
+    if (!/^[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+$/i.test(raw)) return '';
+    return `mailto:${raw}`;
+  }
+
+  function externalSiteHref(display) {
+    const raw = String(display ?? '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return `https://${raw.replace(/^\/+/, '')}`;
+  }
+
+  function verificationAsideHtml(profile) {
+    const raw =
+      typeof profile?.verificationStatus === 'string'
+        ? profile.verificationStatus.trim().toLowerCase()
+        : '';
+    const verified = raw === 'verified';
+    const pending = raw === 'pending' || raw === 'in_review';
+
+    let items;
+    if (verified) {
+      items = [
+        'ИНН проверен',
+        'Юридический адрес подтверждён',
+        'Контактные данные актуальны',
+      ];
+    } else if (pending) {
+      items = [
+        'ИНН: проверка выполняется',
+        'Юридический адрес: проверяется',
+        'Контакты: проверяются',
+      ];
+    } else {
+      items = [
+        'ИНН: сверка на платформе не выполнялась',
+        'Юридический адрес: по данным организации',
+        'Контакты: опубликованы организацией',
+      ];
     }
+
+    const body = items
+      .map((text) => {
+        const check = verified
+          ? '<span class="sidebar-verify-check" aria-hidden="true">✓</span>'
+          : '';
+        return `<div class="sidebar-verify-row${verified ? ' is-verified' : ''}">${check}<span>${esc(text)}</span></div>`;
+      })
+      .join('');
+
+    return `<div class="sidebar-card sidebar-card--verification"><h3>Статус верификации</h3>${body}</div>`;
+  }
+
+  function contactRowHtml(c) {
+    const v = contactValueRaw(c);
+    if (!v) return '';
+    const lb = contactLabelRaw(c);
+    const type = contactTypeRaw(c);
+    const labelPrefix =
+      lb && lb !== v ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ` : '';
+
+    if (type === 'phone') {
+      const href = telHref(v);
+      const body = href
+        ? `<a href="${esc(href)}" class="sidebar-contact-link" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a>`
+        : withBreaks(v);
+      return `<div class="sidebar-row">${labelPrefix}${body}</div>`;
+    }
+    if (type === 'email') {
+      const href = mailtoHref(v);
+      const body = href
+        ? `<a href="${esc(href)}" class="sidebar-contact-link">${esc(v)}</a>`
+        : withBreaks(v);
+      return `<div class="sidebar-row">${labelPrefix}${body}</div>`;
+    }
+    if (type === 'website') {
+      const href = externalSiteHref(v);
+      const body = href
+        ? `<a href="${esc(href)}" target="_blank" rel="noopener" class="sidebar-contact-link">${esc(v)}</a>`
+        : withBreaks(v);
+      return `<div class="sidebar-row">${labelPrefix}${body}</div>`;
+    }
+
+    const mh = mailtoHref(v);
+    if (mh) {
+      return `<div class="sidebar-row">${labelPrefix}<a href="${esc(mh)}" class="sidebar-contact-link">${esc(v)}</a></div>`;
+    }
+    const th = telHref(v);
+    if (th) {
+      return `<div class="sidebar-row">${labelPrefix}<a href="${esc(th)}" class="sidebar-contact-link" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a></div>`;
+    }
+    if (/^https?:\/\//i.test(v)) {
+      return `<div class="sidebar-row">${labelPrefix}<a href="${esc(v)}" target="_blank" rel="noopener" class="sidebar-contact-link">${esc(v)}</a></div>`;
+    }
+    return `<div class="sidebar-row">${labelPrefix}${withBreaks(v)}</div>`;
+  }
+
+  function contactAsideHtml(payload) {
+    const legacyRaw =
+      typeof payload.legacy?.sidebarHtml === 'string'
+        ? payload.legacy.sidebarHtml.trim()
+        : '';
+    if (legacyRaw) {
+      const hasVerification = /Статус\s+верификации/i.test(legacyRaw);
+      return hasVerification
+        ? legacyRaw
+        : `${legacyRaw}${verificationAsideHtml(payload.profile)}`;
+    }
+
     const rows = [];
     const list = Array.isArray(payload.contacts) ? payload.contacts : [];
     if (list.length > 0) {
       list.forEach((c) => {
-        const v = contactValueRaw(c);
-        if (!v) return;
-        const lb = contactLabelRaw(c);
-        const type = contactTypeRaw(c);
-
-        if (type === 'phone') {
-          const href = telHref(v);
-          const btn = href
-            ? `<a href="${esc(href)}" class="btn btn-primary" aria-label="Позвонить: ${esc(v)}">${esc(v)}</a>`
-            : withBreaks(v);
-          const inner =
-            lb && lb !== v
-              ? `<strong class="sidebar-contact-label">${esc(lb)}</strong>${btn}`
-              : btn;
-          rows.push(`<div class="sidebar-row sidebar-row--stack">${inner}</div>`);
-          return;
-        }
-
-        const line =
-          lb && lb !== v
-            ? `<strong class="sidebar-contact-label">${esc(lb)}</strong> ${withBreaks(v)}`
-            : withBreaks(v);
-        rows.push(`<div class="sidebar-row">${line}</div>`);
+        const row = contactRowHtml(c);
+        if (row) rows.push(row);
       });
     } else if (typeof payload.subtitle === 'string' && payload.subtitle.trim()) {
       payload.subtitle.split('\n').forEach((ln) => {
         const s = ln.trim();
         if (!s) return;
-        const th = telHref(s);
-        if (th) {
-          rows.push(
-            `<div class="sidebar-row sidebar-row--stack"><a href="${esc(th)}" class="btn btn-primary" aria-label="Позвонить: ${esc(s)}">${esc(s)}</a></div>`
-          );
-        } else {
-          rows.push(`<div class="sidebar-row">${withBreaks(s)}</div>`);
-        }
+        const fake = { contactValue: s, contact_type: '', contactType: '' };
+        rows.push(contactRowHtml(fake));
       });
     }
 
@@ -124,16 +201,7 @@
         ? payload.profile.websiteUrl.trim()
         : '';
     if (/^https?:\/\//i.test(w)) {
-      websiteBtn = `<a href="${esc(w)}" target="_blank" rel="noopener" class="btn btn-primary mt-16">Перейти на сайт →</a>`;
-    }
-
-    let ver = '';
-    const vs =
-      typeof payload.profile?.verificationStatus === 'string'
-        ? payload.profile.verificationStatus
-        : '';
-    if (vs && vs !== 'unverified') {
-      ver = `<div class="sidebar-card"><h3>Верификация</h3><div class="sidebar-row">${esc(vs)}</div></div>`;
+      websiteBtn = `<a href="${esc(w)}" target="_blank" rel="noopener" class="btn btn-primary">Перейти на сайт →</a>`;
     }
 
     const contactsInner =
@@ -141,7 +209,7 @@
         ? rows.join('\n')
         : '<div class="sidebar-row">Контакты уточняются по запросу.</div>';
 
-    return `<div class="sidebar-card"><h3>Контакты</h3>${contactsInner}${websiteBtn}</div>${ver}`;
+    return `<div class="sidebar-card"><h3>Контакты</h3>${contactsInner}</div>${websiteBtn}${verificationAsideHtml(payload.profile)}`;
   }
 
   function tagsMetaRow(payload) {
