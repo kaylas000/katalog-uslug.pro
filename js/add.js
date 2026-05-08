@@ -69,6 +69,59 @@
       .replace(/'/g, "&#39;");
   }
 
+  const MAX_PHOTOS = 4;
+  const MAX_FILE_BYTES = 8 * 1024 * 1024;
+  const MIN_WIDTH = 800;
+  const MIN_HEIGHT = 600;
+  const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+  function readAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ""));
+      fr.onerror = () => reject(new Error("read_failed"));
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function loadImageSize(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.naturalWidth || 0, height: img.naturalHeight || 0 });
+      img.onerror = () => reject(new Error("image_decode_failed"));
+      img.src = dataUrl;
+    });
+  }
+
+  function renderPhotoPreview(host, photos) {
+    if (!host) return;
+    host.innerHTML = "";
+    if (!Array.isArray(photos) || photos.length === 0) {
+      for (let i = 1; i <= MAX_PHOTOS; i += 1) {
+        const slot = document.createElement("div");
+        slot.className = "org-photo-item";
+        slot.textContent = `Фото ${i}`;
+        host.appendChild(slot);
+      }
+      return;
+    }
+    for (const p of photos) {
+      const slot = document.createElement("div");
+      slot.className = "org-photo-item";
+      const img = document.createElement("img");
+      img.src = p.dataUrl;
+      img.alt = p.name || "Фото организации";
+      slot.appendChild(img);
+      host.appendChild(slot);
+    }
+    for (let i = photos.length + 1; i <= MAX_PHOTOS; i += 1) {
+      const slot = document.createElement("div");
+      slot.className = "org-photo-item";
+      slot.textContent = `Фото ${i}`;
+      host.appendChild(slot);
+    }
+  }
+
   function initOrgLocationPicker(base, regionSelect) {
     const whereInput = document.getElementById("org-where");
     const whereSuggest = document.getElementById("org-where-suggest");
@@ -310,6 +363,59 @@
     }
 
     const base = apiBase();
+    const photosInput = document.getElementById("org-photos");
+    const photosPreview = document.getElementById("org-photo-preview");
+    let selectedPhotos = [];
+    renderPhotoPreview(photosPreview, selectedPhotos);
+
+    if (photosInput instanceof HTMLInputElement) {
+      photosInput.addEventListener("change", async () => {
+        showMsg(msg, "", "");
+        const list = Array.from(photosInput.files || []);
+        if (list.length > MAX_PHOTOS) {
+          photosInput.value = "";
+          selectedPhotos = [];
+          renderPhotoPreview(photosPreview, selectedPhotos);
+          showMsg(msg, `Можно загрузить максимум ${MAX_PHOTOS} фотографии.`, "err");
+          return;
+        }
+        const next = [];
+        try {
+          for (const file of list) {
+            if (!ALLOWED_MIME.has(file.type)) {
+              throw new Error(
+                `Файл «${file.name}» в неподдерживаемом формате. Разрешены JPG/PNG/WEBP.`
+              );
+            }
+            if (file.size > MAX_FILE_BYTES) {
+              throw new Error(`Файл «${file.name}» больше 8 МБ.`);
+            }
+            const dataUrl = await readAsDataUrl(file);
+            const size = await loadImageSize(dataUrl);
+            if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
+              throw new Error(
+                `Файл «${file.name}» слишком маленький: минимум ${MIN_WIDTH}x${MIN_HEIGHT}px.`
+              );
+            }
+            next.push({
+              name: file.name,
+              contentType: file.type,
+              dataUrl,
+              width: size.width,
+              height: size.height,
+            });
+          }
+          selectedPhotos = next;
+          renderPhotoPreview(photosPreview, selectedPhotos);
+        } catch (e) {
+          photosInput.value = "";
+          selectedPhotos = [];
+          renderPhotoPreview(photosPreview, selectedPhotos);
+          const message = e instanceof Error ? e.message : "Не удалось обработать фотографии.";
+          showMsg(msg, message, "err");
+        }
+      });
+    }
     const meta = await jfetch("/v1/org/meta", { method: "GET" });
     let regEl = null;
     if (meta.r.ok) {
@@ -376,6 +482,13 @@
         contactPersonName: document.getElementById("org-contact-person")?.value || "",
         ownerPhone: document.getElementById("org-owner-phone")?.value || "",
         moderationNote: document.getElementById("org-note")?.value || "",
+        portfolioImages: selectedPhotos.map((p) => ({
+          name: p.name,
+          contentType: p.contentType,
+          dataUrl: p.dataUrl,
+          width: p.width,
+          height: p.height,
+        })),
         consentProcessing: true,
       };
       const { r, body } = await jfetch("/v1/org/applications", {
@@ -387,6 +500,8 @@
         return;
       }
       form.reset();
+      selectedPhotos = [];
+      renderPhotoPreview(photosPreview, selectedPhotos);
       if (document.getElementById("org-location-id") instanceof HTMLInputElement) {
         document.getElementById("org-location-id").value = "";
       }

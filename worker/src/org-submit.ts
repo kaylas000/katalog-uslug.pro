@@ -78,6 +78,7 @@ export type SubmitPayload = {
   ownerPhone?: string;
   moderationNote?: string;
   portfolioUrls?: unknown;
+  portfolioImages?: unknown;
   consentProcessing?: boolean;
 };
 
@@ -118,6 +119,65 @@ export async function submitOrganizationApplication(
   const contactPersonName = (payload.contactPersonName || "").trim().slice(0, 200);
   const ownerPhone = (payload.ownerPhone || "").trim().slice(0, 40);
   const moderationNote = (payload.moderationNote || "").trim().slice(0, 500);
+
+  const allowedImageMime = new Set(["image/jpeg", "image/png", "image/webp"]);
+  type UploadedImage = { contentType: string; base64: string };
+  let uploadedImages: UploadedImage[] = [];
+
+  if (Array.isArray(payload.portfolioImages)) {
+    for (const row of payload.portfolioImages.slice(0, 4)) {
+      if (!row || typeof row !== "object") continue;
+      const rec = row as Record<string, unknown>;
+      const ct = String(rec.contentType || "").trim().toLowerCase();
+      const dataUrl = String(rec.dataUrl || "");
+      if (!ct || !allowedImageMime.has(ct)) {
+        return {
+          kind: "err",
+          code: "invalid_image_type",
+          message: "Поддерживаются изображения JPG, PNG, WEBP.",
+          status: 400,
+        };
+      }
+      const m = /^data:([a-z0-9/+.-]+);base64,([a-z0-9+/=\r\n]+)$/i.exec(dataUrl);
+      if (!m) {
+        return {
+          kind: "err",
+          code: "invalid_image_data",
+          message: "Некорректный формат изображения.",
+          status: 400,
+        };
+      }
+      const mimeFromDataUrl = String(m[1] || "").toLowerCase();
+      if (mimeFromDataUrl !== ct) {
+        return {
+          kind: "err",
+          code: "invalid_image_type",
+          message: "MIME-тип изображения не совпадает с данными файла.",
+          status: 400,
+        };
+      }
+      const b64 = String(m[2] || "").replace(/\s+/g, "");
+      const bytesEstimate = Math.floor((b64.length * 3) / 4);
+      if (!b64 || bytesEstimate < 512) {
+        return {
+          kind: "err",
+          code: "invalid_image_data",
+          message: "Пустое или поврежденное изображение.",
+          status: 400,
+        };
+      }
+      if (bytesEstimate > 8 * 1024 * 1024) {
+        return {
+          kind: "err",
+          code: "image_too_large",
+          message: "Изображение больше 8 МБ. Уменьшите файл.",
+          status: 400,
+        };
+      }
+      uploadedImages.push({ contentType: ct, base64: b64 });
+    }
+  }
+  if (uploadedImages.length > 4) uploadedImages = uploadedImages.slice(0, 4);
 
   let portfolioUrls: string[] = [];
   if (Array.isArray(payload.portfolioUrls)) {
@@ -264,7 +324,10 @@ export async function submitOrganizationApplication(
     websiteUrl,
     addressText: addressText || null,
     addressIsPublic,
-    portfolioUrls,
+    portfolioUrls:
+      uploadedImages.length > 0
+        ? uploadedImages.map((_, i) => `/v1/org/${encodeURIComponent(orgSlug)}/media/${i + 1}`)
+        : portfolioUrls,
   };
 
   const privJson = {
@@ -389,6 +452,19 @@ export async function submitOrganizationApplication(
       ]
     );
 
+    if (uploadedImages.length > 0) {
+      await client.query(`DELETE FROM organization_media_blobs WHERE org_id = $1`, [orgSlug]);
+      for (let i = 0; i < uploadedImages.length; i += 1) {
+        const img = uploadedImages[i]!;
+        await client.query(
+          `INSERT INTO organization_media_blobs
+            (org_id, media_index, source_url, content_type, byte_size, data, updated_at)
+           VALUES ($1, $2, NULL, $3, length(decode($4, 'base64')), decode($4, 'base64'), now())`,
+          [orgSlug, i + 1, img.contentType, img.base64]
+        );
+      }
+    }
+
     const orgStillPublished = await client.query<{ published: boolean }>(
       `SELECT published FROM organizations WHERE id = $1`,
       [orgSlug]
@@ -434,6 +510,20 @@ export async function submitOrganizationApplication(
         autoPublish ? new Date().toISOString() : null,
       ]
     );
+
+    if (uploadedImages.length > 0) {
+      const photoUrls = uploadedImages.map(
+        (_, i) => `/v1/org/${encodeURIComponent(orgSlug)}/media/${i + 1}`
+      );
+      await client.query(
+        `UPDATE organization_profiles
+         SET portfolio_images = $2::jsonb,
+             cover_url = $3,
+             updated_at = now()
+         WHERE org_id = $1`,
+        [orgSlug, JSON.stringify(photoUrls), photoUrls[0] || null]
+      );
+    }
 
     if (autoPublish) {
       const contactLines = splitLines(publicContacts);
