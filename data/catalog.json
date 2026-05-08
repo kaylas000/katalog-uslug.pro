@@ -55,24 +55,5 @@
       "/images/portfolio/sidelki/3.jpg",
       "/images/portfolio/sidelki/4.jpg"
     ]
-  },
-  {
-    "id": "club-ring",
-    "title": "CLUB RING",
-    "subtitle": "8 (800) 555-35-35\ninfo@club-ring.ru\nРоссия, доставка по всей стране\nОбработка заказов ежедневно",
-    "text": "CLUB RING — российский бренд премиальной спортивной одежды для бокса, MMA, фитнеса и единоборств. Собственное производство, контроль качества на каждом этапе, доставка по всей России.",
-    "categorySlug": "sportwear",
-    "categoryLabel": "Спортивная одежда",
-    "regionSlug": "rossiya",
-    "regionLabel": "Россия",
-    "rating": 4.7,
-    "reviews": 35,
-    "url": "/org/club-ring/",
-    "portfolioImages": [
-      "/images/portfolio/club-ring/1.jpg",
-      "/images/portfolio/club-ring/2.jpg",
-      "/images/portfolio/club-ring/3.jpg",
-      "/images/portfolio/club-ring/4.jpg"
-    ]
   }
 ]

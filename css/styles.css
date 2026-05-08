@@ -297,6 +297,10 @@ p.card-text:has(.btn-link){
 .catalog-card-text{color:var(--text-2);font-size:14px;line-height:1.5}
 .catalog-card-about{margin-top:8px}
 .catalog-card-footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.catalog-card-text-main .catalog-card-line{margin:3px 0}
+.catalog-card-tel-wrap{margin:6px 0 10px}
+.catalog-card-tel{display:block;width:100%;box-sizing:border-box;text-align:center}
+.catalog-card-link{color:var(--primary);font-weight:600;text-decoration:underline;text-underline-offset:2px}
 
 @media(max-width:1020px){
   .catalog-split{grid-template-columns:1fr}

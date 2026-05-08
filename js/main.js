@@ -371,6 +371,47 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/'/g, '&#39;');
     }
 
+    function telHref(display) {
+      const raw = String(display ?? '').trim();
+      if (!raw) return '';
+      const compact = raw.replace(/[^\d+]/g, '');
+      if (!compact) return '';
+      let num = compact.startsWith('+')
+        ? '+' + compact.slice(1).replace(/\D/g, '')
+        : compact.replace(/\D/g, '');
+      const digits = num.startsWith('+') ? num.slice(1) : num;
+      if (digits.length < 10) return '';
+      return num.startsWith('+') ? `tel:${num}` : `tel:${num}`;
+    }
+
+    function catalogCardSubtitleMain(subtitle) {
+      const lines = String(subtitle || '')
+        .split(/\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (lines.length === 0) {
+        return '<p class="catalog-card-text catalog-card-text-main"></p>';
+      }
+      const parts = [];
+      for (const line of lines) {
+        const th = telHref(line);
+        if (th) {
+          parts.push(
+            `<div class="catalog-card-tel-wrap"><a href="${esc(th)}" class="btn btn-primary catalog-card-tel" aria-label="Позвонить: ${esc(line)}">${esc(line)}</a></div>`
+          );
+        } else if (
+          /^[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+$/i.test(line)
+        ) {
+          parts.push(
+            `<div class="catalog-card-line"><a href="mailto:${esc(line)}" class="catalog-card-link">${esc(line)}</a></div>`
+          );
+        } else {
+          parts.push(`<div class="catalog-card-line">${esc(line)}</div>`);
+        }
+      }
+      return `<div class="catalog-card-text catalog-card-text-main">${parts.join('')}</div>`;
+    }
+
     function catalogMediaSlidesHtml(item) {
       const imgs = Array.isArray(item.portfolioImages) ? item.portfolioImages.filter(Boolean) : [];
       const gradients = ['s1', 's2', 's3'];
@@ -396,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const href = esc(item.url || '#');
       const rs = esc(item.regionSlug || '');
       const cs = esc(item.categorySlug || '');
-      const subtitleHtml = esc(item.subtitle || '').replace(/\n/g, '<br>');
       const textHtml = esc(item.text || '').replace(/\n/g, '<br>');
       return `<article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
@@ -409,7 +449,7 @@ ${catalogMediaSlidesHtml(item)}
                 <span class="tag tag-green">${esc(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${esc(item.title)}</h3>
-              <p class="catalog-card-text catalog-card-text-main">${subtitleHtml}</p>
+              ${catalogCardSubtitleMain(item.subtitle)}
               <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${textHtml}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabelRu(item.reviews)}</span>

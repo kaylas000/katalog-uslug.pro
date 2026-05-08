@@ -31,8 +31,8 @@ const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
 const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
-const STYLES_VERSION = '20260507-locations-v2';
-const MAIN_JS_VERSION = '20260507-locations-v2';
+const STYLES_VERSION = '20260508-catalog-tel';
+const MAIN_JS_VERSION = '20260508-catalog-tel';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -226,7 +226,7 @@ function run() {
   tpl = replaceBetween(tpl, M_REGION_OPTS_START, M_REGION_OPTS_END, regOpts);
 
   const homeDesc =
-    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, патронаж и другие услуги. Фильтры по региону и рейтингу.';
+    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, материалы из ценных пород, патронаж и другие услуги. Фильтры по региону и рейтингу.';
   let homeHtml = replaceBetween(
     tpl,
     M_HEAD_SEO_START,
