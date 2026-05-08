@@ -1,3 +1,26 @@
+function getKatalogApiBase() {
+  return (
+    document
+      .querySelector('meta[name="katalog-catalog-api"]')
+      ?.getAttribute('content')
+      ?.trim()
+      .replace(/\/$/, '') || ''
+  );
+}
+
+function resolveApiMediaUrl(raw) {
+  const t = String(raw || '').trim();
+  if (!t) return '';
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.startsWith('images/')) return `/${t}`;
+  if (t.startsWith('/v1/') || t.startsWith('v1/')) {
+    const base = getKatalogApiBase();
+    if (!base) return t.startsWith('/') ? t : `/${t}`;
+    return `${base}${t.startsWith('/') ? t : `/${t}`}`;
+  }
+  return t;
+}
+
 window.bindPortfolioWidgets =
   window.bindPortfolioWidgets ||
   function bindPortfolioWidgets(scope = document) {
@@ -31,9 +54,7 @@ window.bindPortfolioWidgets =
 
       const slideSrc = (i) => {
         const raw = meta[i]?.getAttribute?.('data-slide-src');
-        let t = raw?.trim() || '';
-        if (t.startsWith('images/')) t = `/${t}`;
-        return t;
+        return resolveApiMediaUrl(raw);
       };
 
       const applyPortfolioBg = (el, url) => {
@@ -378,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const slides = [];
       for (let i = 0; i < n; i++) {
         const isActive = i === 0 ? ' is-active' : '';
-        const url = imgs.length ? imgs[i % imgs.length] : null;
+        const url = imgs.length ? resolveApiMediaUrl(imgs[i % imgs.length]) : null;
         if (url) {
           const u = esc(url);
           slides.push(
@@ -869,18 +890,8 @@ ${catalogMediaSlidesHtml(item)}
     }
   });
 
-  function katalogApiBase() {
-    return (
-      document
-        .querySelector('meta[name="katalog-catalog-api"]')
-        ?.getAttribute('content')
-        ?.trim()
-        .replace(/\/$/, '') || ''
-    );
-  }
-
   async function initKatalogAuthHeader() {
-    const base = katalogApiBase();
+    const base = getKatalogApiBase();
     const out = document.querySelectorAll('[data-auth-when="logged-out"]');
     const inn = document.querySelectorAll('[data-auth-when="logged-in"]');
     const emailEl = document.querySelector('[data-auth-email]');

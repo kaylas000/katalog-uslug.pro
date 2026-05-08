@@ -22,6 +22,18 @@
     return esc(value).replace(/\n/g, '<br>');
   }
 
+  function resolveOrgMediaUrl(raw) {
+    const t = String(raw ?? '').trim();
+    if (!t) return '';
+    if (/^https?:\/\//i.test(t)) return t;
+    if (t.startsWith('/v1/') || t.startsWith('v1/')) {
+      const base = katalogApiBase();
+      if (!base) return t.startsWith('/') ? t : `/${t}`;
+      return `${base}${t.startsWith('/') ? t : `/${t}`}`;
+    }
+    return t;
+  }
+
   function orgSlugFromPath() {
     const fromQuery = new URLSearchParams(window.location.search).get('slug');
     if (fromQuery && fromQuery.trim()) {
@@ -365,12 +377,17 @@ ${servicesUl}
     if (imgs.length > 0) {
       imgs.forEach((src, i) => {
         if (typeof src !== 'string' || !src.trim()) return;
+        const mediaUrl = resolveOrgMediaUrl(src);
+        if (!mediaUrl) return;
         btnHtml += `<button type="button" data-slide-caption="${esc(
           captionForSlide(i)
-        )}" data-slide-src="${esc(src.trim())}"></button>`;
+        )}" data-slide-src="${esc(mediaUrl)}"></button>`;
       });
     } else if (cover) {
-      btnHtml = `<button type="button" data-slide-caption="" data-slide-src="${esc(cover)}"></button>`;
+      const mediaUrl = resolveOrgMediaUrl(cover);
+      if (mediaUrl) {
+        btnHtml = `<button type="button" data-slide-caption="" data-slide-src="${esc(mediaUrl)}"></button>`;
+      }
     }
 
     const contactsAside = contactAsideHtml(payload);
