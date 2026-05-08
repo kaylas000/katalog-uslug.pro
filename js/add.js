@@ -78,6 +78,22 @@
   const MIN_HEIGHT = 600;
   const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+  /** Браузеры и ОС часто отдают пустой `file.type` или `image/jpg` — проверяем по имени файла. */
+  function normalizeImageMime(file) {
+    let t = String(file.type || "")
+      .trim()
+      .toLowerCase();
+    if (t === "image/jpg" || t === "image/pjpeg") t = "image/jpeg";
+    if (ALLOWED_MIME.has(t)) return t;
+    const n = (file.name || "").toLowerCase();
+    if (n.endsWith(".jpg") || n.endsWith(".jpeg") || n.endsWith(".jpe") || n.endsWith(".jfif")) {
+      return "image/jpeg";
+    }
+    if (n.endsWith(".png")) return "image/png";
+    if (n.endsWith(".webp")) return "image/webp";
+    return "";
+  }
+
   function readAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
@@ -435,26 +451,35 @@
     const base = apiBase();
     const photosInput = document.getElementById("org-photos");
     const photosPreview = document.getElementById("org-photo-preview");
+    const photosMsg = document.getElementById("org-photo-msg");
     let selectedPhotos = [];
     renderPhotoPreview(photosPreview, selectedPhotos);
 
     if (photosInput instanceof HTMLInputElement) {
       photosInput.addEventListener("change", async () => {
         showMsg(msg, "", "");
+        showMsg(photosMsg, "", "");
         const list = Array.from(photosInput.files || []);
         if (list.length > MAX_PHOTOS) {
           photosInput.value = "";
           selectedPhotos = [];
           renderPhotoPreview(photosPreview, selectedPhotos);
-          showMsg(msg, `Можно загрузить максимум ${MAX_PHOTOS} фотографии.`, "err");
+          const text = `Можно загрузить максимум ${MAX_PHOTOS} фотографии.`;
+          showMsg(photosMsg, text, "err");
+          try {
+            photosMsg?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } catch {
+            /* ignore */
+          }
           return;
         }
         const next = [];
         try {
           for (const file of list) {
-            if (!ALLOWED_MIME.has(file.type)) {
+            const mime = normalizeImageMime(file);
+            if (!mime) {
               throw new Error(
-                `Файл «${file.name}» в неподдерживаемом формате. Разрешены JPG/PNG/WEBP.`
+                `Файл «${file.name}» — не JPG, PNG или WEBP (если это фото, сохраните как JPEG и попробуйте снова).`
               );
             }
             if (file.size > MAX_FILE_BYTES) {
@@ -464,12 +489,12 @@
             const size = await loadImageSize(dataUrl);
             if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
               throw new Error(
-                `Файл «${file.name}» слишком маленький: минимум ${MIN_WIDTH}x${MIN_HEIGHT}px.`
+                `Файл «${file.name}» слишком маленький: минимум ${MIN_WIDTH}×${MIN_HEIGHT} px (у вас ${size.width}×${size.height}).`
               );
             }
             next.push({
               name: file.name,
-              contentType: file.type,
+              contentType: mime,
               dataUrl,
               width: size.width,
               height: size.height,
@@ -477,12 +502,22 @@
           }
           selectedPhotos = next;
           renderPhotoPreview(photosPreview, selectedPhotos);
+          try {
+            photosPreview?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } catch {
+            /* ignore */
+          }
         } catch (e) {
           photosInput.value = "";
           selectedPhotos = [];
           renderPhotoPreview(photosPreview, selectedPhotos);
           const message = e instanceof Error ? e.message : "Не удалось обработать фотографии.";
-          showMsg(msg, message, "err");
+          showMsg(photosMsg, message, "err");
+          try {
+            photosMsg?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } catch {
+            /* ignore */
+          }
         }
       });
     }
@@ -492,6 +527,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       showMsg(msg, "", "");
+      showMsg(photosMsg, "", "");
       if (locPicker) await locPicker.tryResolveExact();
       const locationId = (document.getElementById("org-location-id")?.value || "").trim();
       if (!locationId) {
