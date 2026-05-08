@@ -29,8 +29,7 @@ const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
 const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
 const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
-const STYLES_VERSION = '20260510-media-api-fix';
-const MAIN_JS_VERSION = '20260508-catalog-no-region-select';
+const STYLES_VERSION = '20260512-migration-complete';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -354,7 +353,7 @@ ${ul}
 </main>
 <!-- katalog:page-main-end -->
 
-  <script src="/js/main.js?v=${MAIN_JS_VERSION}"></script>
+  <script src="/js/main.js?v=${STYLES_VERSION}"></script>
 </body>
 </html>
 `;
