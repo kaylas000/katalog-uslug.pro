@@ -113,8 +113,7 @@
     });
   }
 
-  /** @param {((index: number) => void) | null | undefined} onRemoveIndex */
-  function renderPhotoPreview(host, photos, onRemoveIndex) {
+  function renderPhotoPreview(host, photos) {
     if (!host) return;
     host.innerHTML = "";
     if (!Array.isArray(photos) || photos.length === 0) {
@@ -126,29 +125,13 @@
       }
       return;
     }
-    for (let i = 0; i < photos.length; i += 1) {
-      const p = photos[i];
+    for (const p of photos) {
       const slot = document.createElement("div");
-      slot.className = "org-photo-item org-photo-item--filled";
+      slot.className = "org-photo-item";
       const img = document.createElement("img");
       img.src = p.dataUrl;
       img.alt = p.name || "Фото организации";
       slot.appendChild(img);
-      if (typeof onRemoveIndex === "function") {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "org-photo-remove";
-        btn.setAttribute("aria-label", "Удалить это фото");
-        btn.title = "Удалить";
-        btn.textContent = "×";
-        const idx = i;
-        btn.addEventListener("click", (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          onRemoveIndex(idx);
-        });
-        slot.appendChild(btn);
-      }
       host.appendChild(slot);
     }
     for (let i = photos.length + 1; i <= MAX_PHOTOS; i += 1) {
@@ -471,17 +454,7 @@
     const photosPreview = document.getElementById("org-photo-preview");
     const photosMsg = document.getElementById("org-photo-msg");
     let selectedPhotos = [];
-
-    function refreshPhotoPreview() {
-      renderPhotoPreview(photosPreview, selectedPhotos, (idx) => {
-        if (idx < 0 || idx >= selectedPhotos.length) return;
-        selectedPhotos.splice(idx, 1);
-        if (photosInput instanceof HTMLInputElement) photosInput.value = "";
-        showMsg(photosMsg, "", "");
-        refreshPhotoPreview();
-      });
-    }
-    refreshPhotoPreview();
+    renderPhotoPreview(photosPreview, selectedPhotos);
 
     if (photosInput instanceof HTMLInputElement) {
       photosInput.addEventListener("change", async () => {
@@ -491,7 +464,7 @@
         if (list.length > MAX_PHOTOS) {
           photosInput.value = "";
           selectedPhotos = [];
-          refreshPhotoPreview();
+          renderPhotoPreview(photosPreview, selectedPhotos);
           const text = `Можно загрузить максимум ${MAX_PHOTOS} фотографии.`;
           showMsg(photosMsg, text, "err");
           try {
@@ -529,7 +502,7 @@
             });
           }
           selectedPhotos = next;
-          refreshPhotoPreview();
+          renderPhotoPreview(photosPreview, selectedPhotos);
           try {
             photosPreview?.scrollIntoView({ behavior: "smooth", block: "nearest" });
           } catch {
@@ -538,7 +511,7 @@
         } catch (e) {
           photosInput.value = "";
           selectedPhotos = [];
-          refreshPhotoPreview();
+          renderPhotoPreview(photosPreview, selectedPhotos);
           const message = e instanceof Error ? e.message : "Не удалось обработать фотографии.";
           showMsg(photosMsg, message, "err");
           try {
@@ -614,7 +587,7 @@
       }
       form.reset();
       selectedPhotos = [];
-      refreshPhotoPreview();
+      renderPhotoPreview(photosPreview, selectedPhotos);
       if (document.getElementById("org-location-id") instanceof HTMLInputElement) {
         document.getElementById("org-location-id").value = "";
       }
