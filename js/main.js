@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const key = btn.getAttribute('data-consult');
       const messages = {
         'pick-service': 'Расскажите, какая услуга вам нужна — мы подберем 3 проверенных подрядчика под ваш бюджет и сроки.',
-        'filters': 'Фильтры помогают найти исполнителя по категории, городу и рейтингу. Чем выше рейтинг токенов — тем больше проверенных заказов у компании.',
+        'filters': 'Фильтры: категория, населённый пункт из подсказок и рейтинг. Чем выше рейтинг — тем больше проверенных заказов у компании.',
         'compare': 'Выберите до 4 организаций и нажмите «Сравнить». Мы покажем таблицу по ценам, срокам, гарантиям и отзывам.',
         'free-site': 'Каждая организация на платформе получает бесплатную страницу с контактами, услугами и отзывами. Добавьте компанию — остальное мы сделаем сами.'
       };
@@ -338,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
       host.closest('[data-catalog-section]') ||
       document.querySelector('[data-catalog-section]');
     const filterApply = document.querySelector('[data-filter-apply]');
-    const selRegion = document.getElementById('filter-region');
     const selCategory = document.getElementById('filter-category');
     const selRating = document.getElementById('filter-rating');
     const selSort = document.getElementById('filter-sort');
@@ -353,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const EMPTY_BLOCK = `<div class="catalog-empty" role="status">
           <p class="catalog-empty-title">Ничего не найдено</p>
-          <p class="catalog-empty-text">Попробуйте другой регион, категорию или запрос. <a href="/regions/">Все субъекты РФ</a>.</p>
+          <p class="catalog-empty-text">Попробуйте изменить город в подсказках, категорию или запрос. Обзор по субъектам — <a href="/regions/">все регионы РФ</a>.</p>
         </div>`;
 
     const baseEarly = (
@@ -467,8 +466,7 @@ ${catalogMediaSlidesHtml(item)}
       u.searchParams.set('limit', '24');
       const sort = ((selSort && selSort.value) || 'title').trim();
       u.searchParams.set('sort', sort || 'title');
-      const region =
-        ((selRegion && selRegion.value) || '').trim() || pageRegion || '';
+      const region = (pageRegion || '').trim();
       if (region) u.searchParams.set('region', region);
       const category =
         ((selCategory && selCategory.value) || '').trim() || pageCategory || '';
@@ -676,8 +674,8 @@ ${catalogMediaSlidesHtml(item)}
         p.set('q', q);
         p.set('kinds', 'city,settlement,district,region');
         p.set('limit', '10');
-        const regionSlug = ((selRegion && selRegion.value) || '').trim();
-        if (regionSlug) p.set('regionSlug', regionSlug);
+        const pageReg = (pageRegion || '').trim();
+        if (pageReg) p.set('regionSlug', pageReg);
         const base = baseEarly.replace(/\/$/, '');
         const r = await fetch(`${base}/v1/locations?${p.toString()}`, {
           cache: 'no-store',
@@ -701,8 +699,8 @@ ${catalogMediaSlidesHtml(item)}
       p.set('q', q);
       p.set('kinds', 'city,settlement,district,region');
       p.set('limit', '10');
-      const regionSlug = ((selRegion && selRegion.value) || '').trim();
-      if (regionSlug) p.set('regionSlug', regionSlug);
+      const pageReg = (pageRegion || '').trim();
+      if (pageReg) p.set('regionSlug', pageReg);
       const base = baseEarly.replace(/\/$/, '');
       try {
         const r = await fetch(`${base}/v1/locations?${p.toString()}`, {
@@ -726,12 +724,6 @@ ${catalogMediaSlidesHtml(item)}
     }
 
     syncFromQueryParams();
-    if (pageRegion && selRegion) {
-      const hasOpt = Array.from(selRegion.options).some(
-        (o) => o.value === pageRegion
-      );
-      if (hasOpt) selRegion.value = pageRegion;
-    }
     if (pageCategory && selCategory) {
       const catOpt = Array.from(selCategory.options).some(
         (o) => o.value === pageCategory
@@ -756,7 +748,6 @@ ${catalogMediaSlidesHtml(item)}
       }
       reloadFirstPage();
     });
-    selRegion?.addEventListener('change', () => reloadFirstPage());
     selCategory?.addEventListener('change', () => reloadFirstPage());
     selRating?.addEventListener('change', () => reloadFirstPage());
     selSort?.addEventListener('change', () => reloadFirstPage());

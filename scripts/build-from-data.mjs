@@ -20,8 +20,6 @@ const M_HEAD_SEO_START = '<!-- katalog:gen-head-seo -->';
 const M_HEAD_SEO_END = '<!-- /katalog:gen-head-seo -->';
 const M_REGION_NAV_START = '<!-- katalog:gen-region-seo-nav -->';
 const M_REGION_NAV_END = '<!-- /katalog:gen-region-seo-nav -->';
-const M_REGION_OPTS_START = '<!-- katalog:gen-region-options -->';
-const M_REGION_OPTS_END = '<!-- /katalog:gen-region-options -->';
 const M_CAT_OPTS_START = '<!-- katalog:gen-category-options -->';
 const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
@@ -32,7 +30,7 @@ const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
 const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
 
 const STYLES_VERSION = '20260510-media-api-fix';
-const MAIN_JS_VERSION = '20260510-media-api-fix';
+const MAIN_JS_VERSION = '20260508-catalog-no-region-select';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
@@ -59,14 +57,6 @@ function buildCategoryOptions(categories) {
   const lines = ['\n            <option value="">Все категории</option>'];
   for (const c of categories) {
     lines.push(`            <option value="${escapeHtml(c.slug)}">${escapeHtml(c.label)}</option>`);
-  }
-  return `${lines.join('\n')}\n            `;
-}
-
-function buildRegionOptions(regions) {
-  const lines = ['\n            <option value="">Все регионы</option>'];
-  for (const r of regions) {
-    lines.push(`            <option value="${escapeHtml(r.slug)}">${escapeHtml(r.label)}</option>`);
   }
   return `${lines.join('\n')}\n            `;
 }
@@ -220,13 +210,11 @@ function run() {
   const categories = Array.isArray(site.categories) ? site.categories : [];
 
   const catOpts = buildCategoryOptions(categories);
-  const regOpts = buildRegionOptions(regions);
 
   tpl = replaceBetween(tpl, M_CAT_OPTS_START, M_CAT_OPTS_END, catOpts);
-  tpl = replaceBetween(tpl, M_REGION_OPTS_START, M_REGION_OPTS_END, regOpts);
 
   const homeDesc =
-    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, материалы из ценных пород, патронаж и другие услуги. Фильтры по региону и рейтингу.';
+    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, материалы из ценных пород, патронаж и другие услуги. Поиск по городу из подсказок и по рейтингу.';
   let homeHtml = replaceBetween(
     tpl,
     M_HEAD_SEO_START,
@@ -266,7 +254,6 @@ function run() {
     const desc = region.intro || homeDesc;
 
     let page = replaceBetween(tpl, M_CAT_OPTS_START, M_CAT_OPTS_END, catOpts);
-    page = replaceBetween(page, M_REGION_OPTS_START, M_REGION_OPTS_END, regOpts);
     page = replaceBetween(
       page,
       M_HEAD_SEO_START,

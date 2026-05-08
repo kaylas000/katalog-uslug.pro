@@ -63,6 +63,7 @@ export type SubmitPayload = {
   orgSlug?: string;
   categorySlug?: string;
   categoryNewLabel?: string;
+  /** Устарело: регион выводится из выбранной локации на сервере. */
   regionSlug?: string;
   locationId?: string | number;
   websiteUrl?: string;
@@ -103,7 +104,6 @@ export async function submitOrganizationApplication(
   const categorySlugRaw = (payload.categorySlug || "").trim();
   const categoryNewLabel = (payload.categoryNewLabel || "").trim().slice(0, 80);
   const categorySlug = categorySlugRaw === "__new__" ? "" : categorySlugRaw;
-  const regionSlug = (payload.regionSlug || "").trim();
   const websiteUrl = (payload.websiteUrl || "").trim();
   const publicDescription = (payload.publicDescription || "").trim();
   const publicContacts = (payload.publicContacts || "").trim();
@@ -266,11 +266,29 @@ export async function submitOrganizationApplication(
     return { kind: "err", code: "invalid_location", message: "Локация не найдена.", status: 400 };
   }
 
-  const reg = await client.query(`SELECT id::text FROM regions WHERE slug = $1`, [regionSlug]);
-  if (!reg.rows.length) {
-    return { kind: "err", code: "invalid_region", status: 400 };
+  /** Регион каталога — из дерева locations (узел kind=region), без отдельного поля в форме. */
+  const regFromLoc = await client.query<{ id: string; slug: string }>(
+    `SELECT r.id::text AS id, r.slug
+     FROM locations l
+     INNER JOIN locations lr
+       ON lr.id = CASE WHEN l.kind = 'region' THEN l.id ELSE l.region_id END
+       AND lr.kind = 'region'
+     INNER JOIN regions r ON r.slug = lr.slug AND r.is_active = true
+     WHERE l.id = $1::bigint
+     LIMIT 1`,
+    [locationRaw]
+  );
+  if (!regFromLoc.rows.length) {
+    return {
+      kind: "err",
+      code: "location_region_mismatch",
+      message:
+        "Выбранная локация не сопоставлена с регионом каталога. Выберите другой пункт из подсказок.",
+      status: 400,
+    };
   }
-  const regionId = reg.rows[0].id;
+  const regionId = regFromLoc.rows[0].id;
+  const regionSlugResolved = regFromLoc.rows[0].slug;
 
   const dupPending = await client.query<{ id: string; applicant_user_id: string }>(
     `SELECT id, applicant_user_id::text FROM organization_applications
@@ -453,7 +471,7 @@ export async function submitOrganizationApplication(
           dupPending.rows[0].id,
           orgTitle,
           effectiveCategorySlug,
-          regionSlug,
+          regionSlugResolved,
           websiteUrl || null,
           JSON.stringify(pubJson),
           JSON.stringify(privJson),
@@ -475,7 +493,7 @@ export async function submitOrganizationApplication(
           orgSlug,
           orgTitle,
           effectiveCategorySlug,
-          regionSlug,
+          regionSlugResolved,
           websiteUrl || null,
           JSON.stringify(pubJson),
           JSON.stringify(privJson),

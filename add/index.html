@@ -204,20 +204,14 @@
                 <label for="org-category-new">Новая категория *</label>
                 <input id="org-category-new" maxlength="80" placeholder="Например: Ремонт спецтехники">
               </div>
-              <div class="org-apply-field">
-                <label for="org-region">Регион *</label>
-                <select id="org-region" required>
-                  <option value="">Загрузка...</option>
-                </select>
-              </div>
               <div class="org-apply-field full">
                 <label for="org-site">Сайт организации *</label>
                 <input id="org-site" type="url" required placeholder="https://example.ru">
               </div>
               <div class="org-apply-field full filter-field-where">
-                <label for="org-where">Населённый пункт *</label>
+                <label for="org-where">Местоположение *</label>
                 <input type="hidden" id="org-location-id" value="">
-                <input id="org-where" autocomplete="off" required placeholder="Начните вводить город или район">
+                <input id="org-where" autocomplete="off" required placeholder="Город, посёлок или субъект — из подсказок (регион каталога подставится сам)">
                 <div id="org-where-suggest" class="where-suggest" hidden></div>
               </div>
               <div class="org-apply-field full">
@@ -356,6 +350,6 @@
   </div>
 
   <script src="/js/main.js?v=20260521"></script>
-  <script src="/js/add.js?v=20260508-creds-omit-meta" defer></script>
+  <script src="/js/add.js?v=20260508-location-only-region" defer></script>
 </body>
 </html>
