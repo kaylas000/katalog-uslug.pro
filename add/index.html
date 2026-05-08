@@ -12,6 +12,17 @@
       max-width: 900px;
       margin: 0 auto;
     }
+    /*
+      Нативный выпадающий список <select> у .card в styles.css ломается:
+      у предка overflow:hidden и hover transform — список регионов может
+      открываться «вверх» или не там. Для этой страницы отключаем обрезку и сдвиг.
+    */
+    .org-apply-wrap .card {
+      overflow: visible;
+    }
+    .org-apply-wrap .card:hover {
+      transform: none;
+    }
     .org-apply-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
