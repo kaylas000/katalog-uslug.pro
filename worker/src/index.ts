@@ -116,8 +116,13 @@ function corsHeaders(_env: Env, request: Request): HeadersInit {
     o && (o.startsWith("http://") || o.startsWith("https://"))
       ? o
       : "*";
+  /** Браузер требует `true`, если клиент делает fetch с credentials: include (см. add.js jfetch). */
+  const withCredentials = allow !== "*";
   return {
     "Access-Control-Allow-Origin": allow,
+    ...(withCredentials
+      ? { "Access-Control-Allow-Credentials": "true" as const }
+      : {}),
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
     "Access-Control-Max-Age": "86400",
@@ -273,6 +278,9 @@ export default {
         h.set("Cache-Control", "public, max-age=300");
         h.set("Content-Type", blob.contentType);
         h.set("Access-Control-Allow-Origin", allowOrigin);
+        if (allowOrigin !== "*") {
+          h.set("Access-Control-Allow-Credentials", "true");
+        }
         h.set("Access-Control-Allow-Methods", "GET, OPTIONS");
         h.set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
         h.set("Vary", "Origin");
@@ -346,6 +354,28 @@ export default {
         const message = e instanceof Error ? e.message : "db_error";
         return Response.json(
           { error: "regions_unavailable", message },
+          { status: 502, headers: cors }
+        );
+      }
+    }
+
+    if (path === "/v1/categories" && request.method === "GET") {
+      if (!getDbConnectionString(env)) {
+        return Response.json(
+          { error: "misconfigured", detail: "db_connection" },
+          { status: 503, headers: cors }
+        );
+      }
+      try {
+        const rows = await withDbClient(env, async (c) => {
+          const r = await c.query(ORG_META_SQL.categories);
+          return r.rows;
+        });
+        return Response.json(rows, { headers: cors });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "db_error";
+        return Response.json(
+          { error: "categories_unavailable", message },
           { status: 502, headers: cors }
         );
       }

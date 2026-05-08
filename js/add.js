@@ -28,8 +28,9 @@
   async function jfetch(path, opts = {}) {
     const base = apiBase();
     if (!base) throw new Error("no_api");
-    const headers = { ...(opts.headers || {}) };
-    if (opts.body != null && !headers["Content-Type"]) {
+    const { credentials: credentialsOpt, ...rest } = opts;
+    const headers = { ...(rest.headers || {}) };
+    if (rest.body != null && !headers["Content-Type"]) {
       headers["Content-Type"] = "application/json";
     }
     const st = storedSessionToken();
@@ -37,10 +38,12 @@
     if (!skipAuthHeader && st && !headers.Authorization) {
       headers.Authorization = `Bearer ${st}`;
     }
+    /** `omit`: без куки — не нужен заголовок `Access-Control-Allow-Credentials` (старый воркер / кэш CORS). */
+    const credentials = credentialsOpt === "omit" ? "omit" : "include";
     const r = await fetch(`${base}${path}`, {
-      ...opts,
+      ...rest,
       headers,
-      credentials: "include",
+      credentials,
     });
     let body = {};
     try {
@@ -295,6 +298,100 @@
     return { tryResolveExact, hide };
   }
 
+  async function loadOrgSelectLists() {
+    let categories = null;
+    let regions = null;
+    try {
+      const meta = await jfetch("/v1/org/meta", {
+        method: "GET",
+        credentials: "omit",
+      });
+      if (meta.r.ok && meta.body && typeof meta.body === "object") {
+        categories = meta.body.categories;
+        regions = meta.body.regions;
+      }
+    } catch {
+      /* fallbacks below */
+    }
+    if (!Array.isArray(categories)) {
+      try {
+        const c = await jfetch("/v1/categories", {
+          method: "GET",
+          credentials: "omit",
+        });
+        if (c.r.ok && Array.isArray(c.body)) categories = c.body;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!Array.isArray(regions)) {
+      try {
+        const rr = await jfetch("/v1/regions", {
+          method: "GET",
+          credentials: "omit",
+        });
+        if (rr.r.ok && Array.isArray(rr.body)) {
+          regions = rr.body.map((x) => ({
+            slug: x.slug,
+            label: x.label,
+          }));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    return {
+      categories: Array.isArray(categories) ? categories : [],
+      regions: Array.isArray(regions) ? regions : [],
+    };
+  }
+
+  function bindCategoryNew(catEl, catNewWrap, catNewInput) {
+    if (!(catEl instanceof HTMLSelectElement)) return;
+    if (catEl.dataset.katalogCatNewBind === "1") return;
+    catEl.dataset.katalogCatNewBind = "1";
+    catEl.addEventListener("change", () => {
+      const isNew = catEl.value === "__new__";
+      if (catNewWrap) catNewWrap.style.display = isNew ? "" : "none";
+      if (catNewInput instanceof HTMLInputElement) {
+        catNewInput.required = isNew;
+        if (!isNew) catNewInput.value = "";
+      }
+    });
+  }
+
+  function applyOrgSelectLists(categories, regions) {
+    const catEl = document.getElementById("org-category");
+    const regEl = document.getElementById("org-region");
+    const catNewWrap = document.getElementById("org-category-new-wrap");
+    const catNewInput = document.getElementById("org-category-new");
+    if (catEl instanceof HTMLSelectElement) {
+      catEl.innerHTML = '<option value="">Выберите категорию</option>';
+      for (const c of categories) {
+        if (!c || typeof c.slug !== "string") continue;
+        const opt = document.createElement("option");
+        opt.value = c.slug;
+        opt.textContent = c.label != null ? String(c.label) : c.slug;
+        catEl.appendChild(opt);
+      }
+      const createOpt = document.createElement("option");
+      createOpt.value = "__new__";
+      createOpt.textContent = "Другая категория (создать новую)";
+      catEl.appendChild(createOpt);
+      bindCategoryNew(catEl, catNewWrap, catNewInput);
+    }
+    if (regEl instanceof HTMLSelectElement) {
+      regEl.innerHTML = '<option value="">Выберите регион</option>';
+      for (const r of regions) {
+        if (!r || typeof r.slug !== "string") continue;
+        const opt = document.createElement("option");
+        opt.value = r.slug;
+        opt.textContent = r.label != null ? String(r.label) : r.slug;
+        regEl.appendChild(opt);
+      }
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("org-apply-form");
     const msg = document.getElementById("org-apply-msg");
@@ -336,7 +433,20 @@
       }
     }
 
-    const me = await jfetch("/v1/auth/me", { method: "GET" });
+    let me;
+    try {
+      me = await jfetch("/v1/auth/me", { method: "GET" });
+    } catch {
+      showMsg(
+        msg,
+        "Не удалось связаться с сервером. Проверьте интернет или обновите страницу через минуту.",
+        "err"
+      );
+      lock.style.display = "block";
+      if (lockActions) lockActions.style.display = "flex";
+      box.style.display = "none";
+      return;
+    }
     if (!me.r.ok) {
       lock.style.display = "block";
       if (lockActions) lockActions.style.display = "flex";
@@ -416,45 +526,8 @@
         }
       });
     }
-    const meta = await jfetch("/v1/org/meta", { method: "GET" });
-    let regEl = null;
-    if (meta.r.ok) {
-      const catEl = document.getElementById("org-category");
-      regEl = document.getElementById("org-region");
-      const catNewWrap = document.getElementById("org-category-new-wrap");
-      const catNewInput = document.getElementById("org-category-new");
-      if (catEl && Array.isArray(meta.body.categories)) {
-        catEl.innerHTML = '<option value="">Выберите категорию</option>';
-        for (const c of meta.body.categories) {
-          const opt = document.createElement("option");
-          opt.value = c.slug;
-          opt.textContent = c.label;
-          catEl.appendChild(opt);
-        }
-        const createOpt = document.createElement("option");
-        createOpt.value = "__new__";
-        createOpt.textContent = "Другая категория (создать новую)";
-        catEl.appendChild(createOpt);
-        catEl.addEventListener("change", () => {
-          const isNew = catEl.value === "__new__";
-          if (catNewWrap) catNewWrap.style.display = isNew ? "" : "none";
-          if (catNewInput instanceof HTMLInputElement) {
-            catNewInput.required = isNew;
-            if (!isNew) catNewInput.value = "";
-          }
-        });
-      }
-      if (regEl && Array.isArray(meta.body.regions)) {
-        regEl.innerHTML = '<option value="">Выберите регион</option>';
-        for (const r of meta.body.regions) {
-          const opt = document.createElement("option");
-          opt.value = r.slug;
-          opt.textContent = r.label;
-          regEl.appendChild(opt);
-        }
-      }
-    }
 
+    const regEl = document.getElementById("org-region");
     const locPicker = base ? initOrgLocationPicker(base, regEl) : null;
 
     form.addEventListener("submit", async (e) => {
@@ -526,5 +599,38 @@
         "ok"
       );
     });
+
+    try {
+      const lists = await loadOrgSelectLists();
+      applyOrgSelectLists(lists.categories, lists.regions);
+      const noRegions = !lists.regions.length;
+      const noCategories = !lists.categories.length;
+      if (noRegions && noCategories) {
+        showMsg(
+          msg,
+          "Не удалось загрузить категории и регионы — проверьте доступ к API или обновите страницу (иногда мешает блокировщик).",
+          "err"
+        );
+      } else if (noRegions) {
+        showMsg(
+          msg,
+          "Не удалось загрузить список регионов. Обновите страницу или проверьте блокировку запросов к API.",
+          "err"
+        );
+      } else if (noCategories) {
+        showMsg(
+          msg,
+          "Не удалось загрузить категории: выберите «Другая категория» или обновите страницу.",
+          "err"
+        );
+      }
+    } catch {
+      applyOrgSelectLists([], []);
+      showMsg(
+        msg,
+        "Справочники не загрузились. Обновите страницу.",
+        "err"
+      );
+    }
   });
 })();
