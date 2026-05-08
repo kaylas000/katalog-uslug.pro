@@ -17,45 +17,6 @@ export function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-function telHref(display) {
-  const raw = String(display ?? '').trim();
-  if (!raw) return '';
-  const compact = raw.replace(/[^\d+]/g, '');
-  if (!compact) return '';
-  let num = compact.startsWith('+')
-    ? '+' + compact.slice(1).replace(/\D/g, '')
-    : compact.replace(/\D/g, '');
-  const digits = num.startsWith('+') ? num.slice(1) : num;
-  if (digits.length < 10) return '';
-  return num.startsWith('+') ? `tel:${num}` : `tel:${num}`;
-}
-
-/** Подзаголовок карточки: каждый распознанный телефон — кнопка (как на странице орг.). */
-export function catalogCardSubtitleMainHtml(subtitle) {
-  const lines = String(subtitle || '')
-    .split(/\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (lines.length === 0)
-    return '<p class="catalog-card-text catalog-card-text-main"></p>';
-  const parts = [];
-  for (const line of lines) {
-    const th = telHref(line);
-    if (th) {
-      parts.push(
-        `<div class="catalog-card-tel-wrap"><a href="${escapeHtml(th)}" class="btn btn-primary catalog-card-tel" aria-label="Позвонить: ${escapeHtml(line)}">${escapeHtml(line)}</a></div>`
-      );
-    } else if (/^[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+$/i.test(line)) {
-      parts.push(
-        `<div class="catalog-card-line"><a href="mailto:${escapeHtml(line)}" class="catalog-card-link">${escapeHtml(line)}</a></div>`
-      );
-    } else {
-      parts.push(`<div class="catalog-card-line">${escapeHtml(line)}</div>`);
-    }
-  }
-  return `<div class="catalog-card-text catalog-card-text-main">${parts.join('')}</div>`;
-}
-
 function reviewsLabel(n) {
   const x = Number(n) || 0;
   const mod10 = x % 10;
@@ -91,6 +52,7 @@ export function cardHtml(item) {
   const href = escapeHtml(item.url || '#');
   const rs = escapeHtml(item.regionSlug || '');
   const cs = escapeHtml(item.categorySlug || '');
+  const subtitleHtml = escapeHtml(item.subtitle || '').replace(/\n/g, '<br>');
   const textHtml = escapeHtml(item.text || '').replace(/\n/g, '<br>');
   return `        <article class="card catalog-card-wide" data-region-slug="${rs}" data-category-slug="${cs}" data-org-url="${href}">
           <div class="catalog-card-layout">
@@ -103,7 +65,7 @@ ${catalogMediaSlidesHtml(item.portfolioImages)}
                 <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
               </div>
               <h3 class="card-title">${escapeHtml(item.title)}</h3>
-              ${catalogCardSubtitleMainHtml(item.subtitle || '')}
+              <p class="catalog-card-text catalog-card-text-main">${subtitleHtml}</p>
               <p class="catalog-card-text catalog-card-about"><strong>О компании:</strong> ${textHtml}</p>
               <div class="catalog-card-footer">
                 <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
