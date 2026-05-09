@@ -14,14 +14,14 @@
   ],
   "desktopNavAfterCategories": [
     { "href": "/analytics/", "label": "Аналитика" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/contacts/", "label": "Контакты" },
     { "href": "/blog/", "label": "Статьи" }
   ],
   "mobileNavAfterCategories": [
     { "href": "/analytics/", "label": "Аналитика" },
     { "href": "/contacts/", "label": "Контакты" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/blog/", "label": "Статьи и новости" },
     { "href": "/add/", "label": "Добавить организацию" }
   ],
@@ -29,7 +29,7 @@
   "footerTools": [
     { "href": "/analytics/", "label": "Аналитика рынка" },
     { "href": "/add/", "label": "Добавить организацию" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/blog/", "label": "Статьи и новости" }
   ],
   "footerLegal": [
