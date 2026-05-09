@@ -19,7 +19,7 @@ async function main() {
 
   await client.query(
     "UPDATE categories SET label=$1 WHERE slug='wood-materials'",
-    ["Материалы и комплектующие из ценных пород"]
+    ["Материалы и комплектующие"]
   );
 
   await client.query(

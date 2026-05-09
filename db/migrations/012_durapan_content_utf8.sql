@@ -1,7 +1,7 @@
 -- DURAPAN (org_id durapan): fix mojibake labels + distinct profile text vs catalog listing.
 
 INSERT INTO categories (slug, label, is_public)
-VALUES ('wood-materials', 'Материалы и комплектующие из ценных пород', true)
+VALUES ('wood-materials', 'Материалы и комплектующие', true)
 ON CONFLICT (slug) DO UPDATE
 SET label = EXCLUDED.label,
     is_public = EXCLUDED.is_public,
