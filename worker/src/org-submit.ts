@@ -262,8 +262,6 @@ export async function submitOrganizationApplication(
   const legalInfoProvided =
     legalForm.length > 0 &&
     inn.length > 0 &&
-    ogrn.length > 0 &&
-    legalAddress.length > 0 &&
     contactPersonName.length > 0;
 
   const locRes = await client.query(`SELECT id FROM locations WHERE id = $1::bigint`, [
