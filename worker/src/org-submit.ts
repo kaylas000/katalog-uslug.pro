@@ -195,7 +195,8 @@ export async function submitOrganizationApplication(
     return {
       kind: "err",
       code: "portfolio_required",
-      message: "Добавьте хотя бы одну фотографию организации (до 4 шт.).",
+      message:
+        "Добавьте хотя бы одну фотографию организации (не более 4 шт.).",
       status: 400,
     };
   }
