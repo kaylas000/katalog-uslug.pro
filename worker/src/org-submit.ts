@@ -232,14 +232,13 @@ export async function submitOrganizationApplication(
     };
   }
   if (
-    !websiteUrl ||
-    websiteUrl.length < 8 ||
-    !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(websiteUrl)
+    websiteUrl.length > 0 &&
+    (websiteUrl.length < 8 || !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(websiteUrl))
   ) {
     return {
       kind: "err",
       code: "invalid_website",
-      message: "Укажите сайт организации (http или https).",
+      message: "Если указан сайт — нужен корректный URL (http или https).",
       status: 400,
     };
   }
