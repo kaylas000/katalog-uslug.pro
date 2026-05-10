@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аккаунт — katalog-uslug.pro</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css?v=20260521">
+  <style>
+    .auth-reg-dialog::backdrop { background: rgba(20, 28, 36, 0.45); }
+    .account-page .auth-layout {
+      max-width: var(--container);
+    }
+    .account-page #auth-panel-logged {
+      width: 100%;
+      max-width: none;
+    }
+    .account-page #auth-panel-providers,
+    .account-page #auth-panel-forms {
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .account-page .account-roadmap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .account-page .account-roadmap-grid .card {
+      margin: 0;
+      height: 100%;
+    }
+    .account-page .account-roadmap-grid .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+    .account-page .account-roadmap-grid .btn {
+      align-self: flex-start;
+      margin-top: auto;
+    }
+    .account-page .account-security-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .account-page .account-security-grid > div {
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+    @media (max-width: 1100px) {
+      .account-page .account-roadmap-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+    @media (max-width: 900px) {
+      .account-page .auth-layout {
+        max-width: 520px;
+      }
+      .account-page .account-roadmap-grid {
+        grid-template-columns: 1fr;
+      }
+      .account-page .account-security-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="account-page">
+
+  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="8" width="84" height="84" rx="16" fill="none" stroke="#2F4B6A" stroke-width="8"/>
+          <circle cx="42" cy="42" r="18" fill="none" stroke="#2F4B6A" stroke-width="7"/>
+          <line x1="55" y1="55" x2="78" y2="78" stroke="#2F4B6A" stroke-width="7" stroke-linecap="round"/>
+          <line x1="22" y1="78" x2="62" y2="78" stroke="#F8A11A" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-desktop">katalog-uslug.pro</span>
+        <span class="logo-mobile">Услуги&nbsp;<span class="logo-mobile-accent">Про</span></span>
+      </a>
+      <nav class="nav-desktop">
+        <a href="/">Главная</a>
+        <div class="nav-item has-submenu">
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
+          <div class="submenu">
+            <a href="/c/metalworking/">Металлообработка</a>
+            <a href="/c/autoservice/">Автосервис</a>
+            <a href="/c/care/">Патронаж и сиделки</a>
+            <a href="/c/wood-materials/">Материалы и комплектующие</a>
+          </div>
+        </div>
+        <a href="/analytics/">Аналитика</a>
+        <a href="/promotion/">Продвижение</a>
+        <a href="/contacts/">Контакты</a>
+        <a href="/blog/">Статьи</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
+        <button class="burger" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav">
+    <div class="mobile-panel">
+      <button class="mobile-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <a href="/">Главная</a>
+      <div class="mobile-menu-label">Услуги</div>
+      <a href="/c/metalworking/">Металлообработка</a>
+      <a href="/c/autoservice/">Автосервис</a>
+      <a href="/c/care/">Патронаж и сиделки</a>
+      <a href="/c/wood-materials/">Материалы и комплектующие</a>
+      <a href="/analytics/">Аналитика</a>
+      <a href="/contacts/">Контакты</a>
+      <a href="/promotion/">Продвижение</a>
+      <a href="/blog/">Статьи и новости</a>
+      <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/">Войти</a>
+      <a href="/account/#register">Регистрация</a>
+    </div>
+  </div>
+
+<!-- katalog:page-main -->
+<main class="section">
+  <div class="container auth-layout">
+    <h1 class="section-title" style="margin-bottom:28px;">Аккаунт</h1>
+
+    <div id="auth-global-msg" class="auth-msg" style="display:none;margin-bottom:16px;" role="status"></div>
+
+    <div id="auth-panel-logged" class="card" style="display:none;margin-bottom:24px;">
+      <div class="card-body">
+        <h2 class="card-title" style="font-size:17px;">Вы вошли</h2>
+        <p class="card-text" id="auth-logged-summary"></p>
+        <div class="tag-row" style="margin-top:14px;">
+          <span class="tag tag-green">Статус: Посетитель</span>
+          <span class="tag">Сценарий организаций — отдельно</span>
+        </div>
+          <div class="btn-row" style="margin-top:14px;">
+            <button type="button" class="btn btn-sm btn-outline" id="auth-btn-logout">Выйти</button>
+          </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Кабинет посетителя (дорожная карта)</h3>
+          <p class="card-sub">Ниже разделы, которые будут постепенно включаться. Сейчас это безопасные заглушки для навигации и будущего UX.</p>
+
+          <div class="account-roadmap-grid">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Избранные организации</h4>
+                <p class="card-text">Список сохраненных карточек, быстрый переход и заметки.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Сравнение услуг</h4>
+                <p class="card-text">Таблица сравнения выбранных организаций по цене, срокам и условиям.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Мои заявки и отклики</h4>
+                <p class="card-text">История обращений, статус обработки, контроль обратной связи.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title" style="font-size:15px;margin-bottom:8px;">Уведомления и подписки</h4>
+                <p class="card-text">Оповещения по интересующим категориям, регионам и новым предложениям.</p>
+                <button type="button" class="btn btn-sm btn-ghost" disabled>Скоро</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Переход к сценарию организации</h3>
+          <p class="card-sub">Размещение своей организации идет по отдельному сценарию через модерацию. Позже будет доступна смена статуса прямо в кабинете.</p>
+          <div class="btn-row">
+            <a href="/add/" class="btn btn-sm btn-primary">Подать заявку на размещение</a>
+            <a href="/org-account/" class="btn btn-sm btn-outline">Кабинет организации</a>
+            <button type="button" class="btn btn-sm btn-outline" disabled>Смена статуса в кабинете (скоро)</button>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Мои заявки организаций (пилот)</h3>
+          <p class="card-sub">Здесь показываются отправленные заявки и их текущий статус модерации.</p>
+          <div id="org-applications-msg" class="auth-msg" style="display:none;margin-top:10px;"></div>
+          <div id="org-applications-list" style="display:grid;gap:10px;margin-top:12px;"></div>
+        </div>
+
+        <div id="auth-panel-set-password" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Установить пароль</h3>
+          <p class="card-sub">Если вы заходили через Яндекс, можно добавить пароль для входа по почте.</p>
+          <form id="form-set-password" class="auth-form" style="margin-top:10px;">
+            <div class="auth-field">
+              <label for="set-pw-new">Новый пароль</label>
+              <input id="set-pw-new" type="password" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить пароль</button>
+          </form>
+        </div>
+        <div class="account-security-grid">
+          <div id="auth-panel-change-password" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 class="card-title" style="font-size:16px;">Изменить пароль</h3>
+            <form id="form-change-password" class="auth-form" style="margin-top:10px;">
+              <div class="auth-field">
+                <label for="ch-pw-current">Текущий пароль</label>
+                <input id="ch-pw-current" type="password" required autocomplete="current-password">
+              </div>
+              <div class="auth-field">
+                <label for="ch-pw-new">Новый пароль</label>
+                <input id="ch-pw-new" type="password" required autocomplete="new-password">
+              </div>
+              <button type="submit" class="btn btn-primary">Обновить</button>
+            </form>
+          </div>
+          <div id="auth-panel-attach" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 class="card-title" style="font-size:16px;">Привязать телефон (SMS)</h3>
+            <p class="card-sub">Нужен для входа по SMS.</p>
+            <form id="form-attach-send" class="auth-form" style="margin-top:10px;">
+              <div class="auth-field">
+                <label for="attach-phone">Телефон</label>
+                <input id="attach-phone" type="tel" inputmode="tel" placeholder="+7 …">
+              </div>
+              <button type="submit" class="btn btn-outline">Получить код</button>
+            </form>
+            <form id="form-attach-code" class="auth-form" style="margin-top:12px;display:none;">
+              <div class="auth-field">
+                <label for="attach-otp">Код</label>
+                <input id="attach-otp" type="text" maxlength="6" inputmode="numeric">
+              </div>
+              <button type="submit" class="btn btn-primary">Подтвердить</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="auth-panel-providers" class="card" style="margin-bottom:20px;">
+      <div class="card-body">
+        <h2 class="card-title" style="font-size:17px;">Быстрый вход</h2>
+        <p class="card-sub">Как на крупных площадках: один клик через провайдера.</p>
+        <div class="auth-providers" style="margin-top:14px;">
+          <button type="button" class="auth-provider-btn" id="auth-btn-yandex">Войти с Яндекс</button>
+          <button type="button" class="auth-provider-btn is-disabled" id="auth-btn-esia" disabled title="ЕСИА: включите ESIA_FULL_IMPLEMENTATION после подключения контура">Войти с Госуслуг</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="auth-panel-forms" class="card">
+      <div class="card-body">
+        <div class="auth-tabs" role="tablist">
+          <button type="button" class="auth-tab is-active" data-auth-tab="login" role="tab">Почта</button>
+          <button type="button" class="auth-tab" data-auth-tab="register" role="tab">Регистрация</button>
+        </div>
+
+        <div id="auth-tab-login" data-auth-panel="login">
+          <form id="form-login" class="auth-form" autocomplete="on">
+            <div class="auth-field">
+              <label for="login-email">Электронная почта</label>
+              <input id="login-email" name="email" type="email" required autocomplete="username">
+            </div>
+            <div class="auth-field">
+              <label for="login-password">Пароль</label>
+              <input id="login-password" name="password" type="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+            <p class="card-text" style="margin:0;"><a href="#" id="link-forgot">Забыли пароль?</a></p>
+          </form>
+          <div id="auth-resend-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <p class="card-sub" style="margin-bottom:8px;">Почта ещё не подтверждена. Отправить код повторно?</p>
+            <form id="form-resend-verify" class="auth-form">
+              <div class="auth-field">
+                <label for="resend-email">Почта</label>
+                <input id="resend-email" type="email" required autocomplete="email">
+              </div>
+              <button type="submit" class="btn btn-outline">Отправить код на почту</button>
+            </form>
+          </div>
+          <div id="auth-login-verify-code-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <p class="card-sub" style="margin-bottom:8px;">Введите 6-значный код из письма (тот же пароль, что вы вводили выше).</p>
+            <form id="form-login-email-code" class="auth-form">
+              <div class="auth-field">
+                <label for="login-email-otp">Код</label>
+                <input id="login-email-otp" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Подтвердить почту и войти</button>
+            </form>
+          </div>
+          <p class="card-text is-inline-actions" style="margin-top:14px;margin-bottom:0;">
+            <button type="button" class="btn btn-link" id="link-toggle-phone-login" style="color:var(--accent);">Войти по коду из SMS</button>
+            <span id="auth-phone-login-hint"> — если номер уже привязан к аккаунту.</span>
+          </p>
+          <div id="auth-phone-login-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <p class="card-sub" style="margin-top:0;">Код приходит на номер, привязанный к существующему аккаунту.</p>
+            <form id="form-phone-send" class="auth-form" style="margin-top:12px;">
+              <div class="auth-field">
+                <label for="phone-num">Телефон</label>
+                <input id="phone-num" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+              </div>
+              <button type="submit" class="btn btn-outline">Получить код</button>
+            </form>
+            <form id="form-phone-code" class="auth-form" style="margin-top:16px;display:none;">
+              <div class="auth-field">
+                <label for="phone-otp">Код из SMS</label>
+                <input id="phone-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+              </div>
+              <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="auth-tab-register" data-auth-panel="register" style="display:none;">
+          <form id="form-register" class="auth-form" autocomplete="on">
+            <div class="auth-field">
+              <label for="reg-email">Почта</label>
+              <input id="reg-email" type="email" required autocomplete="email">
+            </div>
+            <div class="auth-field">
+              <label for="reg-password">Пароль (10+ символов, буква и цифра)</label>
+              <input id="reg-password" type="password" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <p class="card-text" style="font-size:13px;color:var(--text-2);margin:0;">После нажатия откроется окно: вы сами выберете, отправить код на почту или в SMS (номер вводится только в этом окне, для SMS).</p>
+          </form>
+        </div>
+
+        <div id="auth-panel-forgot" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Сброс пароля</h3>
+          <form id="form-forgot" class="auth-form" style="margin-top:10px;">
+            <div class="auth-field">
+              <label for="forgot-email">Почта аккаунта</label>
+              <input id="forgot-email" type="email" required>
+            </div>
+            <div class="btn-row">
+            <button type="submit" class="btn btn-primary">Отправить ссылку</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="forgot-cancel">Отмена</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="auth-panel-reset" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <h3 class="card-title" style="font-size:16px;">Новый пароль</h3>
+          <form id="form-reset" class="auth-form" style="margin-top:10px;">
+            <input type="hidden" id="reset-token">
+            <div class="auth-field">
+              <label for="reset-password">Новый пароль</label>
+              <input id="reset-password" type="password" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить и войти</button>
+          </form>
+        </div>
+
+        <dialog id="dialog-reg-confirm" class="auth-reg-dialog" style="max-width:min(440px,96vw);border:1px solid var(--border);border-radius:12px;padding:0;">
+          <div class="card-body" style="padding:22px;">
+            <h2 class="card-title" style="font-size:19px;margin-top:0;">Подтвердите регистрацию</h2>
+            <p class="card-sub" id="dialog-reg-lead" style="margin-bottom:6px;">Аккаунт ещё не создан. Выберите способ и нажмите «Отправить код».</p>
+            <p class="card-text" id="dialog-reg-email-line" style="font-weight:500;margin-bottom:14px;"></p>
+            <div id="dialog-reg-step-send">
+              <fieldset style="border:none;padding:0;margin:0 0 14px;">
+                <legend class="card-text" style="font-size:14px;margin-bottom:10px;">Куда отправить код</legend>
+                <label id="dialog-reg-ch-email-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;">
+                  <input type="radio" name="dialog-reg-channel" id="dialog-reg-ch-email" value="email" checked>
+                  <span>На эту почту</span>
+                </label>
+                <label id="dialog-reg-ch-sms-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="radio" name="dialog-reg-channel" id="dialog-reg-ch-sms" value="sms">
+                  <span>В SMS на номер</span>
+                </label>
+              </fieldset>
+              <div id="dialog-reg-phone-wrap" style="display:none;margin-bottom:14px;">
+                <div class="auth-field">
+                  <label for="dialog-reg-phone">Номер телефона</label>
+                  <input id="dialog-reg-phone" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" id="dialog-reg-send-code">Отправить код</button>
+            </div>
+            <div id="dialog-reg-step-code" style="display:none;margin-top:16px;">
+              <form id="form-dialog-reg-code" class="auth-form" style="margin:0;">
+                <div class="auth-field">
+                  <label for="dialog-reg-otp" id="dialog-reg-otp-label">Код (6 цифр)</label>
+                  <input id="dialog-reg-otp" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать аккаунт и войти</button>
+              </form>
+              <button type="button" class="btn btn-outline btn-sm" id="dialog-reg-resend" style="margin-top:10px;display:none;">Отправить код снова</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;">
+              <button type="button" class="btn btn-ghost btn-sm" id="dialog-reg-back" style="display:none;">Назад</button>
+              <button type="button" class="btn btn-ghost" id="dialog-reg-cancel">Отмена</button>
+            </div>
+          </div>
+        </dialog>
+
+      </div>
+    </div>
+  </div>
+</main>
+<!-- katalog:page-main-end -->
+
+  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>О платформе</h4>
+          <p>Каталог услуг для бизнеса с проверкой данных, прозрачным рейтингом и прямым контактом.</p>
+          <p class="footer-legal-inline"><a href="/privacy/">Конфиденциальность</a> · <a href="/terms/">Условия использования</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Категории</h4>
+          <a href="/categories/">Все категории</a>
+          <a href="/c/metalworking/">Металлообработка</a>
+          <a href="/c/autoservice/">Автосервис</a>
+          <a href="/c/care/">Патронаж и сиделки</a>
+          <a href="/c/wood-materials/">Материалы и комплектующие</a>
+        </div>
+        <div class="footer-col">
+          <h4>Инструменты</h4>
+          <a href="/analytics/">Аналитика рынка</a>
+          <a href="/add/">Добавить организацию</a>
+          <a href="/promotion/">Продвижение</a>
+          <a href="/blog/">Статьи и новости</a>
+        </div>
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <p>Email: info@katalog-uslug.pro</p>
+          <p>Режим работы: ежедневно 09:00–20:00</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 katalog-uslug.pro</span>
+        <span>Платформа услуг для бизнеса</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Consultant widget -->
+  <div class="consultant">
+    <button class="consultant-btn" aria-label="Консультант">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <div class="consultant-panel">
+      <button class="consultant-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <h4>Чем могу помочь?</h4>
+      <button class="consultant-btn-sm" data-consult="pick-service">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Подобрать услугу
+      </button>
+      <button class="consultant-btn-sm" data-consult="filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        Объяснить фильтры
+      </button>
+      <button class="consultant-btn-sm" data-consult="compare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        Сравнить организации
+      </button>
+      <button class="consultant-btn-sm" data-consult="free-site">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Как получить сайт бесплатно
+      </button>
+      <div class="consultant-answer"></div>
+    </div>
+  </div>
+
+  <script src="/js/main.js?v=20260521"></script>
+  <script src="/js/account.js?v=20260515-2" defer></script>
+</body>
+</html>

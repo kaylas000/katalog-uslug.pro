@@ -1,13 +1,15 @@
 /**
  * Собирает каталог из data/catalog.json + data/regions.json + config/site.json:
- * — подставляет опции фильтров и карточки в index.html;
- * — генерирует статические страницы r/<регион>/index.html (канонический URL для SEO по регионам).
+ * — сетка каталога — пустой shell (данные только из API Worker);
+ * — data/catalog.json — источник для импорта в Postgres (npm run db:import);
+ * — страницы категорий c/<slug>/ — из config/site.json.categories (добавили категорию + шаблон страницы с маркерами).
  *
  * Запуск: npm run build:data
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { buildCardsGridInner, escapeHtml } from './lib/catalog-card.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -18,24 +20,26 @@ const M_HEAD_SEO_START = '<!-- katalog:gen-head-seo -->';
 const M_HEAD_SEO_END = '<!-- /katalog:gen-head-seo -->';
 const M_REGION_NAV_START = '<!-- katalog:gen-region-seo-nav -->';
 const M_REGION_NAV_END = '<!-- /katalog:gen-region-seo-nav -->';
-const M_REGION_OPTS_START = '<!-- katalog:gen-region-options -->';
-const M_REGION_OPTS_END = '<!-- /katalog:gen-region-options -->';
 const M_CAT_OPTS_START = '<!-- katalog:gen-category-options -->';
 const M_CAT_OPTS_END = '<!-- /katalog:gen-category-options -->';
 const M_GRID_START = '<!-- katalog:catalog-grid -->';
 const M_GRID_END = '<!-- /katalog:catalog-grid -->';
+const M_CATEGORY_CARDS_START = '<!-- katalog:category-cards -->';
+const M_CATEGORY_CARDS_END = '<!-- /katalog:category-cards -->';
+const M_CATEGORY_INTRO_START = '<!-- katalog:category-intro -->';
+const M_CATEGORY_INTRO_END = '<!-- /katalog:category-intro -->';
+
+const STYLES_VERSION = '20260512-migration-complete';
 
 function readJson(fp) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
 }
 
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+function versionStaticAssets(html, v) {
+  return html
+    .replace(/href="\/css\/styles\.css\?v=[^"]*"/g, `href="/css/styles.css?v=${v}"`)
+    .replace(/src="\/js\/main\.js\?v=[^"]*"/g, `src="/js/main.js?v=${v}"`)
+    .replace(/src="\/js\/org\.js\?v=[^"]*"/g, `src="/js/org.js?v=${v}"`);
 }
 
 function replaceBetween(html, startMark, endMark, inner) {
@@ -56,58 +60,77 @@ function buildCategoryOptions(categories) {
   return `${lines.join('\n')}\n            `;
 }
 
-function buildRegionOptions(regions) {
-  const lines = ['\n            <option value="">Все регионы</option>'];
-  for (const r of regions) {
-    lines.push(`            <option value="${escapeHtml(r.slug)}">${escapeHtml(r.label)}</option>`);
+function replaceCategoryCardsBlock(html, inner) {
+  const a = html.indexOf(M_CATEGORY_CARDS_START);
+  if (a === -1) {
+    throw new Error(`нет маркера ${M_CATEGORY_CARDS_START}`);
   }
-  return `${lines.join('\n')}\n            `;
-}
-
-function reviewsLabel(n) {
-  const x = Number(n) || 0;
-  const mod10 = x % 10;
-  const mod100 = x % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${x} отзыв`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${x} отзыва`;
-  return `${x} отзывов`;
-}
-
-function cardHtml(item) {
-  const rating = typeof item.rating === 'number' ? item.rating.toFixed(1) : escapeHtml(item.rating);
-  const href = escapeHtml(item.url || '#');
-  const rs = escapeHtml(item.regionSlug || '');
-  const cs = escapeHtml(item.categorySlug || '');
-  return `        <div class="card" data-region-slug="${rs}" data-category-slug="${cs}">
-          <div class="card-body">
-            <div class="flex gap-8 flex-wrap mb-8">
-              <span class="tag">${escapeHtml(item.categoryLabel)}</span>
-              <span class="tag tag-green">${escapeHtml(item.regionLabel)}</span>
-            </div>
-            <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-sub">${escapeHtml(item.subtitle)}</p>
-            <p class="card-text">${escapeHtml(item.text)}</p>
-          </div>
-          <div class="card-footer">
-            <span class="tag tag-accent">★ ${rating} · ${reviewsLabel(item.reviews)}</span>
-            <a href="${href}" class="btn btn-sm btn-primary">Подробнее →</a>
-          </div>
-        </div>`;
-}
-
-function catalogEmptyInner() {
-  return `        <div class="catalog-empty" role="status">
-          <p class="catalog-empty-title">Ничего не найдено</p>
-          <p class="catalog-empty-text">Смените регион, категорию или поисковый запрос — либо откройте <a href="/regions/">список всех субъектов РФ</a>.</p>
-        </div>`;
-}
-
-function buildCardsGridInner(items) {
-  if (!items.length) {
-    return `\n      <div class="grid cards-4 gap-24" id="catalog-cards-host">\n${catalogEmptyInner()}\n      </div>\n      `;
+  const afterStart = a + M_CATEGORY_CARDS_START.length;
+  const tail = html.slice(afterStart);
+  const m = /<!--\s*\/katalog:category-cards\s*-->/.exec(tail);
+  if (!m) {
+    throw new Error(`нет маркера закрытия category-cards после ${M_CATEGORY_CARDS_START}`);
   }
-  const cards = items.map(cardHtml).join('\n');
-  return `\n      <div class="grid cards-4 gap-24" id="catalog-cards-host">\n${cards}\n      </div>\n      `;
+  const endIdx = afterStart + m.index;
+  return html.slice(0, afterStart) + inner + html.slice(endIdx);
+}
+
+/**
+ * Хлебные крошки, h1, абзацы c/* — из label (UTF-8 из site.json).
+ * introLead — необязательный первый абзац (иначе шаблон с «Проверенные организации…»).
+ */
+function buildCategoryIntroInner(label, introLead) {
+  const L = escapeHtml(label);
+  const lead =
+    typeof introLead === 'string' && introLead.trim()
+      ? escapeHtml(introLead.trim())
+      : `Проверенные организации категории «${L}». Контакты и информация о компаниях — в карточках ниже.`;
+  return `\n      <nav class="breadcrumbs">
+        <a href="/">Главная</a><span>/</span><span>${L}</span>
+      </nav>
+      <h1 class="section-title">${L}</h1>
+      <p class="section-sub">${lead}</p>
+
+      <p class="section-sub mt-24 mb-0" style="max-width:640px">
+        Фильтры по регионам и рейтингу — на <a href="/#catalog" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px">главной странице каталога</a>.
+      </p>
+`;
+}
+
+const LEGACY_CATEGORY_INTRO_BLOCK_RE =
+  /\s*<nav class="breadcrumbs">[\s\S]*?<\/nav>\s*<h1 class="section-title">[^<]*<\/h1>\s*<p class="section-sub">[\s\S]*?<\/p>\s*<p class="section-sub mt-24[^>]*>[\s\S]*?<\/p>/;
+
+function ensureCategoryIntroMarkers(html, relPathForError) {
+  if (html.includes(M_CATEGORY_INTRO_START)) return html;
+  if (!LEGACY_CATEGORY_INTRO_BLOCK_RE.test(html)) {
+    throw new Error(
+      `${relPathForError}: добавьте маркеры ${M_CATEGORY_INTRO_START} … ${M_CATEGORY_INTRO_END} вместо статического вводного блока (breadcrumbs, h1, два абзаца).`
+    );
+  }
+  return html.replace(
+    LEGACY_CATEGORY_INTRO_BLOCK_RE,
+    `\n      ${M_CATEGORY_INTRO_START}\n      ${M_CATEGORY_INTRO_END}`
+  );
+}
+
+function applyCategoryEmptyCatalogHost(html) {
+  let out = html;
+  if (out.includes(M_CATEGORY_CARDS_START)) {
+    out = replaceCategoryCardsBlock(out, '\n        ');
+  } else {
+    throw new Error(
+      `нет маркеров категории: ${M_CATEGORY_CARDS_START} … ${M_CATEGORY_CARDS_END}`
+    );
+  }
+  out = out.replace(
+    '<div class="catalog-split category-cards-below-intro">\n        <div class="catalog-main">\n',
+    '<div class="catalog-split category-cards-below-intro">\n        <div class="catalog-main" id="catalog-cards-host">\n'
+  );
+  out = out.replace(
+    /<div class="catalog-main">\s*\n\s*<!-- katalog:category-cards -->/,
+    `<div class="catalog-main" id="catalog-cards-host">\n<!-- katalog:category-cards -->`
+  );
+  return out;
 }
 
 function headSeoBlock({ description, canonical, jsonLd }) {
@@ -160,26 +183,37 @@ function setPageRegionAttr(html, regionSlug) {
   );
 }
 
+function setPageCategoryAttr(html, categorySlug) {
+  if (!categorySlug) return html;
+  const esc = escapeHtml(categorySlug);
+  if (/data-page-category="/.test(html)) {
+    return html.replace(/data-page-category="[^"]*"/g, `data-page-category="${esc}"`);
+  }
+  return html.replace(
+    '<section class="section">',
+    `<section class="section" id="catalog" data-catalog-section data-page-category="${esc}">`
+  );
+}
+
 function run() {
   const indexPath = path.join(root, 'index.html');
-  let tpl = fs.readFileSync(indexPath, 'utf8');
+  let tpl = versionStaticAssets(fs.readFileSync(indexPath, 'utf8'), STYLES_VERSION);
   if (!tpl.includes(M_GRID_START)) {
     throw new Error('В index.html нет маркеров каталога (katalog:catalog-grid).');
   }
 
   const site = readJson(path.join(root, 'config', 'site.json'));
   const regions = readJson(path.join(root, 'data', 'regions.json'));
-  const catalog = readJson(path.join(root, 'data', 'catalog.json'));
+  const catalogPath = path.join(root, 'data', 'catalog.json');
+  const catalog = readJson(catalogPath);
   const categories = Array.isArray(site.categories) ? site.categories : [];
 
   const catOpts = buildCategoryOptions(categories);
-  const regOpts = buildRegionOptions(regions);
 
   tpl = replaceBetween(tpl, M_CAT_OPTS_START, M_CAT_OPTS_END, catOpts);
-  tpl = replaceBetween(tpl, M_REGION_OPTS_START, M_REGION_OPTS_END, regOpts);
 
   const homeDesc =
-    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, патронаж и другие услуги. Фильтры по региону и рейтингу.';
+    'Каталог проверенных подрядчиков для бизнеса: металлообработка, автосервис, материалы из ценных пород, патронаж и другие услуги. Поиск по городу из подсказок и по рейтингу.';
   let homeHtml = replaceBetween(
     tpl,
     M_HEAD_SEO_START,
@@ -193,6 +227,7 @@ function run() {
   homeHtml = replaceBetween(homeHtml, M_REGION_NAV_START, M_REGION_NAV_END, '\n        ');
   homeHtml = replaceBetween(homeHtml, M_GRID_START, M_GRID_END, buildCardsGridInner(catalog));
   homeHtml = setPageRegionAttr(homeHtml, '');
+  homeHtml = versionStaticAssets(homeHtml, STYLES_VERSION);
   fs.writeFileSync(indexPath, homeHtml.replace(/\r\n/g, '\n'), 'utf8');
   console.log('index.html: опции фильтров, SEO в <head>, карточки каталога');
 
@@ -218,7 +253,6 @@ function run() {
     const desc = region.intro || homeDesc;
 
     let page = replaceBetween(tpl, M_CAT_OPTS_START, M_CAT_OPTS_END, catOpts);
-    page = replaceBetween(page, M_REGION_OPTS_START, M_REGION_OPTS_END, regOpts);
     page = replaceBetween(
       page,
       M_HEAD_SEO_START,
@@ -232,13 +266,50 @@ function run() {
     page = replaceBetween(page, M_REGION_NAV_START, M_REGION_NAV_END, regionSeoNavHtml());
     page = replaceBetween(page, M_GRID_START, M_GRID_END, buildCardsGridInner(items));
     page = setPageRegionAttr(page, slug);
+    page = versionStaticAssets(page, STYLES_VERSION);
     page = page.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
 
     const dir = path.join(rRoot, slug);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const outFp = path.join(dir, 'index.html');
     fs.writeFileSync(outFp, page.replace(/\r\n/g, '\n'), 'utf8');
-    console.log(`${path.relative(root, outFp)}: ${items.length} карточек`);
+    console.log(
+      `${path.relative(root, outFp)}: пустая сетка (в JSON для региона: ${items.length})`
+    );
+  }
+
+  for (const cat of categories) {
+    const catSlug = cat.slug;
+    const relPath = `c/${catSlug}/index.html`;
+    const fp = path.join(root, ...relPath.split('/'));
+    if (!fs.existsSync(fp)) {
+      console.warn(
+        `${relPath}: нет файла страницы категории — шаблон c/*/index.html с маркерами ${M_CATEGORY_INTRO_START}, ${M_CATEGORY_CARDS_START}`
+      );
+      continue;
+    }
+    let chtml = fs.readFileSync(fp, 'utf8').replace(/^\uFEFF/, '');
+    const catLabel = typeof cat.label === 'string' ? cat.label.trim() : catSlug;
+    const pageTitle = `${catLabel} — katalog-uslug.pro`;
+    chtml = chtml.replace(
+      /<title>[^<]*<\/title>/i,
+      `<title>${escapeHtml(pageTitle)}</title>`
+    );
+    chtml = ensureCategoryIntroMarkers(chtml, relPath);
+    const introLead =
+      typeof cat.introLead === 'string' ? cat.introLead : '';
+    chtml = replaceBetween(
+      chtml,
+      M_CATEGORY_INTRO_START,
+      M_CATEGORY_INTRO_END,
+      buildCategoryIntroInner(catLabel, introLead)
+    );
+    chtml = applyCategoryEmptyCatalogHost(chtml);
+    chtml = setPageCategoryAttr(chtml, catSlug);
+    chtml = versionStaticAssets(chtml, STYLES_VERSION);
+    fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
+    const n = catalog.filter((i) => i.categorySlug === catSlug).length;
+    console.log(`${relPath}: пустой host каталога (в БД ~${n} записей)`);
   }
 
   writeRegionsIndex(regions);
@@ -265,7 +336,7 @@ function writeRegionsIndex(regions) {
   <meta name="description" content="${escapeHtml(desc)}">
   <link rel="canonical" href="${SITE_ORIGIN}/regions/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <link rel="stylesheet" href="/css/styles.css?v=${STYLES_VERSION}">
 </head>
 <body>
 
@@ -282,7 +353,7 @@ ${ul}
 </main>
 <!-- katalog:page-main-end -->
 
-  <script src="/js/main.js?v=20260501"></script>
+  <script src="/js/main.js?v=${STYLES_VERSION}"></script>
 </body>
 </html>
 `;

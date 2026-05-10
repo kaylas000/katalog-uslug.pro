@@ -16,13 +16,53 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
+const CATALOG_API_META = 'name="katalog-catalog-api"';
+
+function injectCatalogApiMeta(html) {
+  const sitePath = path.join(root, 'config', 'site.json');
+  if (!fs.existsSync(sitePath)) return html;
+  let url = '';
+  try {
+    const s = JSON.parse(fs.readFileSync(sitePath, 'utf8'));
+    url =
+      typeof s.catalogApiBaseUrl === 'string' ? s.catalogApiBaseUrl.trim() : '';
+  } catch {
+    return html;
+  }
+  let out = html.replace(
+    new RegExp(`\\n\\s*<meta ${CATALOG_API_META}[^>]*>\\s*`, 'gi'),
+    '\n'
+  );
+  /** Кодировка — первым в <head>; иначе длинный префикс до charset мешает раннему распознаванию UTF-8. */
+  out = out.replace(/\s*<meta\s+charset\s*=\s*["'][^"']*["']\s*\/?>\s*/gi, '');
+  const esc =
+    url
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .trim() || '';
+  const headOpen = out.search(/<head\b/i);
+  if (headOpen === -1) return out;
+  const headTagEnd = out.indexOf('>', headOpen);
+  if (headTagEnd === -1) return out;
+  const apiTag =
+    esc.length === 0
+      ? ''
+      : `\n  <meta ${CATALOG_API_META} content="${esc}">`;
+  const merged =
+    out.slice(0, headTagEnd + 1) +
+    `\n  <meta charset="UTF-8">${apiTag}\n` +
+    out.slice(headTagEnd + 1);
+  return merged.replace(/\n<meta name="viewport"/, '\n  <meta name="viewport"');
+}
+
 function normalizeEOL(s) {
   return s.replace(/\r\n/g, '\n');
 }
 
 /** Единый финальный \\n — иначе сравнение на Windows «плавает» */
 function normalizeFileContent(s) {
-  return normalizeEOL(s).replace(/\s+$/, '') + '\n';
+  return normalizeEOL(s.replace(/^\uFEFF/, '')).replace(/\s+$/, '') + '\n';
 }
 
 const HEADER_PARTIAL = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-header.html'), 'utf8'));
@@ -71,6 +111,7 @@ function listLayoutHtmlFiles() {
   }
   const orgRoot = path.join(root, 'org');
   if (fs.existsSync(orgRoot)) {
+    add(path.join(orgRoot, 'index.html'));
     for (const ent of fs.readdirSync(orgRoot, { withFileTypes: true })) {
       if (!ent.isDirectory()) continue;
       add(path.join(orgRoot, ent.name, 'index.html'));
@@ -141,20 +182,51 @@ function findHeaderSliceStart(html) {
   const bodyOpen = html.match(/<body[^>]*>/);
   if (!bodyOpen) throw new Error('Нет <body>');
   const afterBody = bodyOpen.index + bodyOpen[0].length;
-  const c = html.indexOf('<!-- Header -->', afterBody);
   const headerIdx = html.indexOf('<header class="site-header">', afterBody);
   if (headerIdx === -1) throw new Error('Нет <header class="site-header">');
+  /** Точное `<!-- Header -->` (старый маркер) */
+  const c = html.indexOf('<!-- Header -->', afterBody);
   if (c !== -1 && c < headerIdx) return trimHorizontalSpaceBefore(html, afterBody, c);
-  return trimHorizontalSpaceBefore(html, afterBody, headerIdx);
+  /**
+   * Комментарий из partials: `<!-- Header (фрагменты …) -->`.
+   * Начало вырезаемого блока — с первого такого комментария (если есть), иначе с `<header>`,
+   * иначе при повторном build:layout старые копии комментариев остаются в HTML.
+   */
+  let i = afterBody;
+  let sliceStart = headerIdx;
+  while (i < headerIdx) {
+    while (i < headerIdx && /\s/.test(html[i])) i += 1;
+    if (i >= headerIdx) break;
+    if (!html.startsWith('<!--', i)) break;
+    const end = html.indexOf('-->', i + 4);
+    if (end === -1 || end > headerIdx) break;
+    const inner = html.slice(i + 4, end);
+    if (!/^\s*Header\b/i.test(inner)) break;
+    sliceStart = Math.min(sliceStart, i);
+    i = end + 3;
+  }
+  return trimHorizontalSpaceBefore(html, afterBody, sliceStart);
 }
 
 function findFooterSliceStart(html, hEnd) {
   const footerIdx = html.indexOf('<footer class="site-footer">');
   if (footerIdx === -1) throw new Error('Нет <footer class="site-footer">');
-  const before = html.slice(0, footerIdx);
-  const c = before.lastIndexOf('<!-- Footer -->');
-  if (c !== -1 && footerIdx - c < 160) return trimHorizontalSpaceBefore(html, hEnd, c);
-  return trimHorizontalSpaceBefore(html, hEnd, footerIdx);
+  /** Убираем цепочки `<!-- Footer … -->` перед подвалом — иначе при legacy-инжекте они копятся между прогонами. */
+  let cut = footerIdx;
+  while (cut > hEnd) {
+    let p = cut;
+    while (p > hEnd && /\s/.test(html[p - 1])) p -= 1;
+    if (p <= hEnd) break;
+    const lineEnd = p;
+    const lineStart = Math.max(hEnd, html.lastIndexOf('\n', p - 1) + 1);
+    const line = html.slice(lineStart, lineEnd + 1).trim();
+    if (/^<!--[\s\S]*\bFooter\b[\s\S]*-->$/.test(line)) {
+      cut = lineStart;
+      continue;
+    }
+    break;
+  }
+  return trimHorizontalSpaceBefore(html, hEnd, cut);
 }
 
 /** Только до подвала: после .mobile-nav убираем лишние \\n (не трогать .consultant с тем же паттерном </div>) */
@@ -264,7 +336,9 @@ function runInject() {
     }
     let next;
     try {
-      next = normalizeFileContent(appendExtensionScripts(injectLayout(raw)));
+      next = normalizeFileContent(
+        injectCatalogApiMeta(appendExtensionScripts(injectLayout(raw)))
+      );
     } catch (e) {
       console.log(`${name}: пропуск — ${e.message}`);
       continue;

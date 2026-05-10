@@ -1,21 +1,27 @@
 {
-  "$comment": "Отсюда собираются шапка и подвал (npm run build:partials). Новая категория — блок в categories; новый пункт меню — в desktopNavAfterCategories / mobileNavAfterCategories.",
+  "$comment": "Отсюда собираются шапка и подвал (npm run build:partials). Новая категория — блок в categories и статическая страница c/<slug>/index.html с маркерами katalog:category-cards (npm run build:data подставляет карточки из scripts/lib/catalog-card.mjs + data/catalog.json). Меню — desktopNavAfterCategories / mobileNavAfterCategories.",
+  "accountBasePath": "/account/",
+  "catalogApiBaseUrl": "https://katalog-uslug-api.kaylas000.workers.dev",
   "categories": [
     { "slug": "metalworking", "label": "Металлообработка" },
     { "slug": "autoservice", "label": "Автосервис" },
     { "slug": "care", "label": "Патронаж и сиделки" },
-    { "slug": "sportwear", "label": "Спортивная одежда" }
+    {
+      "slug": "wood-materials",
+      "label": "Материалы и комплектующие",
+      "introLead": "Поставщики шпона, фанеры, пиломатериалов, фанерованного МДФ и смежной продукции из древесины для производителей мебели и дверей. Контакты и краткие сведения о компаниях — в карточках ниже."
+    }
   ],
   "desktopNavAfterCategories": [
     { "href": "/analytics/", "label": "Аналитика" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/contacts/", "label": "Контакты" },
     { "href": "/blog/", "label": "Статьи" }
   ],
   "mobileNavAfterCategories": [
     { "href": "/analytics/", "label": "Аналитика" },
     { "href": "/contacts/", "label": "Контакты" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/blog/", "label": "Статьи и новости" },
     { "href": "/add/", "label": "Добавить организацию" }
   ],
@@ -23,7 +29,7 @@
   "footerTools": [
     { "href": "/analytics/", "label": "Аналитика рынка" },
     { "href": "/add/", "label": "Добавить организацию" },
-    { "href": "/moderation/", "label": "Модерация" },
+    { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/blog/", "label": "Статьи и новости" }
   ],
   "footerLegal": [

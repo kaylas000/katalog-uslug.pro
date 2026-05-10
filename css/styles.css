@@ -42,6 +42,11 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   --container:1200px;
   --page-pad:18px;
   --header-height:64px;
+  /* Единый вертикальный ритм отступов по сайту */
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:16px;
+  --space-lg:24px;
 }
 
 /* ========== UTILITIES ========== */
@@ -91,6 +96,40 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .btn-lg{padding:14px 32px;font-size:16px}
 .btn .arrow{transition:transform .2s ease}
 .btn:hover .arrow{transform:translateX(3px)}
+/* Ряд кнопок/ссылок после текста — не слипается с абзацем */
+.btn-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:var(--space-md);
+}
+/* Строка бейджей/меток */
+.tag-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+/* Единые отступы между текстом, блоками и кнопками в карточках */
+.card-body > * + *{margin-top:var(--space-sm)}
+.card-body > .btn-row{margin-top:var(--space-md)}
+/* Сообщения с ссылкой: зазор перед ссылкой */
+.auth-msg a{margin-left:0.35em;text-underline-offset:2px;font-weight:600}
+/* Кнопка как ссылка в одной строке с текстом */
+.btn-link{
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  color:var(--primary);
+  text-decoration:underline;
+  font:inherit;
+  vertical-align:baseline;
+}
+.btn-link:hover{color:var(--primary-dark)}
+.card-text.is-inline-actions,
+p.card-text:has(.btn-link){
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:6px 12px;
+}
 
 /* ========== TAG / BADGE ========== */
 .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
@@ -101,11 +140,23 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c6d3e2}
 .card-body{padding:20px}
-.card-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.22;letter-spacing:-0.1px}
-.card-sub{font-size:14px;color:var(--text-2);margin-top:3px;line-height:1.35}
-.card-text{font-size:14px;color:var(--text-2);margin-top:8px;line-height:1.5}
-.card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2)}
-.card-footer .btn{flex-shrink:0}
+.card-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.22;letter-spacing:-0.1px;margin:0}
+.card-sub{font-size:14px;color:var(--text-2);line-height:1.35;margin:0}
+.card-text{font-size:14px;color:var(--text-2);line-height:1.5;margin:0}
+/* Текст карточки не прилипает к полосе с рейтингом и кнопкой */
+.card > .card-body > .card-text:last-child{margin-bottom:18px}
+.card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px 20px;
+  padding:18px 20px;
+  border-top:1px solid var(--border);
+  background:var(--surface-2);
+  flex-wrap:wrap;
+}
+.card-footer .tag{flex:1 1 auto;min-width:0;line-height:1.35}
+.card-footer .btn{flex-shrink:0;margin-left:auto}
 
 /* ========== HEADER ========== */
 .site-header{background:var(--surface);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100;box-shadow:var(--shadow-sm)}
@@ -176,8 +227,18 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .section{padding:44px 0}
 .section.bg-surface{background:var(--surface)}
 .section-title{font-size:clamp(22px,3vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.3px}
-.section-sub{font-size:15px;color:var(--text-2);margin-top:8px;max-width:560px;line-height:1.45}
+.section-sub{font-size:15px;color:var(--text-2);margin:0;max-width:560px;line-height:1.45}
 .section-header{margin-bottom:24px}
+/* Единый ритм блоков внутри секции */
+.section > .container > * + *{margin-top:var(--space-md)}
+.section > .container > .grid,
+.section > .container > #catalog-cards-host,
+.section > .container > .card,
+.section > .container > .stub-card{margin-top:var(--space-lg)}
+.section > .container > h1.section-title{margin-bottom:18px}
+.section > .container > .breadcrumbs + h1.section-title{margin-top:2px}
+/* Страницы /c/… — явный зазор (на проде может подтягиваться старый кэш; класс без селектора «+» надёжнее) */
+.section .container .category-cards-below-intro{margin-top:48px!important}
 
 /* ========== FILTER BAR ========== */
 .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -186,6 +247,13 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .filter-field svg{width:18px;height:18px;color:var(--text-2);flex-shrink:0}
 .filter-field input,.filter-field select{background:transparent;border:none;outline:none;width:100%;font-size:14px;color:var(--text)}
 .filter-field select{cursor:pointer;appearance:none;-webkit-appearance:none}
+.filter-field-where{position:relative}
+.where-suggest{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:40;max-height:320px;overflow:auto}
+.where-suggest[hidden]{display:none}
+.suggest-item{display:block;width:100%;text-align:left;padding:8px 10px;border:0;background:#fff;cursor:pointer}
+.suggest-item:hover,.suggest-item.is-active{background:#f3f6fb}
+.suggest-title{font-size:14px;color:var(--text)}
+.suggest-hint{font-size:12px;color:var(--text-2)}
 
 .region-seo-nav{font-size:13px;color:var(--text-2);line-height:1.5;margin-top:12px;max-width:720px}
 .region-seo-nav a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
@@ -196,6 +264,48 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .catalog-empty-title{font-weight:700;font-size:17px;color:var(--text);margin-bottom:8px}
 .catalog-empty-text{font-size:14px;color:var(--text-2);line-height:1.55;max-width:480px;margin:0 auto}
 .catalog-empty-text a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
+
+/* Каталог: 2 колонки (слева карточки, справа вертикальный слот) */
+.catalog-split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
+.catalog-main{display:flex;flex-direction:column;gap:16px}
+.catalog-side{
+  min-height:100%;
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,#f8fafc 0%, #eef3f8 100%);
+  padding:14px;
+}
+.catalog-side-placeholder{
+  min-height:320px;
+  height:100%;
+  border-radius:10px;
+  border:1px dashed #cbd5e1;
+  background:repeating-linear-gradient(135deg,#f8fafc,#f8fafc 12px,#f1f5f9 12px,#f1f5f9 24px);
+}
+
+.catalog-card-wide.card{overflow:hidden}
+.catalog-card-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;padding:16px}
+.catalog-media{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#e2e8f0}
+.catalog-slide{position:absolute;inset:0;opacity:0;transition:opacity .45s ease;background-size:cover;background-position:center}
+.catalog-slide.is-active{opacity:1}
+.catalog-slide.s1{background:linear-gradient(145deg,#cbd5e1,#94a3b8)}
+.catalog-slide.s2{background:linear-gradient(145deg,#bfdbfe,#93c5fd)}
+.catalog-slide.s3{background:linear-gradient(145deg,#fde68a,#fca5a5)}
+.catalog-slide.catalog-slide-photo{background-color:#e2e8f0}
+.catalog-card-content{display:flex;flex-direction:column;min-width:0}
+.catalog-card-content .card-title{font-size:20px}
+.catalog-card-text{color:var(--text-2);font-size:14px;line-height:1.5}
+.catalog-card-about{margin-top:8px}
+.catalog-card-footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+
+@media(max-width:1020px){
+  .catalog-split{grid-template-columns:1fr}
+  .catalog-side{display:none}
+}
+@media(max-width:700px){
+  .catalog-card-layout{grid-template-columns:1fr;gap:12px;padding:12px}
+  .catalog-media{max-width:240px}
+}
 
 .regions-index-list{
   list-style:none;
@@ -238,6 +348,8 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 /* Портфолио + контакты + верификация — один блок, три колонки (орг-страницы) */
 .org-portfolio-slot{width:100%;margin-bottom:0}
 .org-portfolio-wrap{width:100%}
+.org-portfolio-wrap--empty .org-showcase--layout > .org-showcase-minis{display:none !important;width:0;flex:0 0 0 !important;min-width:0;margin:0;padding:0;overflow:hidden;border:0}
+.org-portfolio-wrap--empty .org-showcase-mob{display:none !important}
 .org-showcase.org-showcase--layout{
   display:flex;
   flex-direction:row;
@@ -394,6 +506,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
   .org-showcase-aside{height:auto}
   .org-showcase-aside .sidebar-card{max-width:none}
   .org-showcase-aside .sidebar-row{flex-wrap:wrap;min-width:0;overflow-wrap:anywhere}
+  .org-portfolio-wrap--empty .org-showcase-card--hero > .portfolio-pixel-hero{
+    aspect-ratio:4/3;
+    max-height:min(220px, 55vw);
+  }
 }
 
 .content-block h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
@@ -411,7 +527,15 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .sidebar-card h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
 .sidebar-row{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-2);padding:8px 0;border-bottom:1px solid var(--border)}
 .sidebar-row:last-child{border:none}
+.sidebar-row--stack{flex-direction:column;align-items:stretch;gap:10px}
+.sidebar-row--stack .sidebar-contact-label{align-self:flex-start}
 .sidebar-row svg{width:18px;height:18px;color:var(--primary);flex-shrink:0}
+.sidebar-contact-link{color:var(--primary);font-weight:600;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;word-break:break-word}
+.sidebar-contact-link:hover{filter:brightness(0.92)}
+.sidebar-card--verification .sidebar-verify-row{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-2);line-height:1.45;padding:8px 0;border-bottom:1px solid var(--border)}
+.sidebar-card--verification .sidebar-verify-row:last-child{border:none}
+.sidebar-card--verification .sidebar-verify-row.is-verified{color:var(--text)}
+.sidebar-verify-check{color:#15803d;flex-shrink:0;font-weight:700;line-height:1.45}
 .sidebar .btn{width:100%}
 
 /* ========== REVIEWS ========== */
@@ -498,7 +622,7 @@ button.portfolio-pixel:hover:not(.portfolio-pixel--photo){
 .consultant-btn svg{width:26px;height:26px}
 .consultant-panel{position:absolute;bottom:68px;right:0;width:min(340px,90vw);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:none;flex-direction:column;gap:12px}
 .consultant-panel.open{display:flex}
-.consultant-panel h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.consultant-panel h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
 .consultant-btn-sm{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);font-size:14px;font-weight:500;color:var(--text);transition:background .2s,border-color .2s;text-align:left}
 .consultant-btn-sm:hover{background:var(--bg);border-color:var(--primary-2)}
 .consultant-btn-sm svg{width:18px;height:18px;color:var(--primary);flex-shrink:0}
@@ -576,6 +700,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   html{scroll-behavior:auto}
   body{min-height:100svh}
   :root{--header-height:56px}
+  /* /account/: убираем слишком большой зазор под фиксированной шапкой */
+  body.account-page main.section{padding-top:14px}
   .nav-desktop{display:none}
   .burger{display:flex}
   .header-inner{height:56px;gap:6px}
@@ -604,6 +730,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   }
   .hero{padding:34px 0 30px}
   .hero-actions .btn{width:100%}
+  /* ЛК /account/: «Войти» и «Регистрация» в шапке на узком экране перекрывали бургер — пункты уже есть в выезжающем меню */
+  body.account-page .header-actions .btn-ghost,
+  body.account-page .header-actions .btn-outline{display:none!important}
+  .header-actions .burger{
+    flex-shrink:0;
+    min-width:44px;
+    min-height:44px;
+    align-items:center;
+    justify-content:center;
+  }
   .section{padding:30px 0}
   .container.footer-inner{padding-top:36px}
   .footer-bottom{flex-direction:column;text-align:center;gap:8px}
@@ -636,3 +772,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .card-footer{padding:10px 12px}
   .tag{font-size:12px;padding:3px 8px}
 }
+
+.auth-layout{max-width:520px;margin:0 auto}
+.auth-providers{display:flex;flex-direction:column;gap:10px}
+.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-weight:600;cursor:pointer;font-size:15px;font-family:inherit;color:var(--text)}
+.auth-provider-btn:hover{border-color:#c6d3e2}
+.auth-provider-btn.is-disabled{opacity:.45;cursor:not-allowed}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.auth-field label{display:block;font-size:13px;color:var(--text-2);margin-bottom:4px}
+.auth-field input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:15px;font-family:inherit;box-sizing:border-box}
+.auth-msg{font-size:14px;padding:10px 12px;border-radius:8px;line-height:1.45}
+.auth-msg.is-error{background:#fdeaea;color:#8b1a1a;border:1px solid #f0c4c4}
+.auth-msg.is-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #c8e6c9}
+.auth-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.auth-tab{padding:8px 14px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600;color:var(--text-2);font-family:inherit;font-size:14px}
+.auth-tab.is-active{background:var(--surface);border-color:var(--border);color:var(--text)}
+/* /account/: подзаголовки и кнопки во вложенных div — не только прямой child .card-body */
+.account-page .card-body p.card-sub + .btn-row,
+.account-page .card-body .card-sub + .btn-row{margin-top:22px}
+.account-page .card-body p.card-text + .btn-row{margin-top:16px}

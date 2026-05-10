@@ -1,0 +1,29 @@
+﻿---
+description: "MASTER: katalog-uslug.pro migration (apply from repo root)"
+globs: "**/*"
+alwaysApply: true
+---
+
+# ROLE
+You are Cursor Agent. Execute the migration end-to-end until DONE.
+
+# NON-NEGOTIABLE RULES
+- Never load entire catalog to browser as one JSON. Only server-side filtering + pagination.
+- Never fetch org HTML pages to hydrate cards (no per-item HTML fetch).
+- Never keep/generate org/<slug>/index.html per organization as final solution.
+- /v1/catalog must be limit+cursor (keyset), deterministic ordering with id tiebreaker.
+- Fix errors and continue until the system works.
+
+# DEFINITION OF DONE (must all be true)
+1) GET /v1/catalog?v=2 returns {items,nextCursor,meta}, supports filters: category, region, q, minRating; sorts: title|rating|updated; keyset cursor.
+2) GET /v1/org/:slug returns full org data from DB (profile + contacts + services + tags + media).
+3) Frontend lists render cards from API v2 (no /data/catalog.json). Has "Show more" using nextCursor.
+4) There is exactly one org template page: /org/index.html + /js/org.js, loaded via rewrite /org/* -> /org/index.html.
+5) _redirects exists with rule: /org/* /org/index.html 200
+6) Static build scripts must no longer inject massive card HTML as the source of truth.
+
+# EXECUTION PROTOCOL
+Work in cycles:
+- make small commits
+- run build/tests after each major change
+- if something breaks: fix immediately, do not stop.

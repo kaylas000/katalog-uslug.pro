@@ -2,53 +2,58 @@
   {
     "id": "lazer-rezka",
     "title": "Цех лазерной резки",
-    "subtitle": "Лазерная резка, гибка, сварка, порошковая покраска",
-    "text": "Нахабино, Московская область. 500+ выполненных заказов. Точность ±0.01 мм. Работаем с черной сталью, нержавейкой и алюминием.",
+    "subtitle": "+7 (985) 456-37-64\ninfo@ceh-lazer-rezka.ru\nНахабино, Московская область\nЕжедневно 09:00–20:00",
+    "text": "Цех лазерной резки и металлообработки в Нахабино. Выполняем полный цикл работ «под ключ»: от раскроя листового металла до порошковой покраски готового изделия. Работаем с юридическими и физическими лицами, принимаем заказы от 1 штуки.",
     "categorySlug": "metalworking",
     "categoryLabel": "Металлообработка",
     "regionSlug": "moskva",
     "regionLabel": "Москва и МО",
     "rating": 4.9,
     "reviews": 62,
-    "url": "/org/lazer-rezka/"
+    "url": "/org/lazer-rezka/",
+    "portfolioImages": [
+      "/images/portfolio/lazer-rezka/1.jpg",
+      "/images/portfolio/lazer-rezka/2.jpg",
+      "/images/portfolio/lazer-rezka/3.jpg",
+      "/images/portfolio/lazer-rezka/4.jpg"
+    ]
   },
   {
     "id": "svk-avto",
     "title": "СВК Авто",
-    "subtitle": "Техническое обслуживание и ремонт автомобилей",
-    "text": "м. Парк Победы. Ежедневно 09:00–20:00. Гарантия до 6 месяцев на работы. Плановое ТО от 5 000 ₽.",
+    "subtitle": "+7 (495) 123-45-67\ninfo@svk-avto.ru\nМосква, м. Парк Победы\nЕжедневно 09:00–20:00",
+    "text": "Автосервис СВК Авто — техническое обслуживание и ремонт автомобилей всех марок в Москве. Удобное расположение у метро Парк Победы. Ежедневно с 09:00 до 20:00, без выходных. Гарантия до 6 месяцев на все виды работ.",
     "categorySlug": "autoservice",
     "categoryLabel": "Автосервис",
     "regionSlug": "moskva",
     "regionLabel": "Москва",
     "rating": 4.8,
     "reviews": 48,
-    "url": "/org/svk-avto/"
+    "url": "/org/svk-avto/",
+    "portfolioImages": [
+      "/images/portfolio/svk-avto/1.jpg",
+      "/images/portfolio/svk-avto/2.jpg",
+      "/images/portfolio/svk-avto/3.jpg",
+      "/images/portfolio/svk-avto/4.jpg"
+    ]
   },
   {
     "id": "sidelki",
     "title": "Бережные сиделки",
-    "subtitle": "Сиделки с проживанием, приходящие, в больницу",
-    "text": "Патронажная служба Москвы и МО. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндексе. Персональный менеджер 24/7.",
+    "subtitle": "+7 (901) 767-76-50\ninfo@sidelki-msk.ru\nМосква, ул. Арбат, д. 6/2\nЕжедневно 09:00–21:00",
+    "text": "Патронажная служба «Бережные сиделки» — подбор сиделок на дом, с проживанием, приходящих и в больницу по Москве и Московской области. Более 8000 сиделок в базе. Рейтинг 5.0 в Яндекс Справочнике.",
     "categorySlug": "care",
     "categoryLabel": "Патронаж",
     "regionSlug": "moskva",
     "regionLabel": "Москва",
-    "rating": 5.0,
+    "rating": 5,
     "reviews": 110,
-    "url": "/org/sidelki/"
-  },
-  {
-    "id": "club-ring",
-    "title": "CLUB RING",
-    "subtitle": "Премиальная спортивная одежда",
-    "text": "Одежда для бокса, MMA, фитнеса и тренировок. Собственное производство. Доставка по всей России.",
-    "categorySlug": "sportwear",
-    "categoryLabel": "Спортивная одежда",
-    "regionSlug": "rossiya",
-    "regionLabel": "Россия",
-    "rating": 4.7,
-    "reviews": 35,
-    "url": "/org/club-ring/"
+    "url": "/org/sidelki/",
+    "portfolioImages": [
+      "/images/portfolio/sidelki/1.jpg",
+      "/images/portfolio/sidelki/2.jpg",
+      "/images/portfolio/sidelki/3.jpg",
+      "/images/portfolio/sidelki/4.jpg"
+    ]
   }
 ]

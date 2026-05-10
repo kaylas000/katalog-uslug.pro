@@ -1,0 +1,93 @@
+# Деплой Cloudflare Worker из папки worker/ при пуше в main.
+# В GitHub → Settings → Secrets → Actions добавьте:
+#   CLOUDFLARE_API_TOKEN — токен с правами Workers Edit (и при необходимости DNS Edit для кастомного домена).
+# Опционально, если wrangler не подхватит аккаунт:
+#   CLOUDFLARE_ACCOUNT_ID
+# Опционально для кода регистрации / писем:
+#   RESEND_API_KEY — письма через Resend (wrangler secret put при деплое).
+#   SMSRU_API_ID — SMS через sms.ru (так же secret put при деплое).
+# Хотя бы один из двух нужен, иначе на сайте блокируется регистрация по коду.
+
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+
+# Убирает предупреждение GitHub про Node 20 в actions/checkout и setup-node (до дефолта на 24).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: deploy-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worker
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Cloudflare token is set
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::В Secrets репозитория нет CLOUDFLARE_API_TOKEN. Settings → Secrets and variables → Actions → New repository secret."
+            exit 1
+          fi
+
+      - name: Verify Cloudflare API (whoami)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler whoami
+
+      - name: Sync RESEND_API_KEY to Worker (if GitHub secret set)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          if [ -n "${RESEND_API_KEY:-}" ]; then
+            printf '%s' "$RESEND_API_KEY" | npx wrangler secret put RESEND_API_KEY
+          else
+            echo "::notice::RESEND_API_KEY не задан в GitHub Secrets — пропуск. Задайте ключ в Cloudflare Worker или добавьте секрет RESEND_API_KEY сюда."
+          fi
+
+      - name: Sync SMSRU_API_ID to Worker (if GitHub secret set)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SMSRU_API_ID: ${{ secrets.SMSRU_API_ID }}
+        run: |
+          if [ -n "${SMSRU_API_ID:-}" ]; then
+            printf '%s' "$SMSRU_API_ID" | npx wrangler secret put SMSRU_API_ID
+          else
+            echo "::notice::SMSRU_API_ID не задан в GitHub Secrets — пропуск. Регистрация по SMS без этого ключа не заработает."
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_LOG: debug
+        run: npx wrangler deploy

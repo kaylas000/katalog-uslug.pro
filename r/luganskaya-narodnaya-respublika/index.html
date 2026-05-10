@@ -1,7 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- katalog:gen-head-seo -->
   <meta name="description" content="Каталог проверенных организаций: Луганская Народная Республика. Раздел пополняется — добавьте компанию через форму на сайте.">
@@ -10,14 +11,10 @@
   <!-- /katalog:gen-head-seo -->
   <title>Каталог — Луганская Народная Республика — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <link rel="stylesheet" href="/css/styles.css?v=20260512-migration-complete">
 </head>
 <body>
 
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
@@ -39,18 +36,18 @@
             <a href="/c/metalworking/">Металлообработка</a>
             <a href="/c/autoservice/">Автосервис</a>
             <a href="/c/care/">Патронаж и сиделки</a>
-            <a href="/c/sportwear/">Спортивная одежда</a>
+            <a href="/c/wood-materials/">Материалы и комплектующие</a>
           </div>
         </div>
         <a href="/analytics/">Аналитика</a>
-        <a href="/moderation/">Модерация</a>
+        <a href="/promotion/">Продвижение</a>
         <a href="/contacts/">Контакты</a>
         <a href="/blog/">Статьи</a>
       </nav>
       <div class="header-actions">
         <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
-        <a href="#" class="btn btn-sm btn-ghost">Войти</a>
-        <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
         <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
@@ -69,20 +66,23 @@
       <a href="/c/metalworking/">Металлообработка</a>
       <a href="/c/autoservice/">Автосервис</a>
       <a href="/c/care/">Патронаж и сиделки</a>
-      <a href="/c/sportwear/">Спортивная одежда</a>
+      <a href="/c/wood-materials/">Материалы и комплектующие</a>
       <a href="/analytics/">Аналитика</a>
       <a href="/contacts/">Контакты</a>
-      <a href="/moderation/">Модерация</a>
+      <a href="/promotion/">Продвижение</a>
       <a href="/blog/">Статьи и новости</a>
       <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/">Войти</a>
+      <a href="/account/#register">Регистрация</a>
     </div>
   </div>
 
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <h1>Найдите проверенного подрядчика для бизнеса</h1>
-      <p>Каталог организаций с проверкой данных, прозрачным рейтингом и прямым контактом. Без посредников и скрытых комиссий.</p>
+      <h1>Услуги для бизнеса</h1>
+      <p>Найдите проверенного партнера для бизнеса и поставщика товаров.</p>
       <div class="hero-actions">
         <a href="#catalog" class="btn btn-accent btn-lg">Найти услугу <span class="arrow">→</span></a>
         <a href="/add/" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.55)">Добавить организацию</a>
@@ -96,7 +96,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Каталог организаций</h2>
-        <p class="section-sub">Фильтруйте по направлению, городу и рейтингу</p>
+        <p class="section-sub">Направление, населённый пункт из подсказок и рейтинг</p>
         <!-- katalog:gen-region-seo-nav -->
         <nav class="region-seo-nav" aria-label="Каталог по регионам">
           <a href="/">Главная</a>
@@ -110,6 +110,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input id="filter-search" type="search" name="q" autocomplete="off" placeholder="Поиск по услуге или названию…">
         </div>
+        <div class="filter-field filter-field-where">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input id="filter-where" type="search" name="where" autocomplete="off" placeholder="Где? (город или район)">
+          <div id="where-suggest" class="where-suggest" hidden></div>
+        </div>
         <div class="filter-field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
           <select id="filter-category" name="category">
@@ -118,106 +123,8 @@
             <option value="metalworking">Металлообработка</option>
             <option value="autoservice">Автосервис</option>
             <option value="care">Патронаж и сиделки</option>
-            <option value="sportwear">Спортивная одежда</option>
+            <option value="wood-materials">Материалы и комплектующие</option>
             <!-- /katalog:gen-category-options -->
-          </select>
-        </div>
-        <div class="filter-field">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <select id="filter-region" name="region">
-            <!-- katalog:gen-region-options -->
-            <option value="">Все регионы</option>
-            <option value="altayskiy-kray">Алтайский край</option>
-            <option value="amurskaya-oblast">Амурская область</option>
-            <option value="arhangelskaya-oblast">Архангельская область</option>
-            <option value="astrahanskaya-oblast">Астраханская область</option>
-            <option value="belgorodskaya-oblast">Белгородская область</option>
-            <option value="bryanskaya-oblast">Брянская область</option>
-            <option value="vladimirskaya-oblast">Владимирская область</option>
-            <option value="volgogradskaya-oblast">Волгоградская область</option>
-            <option value="vologodskaya-oblast">Вологодская область</option>
-            <option value="voronezhskaya-oblast">Воронежская область</option>
-            <option value="rossiya">Вся Россия</option>
-            <option value="donetskaya-narodnaya-respublika">Донецкая Народная Республика</option>
-            <option value="evreyskaya-avtonomnaya-oblast">Еврейская автономная область</option>
-            <option value="zabaykalskiy-kray">Забайкальский край</option>
-            <option value="zaporozhskaya-oblast">Запорожская область</option>
-            <option value="ivanovskaya-oblast">Ивановская область</option>
-            <option value="irkutskaya-oblast">Иркутская область</option>
-            <option value="kabardinobalkarskaya-respublika">Кабардино-Балкарская Республика</option>
-            <option value="kaliningradskaya-oblast">Калининградская область</option>
-            <option value="kaluzhskaya-oblast">Калужская область</option>
-            <option value="kamchatskiy-kray">Камчатский край</option>
-            <option value="karachaevocherkesskaya-respublika">Карачаево-Черкесская Республика</option>
-            <option value="kemerovskaya-oblast-kuzbass">Кемеровская область — Кузбасс</option>
-            <option value="kirovskaya-oblast">Кировская область</option>
-            <option value="kostromskaya-oblast">Костромская область</option>
-            <option value="krasnodarskiy-kray">Краснодарский край</option>
-            <option value="krasnoyarskiy-kray">Красноярский край</option>
-            <option value="kurganskaya-oblast">Курганская область</option>
-            <option value="kurskaya-oblast">Курская область</option>
-            <option value="leningradskaya-oblast">Ленинградская область</option>
-            <option value="lipetskaya-oblast">Липецкая область</option>
-            <option value="luganskaya-narodnaya-respublika">Луганская Народная Республика</option>
-            <option value="magadanskaya-oblast">Магаданская область</option>
-            <option value="moskva">Москва</option>
-            <option value="moskovskaya-oblast">Московская область</option>
-            <option value="murmanskaya-oblast">Мурманская область</option>
-            <option value="nenetskiy-avtonomnyy-okrug">Ненецкий автономный округ</option>
-            <option value="nizhegorodskaya-oblast">Нижегородская область</option>
-            <option value="novgorodskaya-oblast">Новгородская область</option>
-            <option value="novosibirskaya-oblast">Новосибирская область</option>
-            <option value="omskaya-oblast">Омская область</option>
-            <option value="orenburgskaya-oblast">Оренбургская область</option>
-            <option value="orlovskaya-oblast">Орловская область</option>
-            <option value="penzenskaya-oblast">Пензенская область</option>
-            <option value="permskiy-kray">Пермский край</option>
-            <option value="primorskiy-kray">Приморский край</option>
-            <option value="pskovskaya-oblast">Псковская область</option>
-            <option value="respublika-adygeya">Республика Адыгея</option>
-            <option value="respublika-altay">Республика Алтай</option>
-            <option value="respublika-bashkortostan">Республика Башкортостан</option>
-            <option value="respublika-buryatiya">Республика Бурятия</option>
-            <option value="respublika-dagestan">Республика Дагестан</option>
-            <option value="respublika-ingushetiya">Республика Ингушетия</option>
-            <option value="respublika-kalmykiya">Республика Калмыкия</option>
-            <option value="respublika-kareliya">Республика Карелия</option>
-            <option value="respublika-komi">Республика Коми</option>
-            <option value="respublika-krym">Республика Крым</option>
-            <option value="respublika-mariy-el">Республика Марий Эл</option>
-            <option value="respublika-mordoviya">Республика Мордовия</option>
-            <option value="respublika-saha">Республика Саха</option>
-            <option value="respublika-severnaya-osetiya-alaniya">Республика Северная Осетия — Алания</option>
-            <option value="respublika-tatarstan">Республика Татарстан</option>
-            <option value="respublika-tyva">Республика Тыва</option>
-            <option value="respublika-hakasiya">Республика Хакасия</option>
-            <option value="rostovskaya-oblast">Ростовская область</option>
-            <option value="ryazanskaya-oblast">Рязанская область</option>
-            <option value="samarskaya-oblast">Самарская область</option>
-            <option value="sankt-peterburg">Санкт-Петербург</option>
-            <option value="saratovskaya-oblast">Саратовская область</option>
-            <option value="sahalinskaya-oblast">Сахалинская область</option>
-            <option value="sverdlovskaya-oblast">Свердловская область</option>
-            <option value="sevastopol">Севастополь</option>
-            <option value="smolenskaya-oblast">Смоленская область</option>
-            <option value="stavropolskiy-kray">Ставропольский край</option>
-            <option value="tambovskaya-oblast">Тамбовская область</option>
-            <option value="tverskaya-oblast">Тверская область</option>
-            <option value="tomskaya-oblast">Томская область</option>
-            <option value="tulskaya-oblast">Тульская область</option>
-            <option value="tyumenskaya-oblast">Тюменская область</option>
-            <option value="udmurtskaya-respublika">Удмуртская Республика</option>
-            <option value="ulyanovskaya-oblast">Ульяновская область</option>
-            <option value="habarovskiy-kray">Хабаровский край</option>
-            <option value="hantymansiyskiy-avtonomnyy-okrug-yugra">Ханты-Мансийский автономный округ — Югра</option>
-            <option value="hersonskaya-oblast">Херсонская область</option>
-            <option value="chelyabinskaya-oblast">Челябинская область</option>
-            <option value="chechenskaya-respublika">Чеченская Республика</option>
-            <option value="chuvashskaya-respublika-chuvashiya">Чувашская Республика — Чувашия</option>
-            <option value="chukotskiy-avtonomnyy-okrug">Чукотский автономный округ</option>
-            <option value="yamalonenetskiy-avtonomnyy-okrug">Ямало-Ненецкий автономный округ</option>
-            <option value="yaroslavskaya-oblast">Ярославская область</option>
-            <!-- /katalog:gen-region-options -->
           </select>
         </div>
         <div class="filter-field">
@@ -229,15 +136,22 @@
             <option value="3.5">3.5 и выше</option>
           </select>
         </div>
+        <div class="filter-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M8 12h8M10 18h4"/></svg>
+          <select id="filter-sort" name="sort" aria-label="Сортировка">
+            <option value="title">По названию</option>
+            <option value="rating">По рейтингу</option>
+            <option value="updated">По дате обновления</option>
+          </select>
+        </div>
         <button class="btn btn-primary" data-filter-apply>Применить</button>
       </div>
 
       <!-- katalog:catalog-grid -->
-      <div class="grid cards-4 gap-24" id="catalog-cards-host">
-        <div class="catalog-empty" role="status">
-          <p class="catalog-empty-title">Ничего не найдено</p>
-          <p class="catalog-empty-text">Смените регион, категорию или поисковый запрос — либо откройте <a href="/regions/">список всех субъектов РФ</a>.</p>
+      <div class="catalog-split">
+        <div class="catalog-main" id="catalog-cards-host">
         </div>
+        <aside class="catalog-side"><div class="catalog-side-placeholder"></div></aside>
       </div>
       <!-- /katalog:catalog-grid -->
     </div>
@@ -329,10 +243,6 @@
   </section>
 
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-grid">
@@ -347,13 +257,13 @@
           <a href="/c/metalworking/">Металлообработка</a>
           <a href="/c/autoservice/">Автосервис</a>
           <a href="/c/care/">Патронаж и сиделки</a>
-          <a href="/c/sportwear/">Спортивная одежда</a>
+          <a href="/c/wood-materials/">Материалы и комплектующие</a>
         </div>
         <div class="footer-col">
           <h4>Инструменты</h4>
           <a href="/analytics/">Аналитика рынка</a>
           <a href="/add/">Добавить организацию</a>
-          <a href="/moderation/">Модерация</a>
+          <a href="/promotion/">Продвижение</a>
           <a href="/blog/">Статьи и новости</a>
         </div>
         <div class="footer-col">
@@ -399,6 +309,6 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260501"></script>
+  <script src="/js/main.js?v=20260512-migration-complete"></script>
 </body>
 </html>

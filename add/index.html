@@ -1,19 +1,108 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="katalog-catalog-api" content="https://katalog-uslug-api.kaylas000.workers.dev">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Добавить организацию — katalog-uslug.pro</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/styles.css?v=20260501">
+  <link rel="stylesheet" href="/css/styles.css?v=20260521">
+  <style>
+    .org-apply-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    /* У body уже padding под фикс. шапку — здесь только небольшой зазор до карточки */
+    .org-apply-section.section {
+      padding: 28px 0 56px;
+    }
+    /*
+      Нативный выпадающий список <select> у .card в styles.css ломается:
+      у предка overflow:hidden и hover transform — список регионов может
+      открываться «вверх» или не там. Для этой страницы отключаем обрезку и сдвиг.
+    */
+    .org-apply-wrap .card {
+      overflow: visible;
+    }
+    .org-apply-wrap .card:hover {
+      transform: none;
+    }
+    .org-apply-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .org-apply-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .org-apply-field label {
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .org-apply-field input,
+    .org-apply-field select,
+    .org-apply-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font: inherit;
+      box-sizing: border-box;
+      background: var(--surface);
+    }
+    .org-apply-field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    .org-apply-field.full {
+      grid-column: 1 / -1;
+    }
+    .org-photo-help {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.45;
+    }
+    .org-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .org-photo-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface);
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-2);
+      font-size: 12px;
+    }
+    .org-photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .org-apply-section.section {
+        padding: 16px 0 40px;
+      }
+      .org-apply-grid {
+        grid-template-columns: 1fr;
+      }
+      .org-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
-  <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <!-- Header (фрагменты {{...}} подставляет scripts/generate-partials.mjs из config/site.json) -->
   <header class="site-header">
     <div class="container header-inner">
@@ -35,18 +124,18 @@
             <a href="/c/metalworking/">Металлообработка</a>
             <a href="/c/autoservice/">Автосервис</a>
             <a href="/c/care/">Патронаж и сиделки</a>
-            <a href="/c/sportwear/">Спортивная одежда</a>
+            <a href="/c/wood-materials/">Материалы и комплектующие</a>
           </div>
         </div>
         <a href="/analytics/">Аналитика</a>
-        <a href="/moderation/">Модерация</a>
+        <a href="/promotion/">Продвижение</a>
         <a href="/contacts/">Контакты</a>
         <a href="/blog/">Статьи</a>
       </nav>
       <div class="header-actions">
         <a href="/add/" class="btn btn-sm btn-primary">Добавить организацию</a>
-        <a href="#" class="btn btn-sm btn-ghost">Войти</a>
-        <a href="#" class="btn btn-sm btn-outline">Регистрация</a>
+        <a href="/account/" class="btn btn-sm btn-ghost">Войти</a>
+        <a href="/account/#register" class="btn btn-sm btn-outline">Регистрация</a>
         <button class="burger" aria-label="Меню">
           <span></span><span></span><span></span>
         </button>
@@ -65,105 +154,122 @@
       <a href="/c/metalworking/">Металлообработка</a>
       <a href="/c/autoservice/">Автосервис</a>
       <a href="/c/care/">Патронаж и сиделки</a>
-      <a href="/c/sportwear/">Спортивная одежда</a>
+      <a href="/c/wood-materials/">Материалы и комплектующие</a>
       <a href="/analytics/">Аналитика</a>
       <a href="/contacts/">Контакты</a>
-      <a href="/moderation/">Модерация</a>
+      <a href="/promotion/">Продвижение</a>
       <a href="/blog/">Статьи и новости</a>
       <a href="/add/">Добавить организацию</a>
+      <div class="mobile-menu-label">Аккаунт</div>
+      <a href="/account/">Войти</a>
+      <a href="/account/#register">Регистрация</a>
     </div>
   </div>
 
-  <section class="section org-apply-section" style="padding-top:28px;padding-bottom:56px;">
+  <section class="section org-apply-section">
     <div class="container org-apply-wrap">
       <div class="card" style="margin-bottom:16px;">
         <div class="card-body">
           <h1 class="card-title">Регистрация организации</h1>
           <p class="card-sub">Заявка попадает в модерацию, после проверки публикуется карточка организации.</p>
-          <div id="org-apply-msg" class="auth-msg" style="display:none;margin-top:14px;"></div>
-          <form id="org-apply-form" class="org-apply-grid" style="margin-top:16px;">
-            <div class="org-apply-field">
-              <label for="org-title">Название организации *</label>
-              <input id="org-title" required maxlength="140" placeholder="ООО / ИП">
+          <div id="org-auth-lock" class="auth-msg is-error" style="display:none;margin-top:14px;">
+            Для отправки заявки нужно войти в аккаунт. <a href="/account/" style="text-decoration:underline;">Открыть вход</a>
+          </div>
+          <div id="org-auth-actions" class="btn-row" style="display:none;margin-top:14px;">
+            <a href="/account/" class="btn btn-sm btn-outline">Войти по почте / SMS</a>
+            <a href="/account/#register" class="btn btn-sm btn-ghost">Регистрация</a>
+            <button type="button" id="org-auth-yandex" class="btn btn-sm btn-primary" style="display:none;">Войти через Яндекс</button>
+          </div>
+          <div id="org-verify-lock" class="auth-msg is-error" style="display:none;margin-top:14px;">
+            Аккаунт не верифицирован для подачи заявки. Подтвердите email или телефон теми же способами, что в регистрации пользователя (почта/SMS/провайдер), затем возвращайтесь на эту страницу.
+          </div>
+          <div id="org-verify-actions" class="btn-row" style="display:none;margin-top:14px;">
+            <a href="/account/" class="btn btn-sm btn-outline">Подтвердить в аккаунте</a>
+            <button type="button" id="org-verify-yandex" class="btn btn-sm btn-primary" style="display:none;">Подтвердить через Яндекс</button>
+          </div>
+          <div id="org-form-box" style="display:none;">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+              <a href="/org-account/" class="btn btn-sm btn-ghost">Личный кабинет организации</a>
             </div>
-            <div class="org-apply-field">
-              <label for="org-category">Выберите категорию *</label>
-              <select id="org-category" required>
-                <option value="">Выберите категорию</option>
-              </select>
-            </div>
-            <div id="org-category-new-wrap" class="org-apply-field full" style="display:none;">
-              <label for="org-category-new">Новая категория *</label>
-              <input id="org-category-new" maxlength="80" placeholder="Например: Ремонт спецтехники">
-            </div>
-            <div class="org-apply-field full">
-              <label for="org-site">Сайт организации (не обязательно)</label>
-              <input id="org-site" type="url" placeholder="https://example.ru">
-            </div>
-            <div class="org-apply-field full filter-field-where">
-              <label for="org-where">Местоположение *</label>
-              <input type="hidden" id="org-location-id" value="">
-              <input id="org-where" autocomplete="off" required placeholder="Город, посёлок или субъект — из подсказок (регион каталога подставится сам)">
-              <div id="org-where-suggest" class="where-suggest" hidden></div>
-            </div>
-            <div class="org-apply-field full">
-              <label for="org-description">Публичное описание *</label>
-              <textarea id="org-description" required maxlength="4000" placeholder="Чем занимается организация, какие услуги и в каких регионах работает"></textarea>
-            </div>
-            <div class="org-apply-field">
-              <label for="org-contact-phone">Телефон (публикуется) *</label>
-              <input id="org-contact-phone" type="tel" maxlength="80" autocomplete="tel" placeholder="+7 …">
-            </div>
-            <div class="org-apply-field">
-              <label for="org-contact-email">Email (публикуется) *</label>
-              <input id="org-contact-email" type="email" maxlength="320" autocomplete="email" placeholder="info@example.ru">
-            </div>
-            <div class="org-apply-field full">
-              <label for="org-photos">Фотографии организации (4 шт.) *</label>
-              <input id="org-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-              <div class="org-photo-help">
-                Поддерживаются JPG, PNG, WEBP. До 4 фото, до 8 МБ каждое. Для чёткости на экранах лучше от 800×600 px и выше; принимаем от 600×450 px.
+            <div id="org-apply-msg" class="auth-msg" style="display:none;margin-top:14px;"></div>
+            <form id="org-apply-form" class="org-apply-grid" style="margin-top:16px;">
+              <div class="org-apply-field">
+                <label for="org-title">Название организации *</label>
+                <input id="org-title" required maxlength="140" placeholder="ООО / ИП">
               </div>
-              <div id="org-photo-preview" class="org-photo-grid" aria-live="polite"></div>
-              <div id="org-photo-msg" class="auth-msg" style="display:none;margin-top:10px;" role="alert" aria-live="polite"></div>
-            </div>
-            <div class="org-apply-field full">
-              <label for="org-address">Фактический адрес *</label>
-              <input id="org-address" required maxlength="500" placeholder="Улица, дом, офис">
-            </div>
-            <div class="org-apply-field">
-              <label for="org-legal-form">Форма (не публикуется)</label>
-              <input id="org-legal-form" maxlength="32" placeholder="ИП / ООО">
-            </div>
-            <div class="org-apply-field">
-              <label for="org-inn">ИНН (не публикуется)</label>
-              <input id="org-inn" maxlength="20" placeholder="ИНН">
-            </div>
-            <div class="org-apply-field">
-              <label for="org-ogrn">ОГРН / ОГРНИП (не публикуется) — необязательно</label>
-              <input id="org-ogrn" maxlength="20" placeholder="ОГРН / ОГРНИП">
-            </div>
-            <div class="org-apply-field full">
-              <label for="org-contact-person">Контактное лицо, ФИО (не публикуется)</label>
-              <input id="org-contact-person" maxlength="200">
-            </div>
-            <div class="org-apply-field full">
-              <label class="org-apply-check" style="display:flex;gap:8px;align-items:flex-start;font-size:14px;">
-                <input type="checkbox" id="org-consent" required style="margin-top:3px;">
-                Согласен(на) на обработку персональных данных и публикацию указанных контактов организации *
-              </label>
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:8px;">Отправить заявку</button>
-          </form>
+              <div class="org-apply-field">
+                <label for="org-category">Выберите категорию *</label>
+                <select id="org-category" required>
+                  <option value="">Выберите категорию</option>
+                </select>
+              </div>
+              <div id="org-category-new-wrap" class="org-apply-field full" style="display:none;">
+                <label for="org-category-new">Новая категория *</label>
+                <input id="org-category-new" maxlength="80" placeholder="Например: Ремонт спецтехники">
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-site">Сайт организации (не обязательно)</label>
+                <input id="org-site" type="url" placeholder="https://example.ru">
+              </div>
+              <div class="org-apply-field full filter-field-where">
+                <label for="org-where">Местоположение *</label>
+                <input type="hidden" id="org-location-id" value="">
+                <input id="org-where" autocomplete="off" required placeholder="Город, посёлок или субъект — из подсказок (регион каталога подставится сам)">
+                <div id="org-where-suggest" class="where-suggest" hidden></div>
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-description">Публичное описание *</label>
+                <textarea id="org-description" required maxlength="4000" placeholder="Чем занимается организация, какие услуги и в каких регионах работает"></textarea>
+              </div>
+              <div class="org-apply-field">
+                <label for="org-contact-phone">Телефон (публикуется) *</label>
+                <input id="org-contact-phone" type="tel" maxlength="80" autocomplete="tel" placeholder="+7 …">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-contact-email">Email (публикуется) *</label>
+                <input id="org-contact-email" type="email" maxlength="320" autocomplete="email" placeholder="info@example.ru">
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-photos">Фотографии организации (4 шт.) *</label>
+                <input id="org-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+                <div class="org-photo-help">
+                  Поддерживаются JPG, PNG, WEBP. До 4 фото, до 8 МБ каждое. Для чёткости на экранах лучше от 800×600 px и выше; принимаем от 600×450 px.
+                </div>
+                <div id="org-photo-preview" class="org-photo-grid" aria-live="polite"></div>
+                <div id="org-photo-msg" class="auth-msg" style="display:none;margin-top:10px;" role="alert" aria-live="polite"></div>
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-address">Фактический адрес *</label>
+                <input id="org-address" required maxlength="500" placeholder="Улица, дом, офис">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-legal-form">Форма (не публикуется)</label>
+                <input id="org-legal-form" maxlength="32" placeholder="ИП / ООО">
+              </div>
+              <div class="org-apply-field">
+                <label for="org-inn">ИНН (не публикуется)</label>
+                <input id="org-inn" maxlength="20" placeholder="ИНН">
+              </div>
+              <div class="org-apply-field full">
+                <label for="org-contact-person">Контактное лицо, ФИО (не публикуется)</label>
+                <input id="org-contact-person" maxlength="200">
+              </div>
+              <div class="org-apply-field full">
+                <label class="org-apply-check" style="display:flex;gap:8px;align-items:flex-start;font-size:14px;">
+                  <input type="checkbox" id="org-consent" required style="margin-top:3px;">
+                  Согласен(на) на обработку персональных данных и публикацию указанных контактов организации *
+                </label>
+              </div>
+              <div class="org-apply-field full">
+                <button type="submit" class="btn btn-primary">Отправить заявку</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
-  <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">
     <div class="container footer-inner">
@@ -179,13 +285,13 @@
           <a href="/c/metalworking/">Металлообработка</a>
           <a href="/c/autoservice/">Автосервис</a>
           <a href="/c/care/">Патронаж и сиделки</a>
-          <a href="/c/sportwear/">Спортивная одежда</a>
+          <a href="/c/wood-materials/">Материалы и комплектующие</a>
         </div>
         <div class="footer-col">
           <h4>Инструменты</h4>
           <a href="/analytics/">Аналитика рынка</a>
           <a href="/add/">Добавить организацию</a>
-          <a href="/moderation/">Модерация</a>
+          <a href="/promotion/">Продвижение</a>
           <a href="/blog/">Статьи и новости</a>
         </div>
         <div class="footer-col">
@@ -231,161 +337,7 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=20260501"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const form = document.getElementById('org-apply-form');
-      const categorySelect = document.getElementById('org-category');
-      const categoryNewWrap = document.getElementById('org-category-new-wrap');
-      const msgEl = document.getElementById('org-apply-msg');
-      
-      // Load categories
-      try {
-        const response = await fetch('/config/site.json');
-        const config = await response.json();
-        if (config.categories && Array.isArray(config.categories)) {
-          config.categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.slug;
-            option.textContent = cat.label;
-            categorySelect.appendChild(option);
-          });
-          const otherOption = document.createElement('option');
-          otherOption.value = '__other__';
-          otherOption.textContent = 'Другое (указать новую)';
-          categorySelect.appendChild(otherOption);
-        }
-      } catch (e) {
-        console.error('Failed to load categories:', e);
-      }
-      
-      // Show new category field when "Other" is selected
-      categorySelect.addEventListener('change', () => {
-        if (categorySelect.value === '__other__') {
-          categoryNewWrap.style.display = 'block';
-          document.getElementById('org-category-new').required = true;
-        } else {
-          categoryNewWrap.style.display = 'none';
-          document.getElementById('org-category-new').required = false;
-        }
-      });
-      
-      // Handle location autocomplete
-      const whereInput = document.getElementById('org-where');
-      const whereSuggest = document.getElementById('org-where-suggest');
-      const locationIdInput = document.getElementById('org-location-id');
-      
-      whereInput?.addEventListener('input', async (e) => {
-        const query = e.target.value.trim();
-        if (query.length < 2) {
-          whereSuggest.hidden = true;
-          return;
-        }
-        
-        try {
-          const response = await fetch('/data/regions.json');
-          const regions = await response.json();
-          
-          // Filter regions by name
-          const filtered = regions.filter(r => 
-            r.name.toLowerCase().includes(query.toLowerCase())
-          ).slice(0, 10);
-          
-          whereSuggest.innerHTML = '';
-          filtered.forEach(region => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = region.name;
-            btn.onclick = (e) => {
-              e.preventDefault();
-              whereInput.value = region.name;
-              locationIdInput.value = region.id || '';
-              whereSuggest.hidden = true;
-            };
-            whereSuggest.appendChild(btn);
-          });
-          
-          whereSuggest.hidden = filtered.length === 0;
-        } catch (error) {
-          console.error('Failed to load regions:', error);
-          whereSuggest.hidden = true;
-        }
-      });
-      
-      // Handle photo preview
-      const photosInput = document.getElementById('org-photos');
-      const photoPreview = document.getElementById('org-photo-preview');
-      
-      photosInput?.addEventListener('change', () => {
-        photoPreview.innerHTML = '';
-        for (let i = 0; i < photosInput.files.length && i < 4; i++) {
-          const file = photosInput.files[i];
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            photoPreview.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        msgEl.textContent = 'Отправка заявки...';
-        msgEl.className = 'auth-msg';
-        msgEl.style.display = 'block';
-        
-        try {
-          const payload = {
-            orgTitle: document.getElementById('org-title').value,
-            categorySlug: document.getElementById('org-category').value === '__other__' ? '' : document.getElementById('org-category').value,
-            categoryNewLabel: document.getElementById('org-category-new').value || '',
-            locationId: document.getElementById('org-location-id').value,
-            websiteUrl: document.getElementById('org-site').value,
-            publicDescription: document.getElementById('org-description').value,
-            publicContacts: {
-              phone: document.getElementById('org-contact-phone').value,
-              email: document.getElementById('org-contact-email').value
-            },
-            addressText: document.getElementById('org-address').value,
-            legalForm: document.getElementById('org-legal-form').value,
-            inn: document.getElementById('org-inn').value,
-            ogrn: document.getElementById('org-ogrn').value,
-            contactPerson: document.getElementById('org-contact-person').value
-          };
-          
-          const formData = new FormData();
-          formData.append('payload', JSON.stringify(payload));
-          
-          const photosInput = document.getElementById('org-photos');
-          if (photosInput.files.length > 0) {
-            for (let i = 0; i < photosInput.files.length && i < 4; i++) {
-              formData.append('photos', photosInput.files[i]);
-            }
-          }
-          
-          // Use the API endpoint from meta tag
-          const apiUrl = document.querySelector('meta[name="katalog-catalog-api"]')?.content || 'https://katalog-uslug-api.kaylas000.workers.dev';
-          const response = await fetch(`${apiUrl}/submit-org`, {
-            method: 'POST',
-            body: formData
-          });
-          
-          const result = await response.json();
-          if (result.ok) {
-            msgEl.textContent = 'Заявка успешно отправлена! Спасибо за участие.';
-            msgEl.className = 'auth-msg success';
-            form.reset();
-          } else {
-            msgEl.textContent = result.message || 'Ошибка при отправке заявки.';
-            msgEl.className = 'auth-msg err';
-          }
-        } catch (error) {
-          msgEl.textContent = 'Ошибка при отправке: ' + error.message;
-          msgEl.className = 'auth-msg err';
-        }
-      });
-    });
-  </script>
+  <script src="/js/main.js?v=20260521"></script>
+  <script src="/js/add.js?v=20260511-photo-label-4pcs" defer></script>
 </body>
 </html>

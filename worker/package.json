@@ -1,0 +1,24 @@
+{
+  "name": "katalog-uslug-api-worker",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types",
+    "db:import": "node import-data-from-json.mjs",
+    "db:migrate": "node apply-migrations.mjs",
+    "db:import:locations": "node import-locations.mjs",
+    "db:media:backfill": "node backfill-org-media-db.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@cloudflare/workers-types": "^4.20250317.0",
+    "@types/pg": "^8.15.5",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.19.0"
+  }
+}

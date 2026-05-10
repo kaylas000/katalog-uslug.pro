@@ -1,0 +1,10 @@
+---
+description: "TZ: Filters location (districts/cities) - implement fully"
+globs: "**/*"
+alwaysApply: true
+---
+
+Follow and implement:
+@docs/TZ_LOCATIONS_FILTERS.md
+
+Do not stop on errors: fix and continue until done.
