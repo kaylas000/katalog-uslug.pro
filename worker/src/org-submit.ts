@@ -191,6 +191,15 @@ export async function submitOrganizationApplication(
       .slice(0, 8);
   }
 
+  if (uploadedImages.length === 0 && portfolioUrls.length === 0) {
+    return {
+      kind: "err",
+      code: "portfolio_required",
+      message: "Добавьте хотя бы одну фотографию организации (до 4 шт.).",
+      status: 400,
+    };
+  }
+
   if (!consent) {
     return {
       kind: "err",

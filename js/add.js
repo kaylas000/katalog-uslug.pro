@@ -560,6 +560,17 @@
         return;
       }
       const publicContacts = [pubPhone, pubEmail].filter(Boolean).join("\n");
+      if (!selectedPhotos.length) {
+        const photoErr = "Добавьте хотя бы одну фотографию организации (до 4 шт.).";
+        showMsg(msg, photoErr, "err");
+        showMsg(photosMsg, photoErr, "err");
+        try {
+          photosMsg?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
       const payload = {
         orgTitle: document.getElementById("org-title")?.value || "",
         categorySlug: document.getElementById("org-category")?.value || "",
