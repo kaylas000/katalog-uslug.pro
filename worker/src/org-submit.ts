@@ -250,6 +250,14 @@ export async function submitOrganizationApplication(
       status: 400,
     };
   }
+  if (!addressText || addressText.length > 500) {
+    return {
+      kind: "err",
+      code: "invalid_address",
+      message: "Укажите фактический адрес (до 500 символов).",
+      status: 400,
+    };
+  }
 
   const legalInfoProvided =
     legalForm.length > 0 &&

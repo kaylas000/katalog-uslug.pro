@@ -550,6 +550,15 @@
         showMsg(msg, "Укажите публичный телефон и/или email.", "err");
         return;
       }
+      const addressText = (
+        document.getElementById("org-address") instanceof HTMLInputElement
+          ? document.getElementById("org-address").value
+          : ""
+      ).trim();
+      if (!addressText || addressText.length > 500) {
+        showMsg(msg, "Укажите фактический адрес (до 500 символов).", "err");
+        return;
+      }
       const publicContacts = [pubPhone, pubEmail].filter(Boolean).join("\n");
       const payload = {
         orgTitle: document.getElementById("org-title")?.value || "",
@@ -559,7 +568,7 @@
         websiteUrl: document.getElementById("org-site")?.value || "",
         publicDescription: document.getElementById("org-description")?.value || "",
         publicContacts,
-        addressText: document.getElementById("org-address")?.value || "",
+        addressText,
         addressIsPublic: true,
         legalForm: document.getElementById("org-legal-form")?.value || "",
         inn: document.getElementById("org-inn")?.value || "",
