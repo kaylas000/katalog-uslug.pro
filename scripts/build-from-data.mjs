@@ -78,16 +78,26 @@ function replaceCategoryCardsBlock(html, inner) {
 /**
  * Хлебные крошки, h1, абзацы c/* — из label (UTF-8 из site.json).
  * introLead — необязательный первый абзац (иначе шаблон с «Проверенные организации…»).
+ * isGoodsCategory — true для категорий товаров (добавляет ссылку на /goods/ в breadcrumbs).
  */
-function buildCategoryIntroInner(label, introLead) {
+function buildCategoryIntroInner(label, introLead, isGoodsCategory = false) {
   const L = escapeHtml(label);
   const lead =
     typeof introLead === 'string' && introLead.trim()
       ? escapeHtml(introLead.trim())
       : `Проверенные организации категории «${L}». Контакты и информация о компаниях — в карточках ниже.`;
-  return `\n      <nav class="breadcrumbs">
-        <a href="/">Главная</a><span>/</span><span>${L}</span>
-      </nav>
+  
+  let breadcrumbs = `\n      <nav class="breadcrumbs">
+        <a href="/">Главная</a><span>/</span>`;
+  
+  if (isGoodsCategory) {
+    breadcrumbs += `<a href="/goods/">Товары</a><span>/</span>`;
+  }
+  
+  breadcrumbs += `<span>${L}</span>
+      </nav>`;
+  
+  return `${breadcrumbs}
       <h1 class="section-title">${L}</h1>
       <p class="section-sub">${lead}</p>
 
@@ -206,9 +216,11 @@ function run() {
   const regions = readJson(path.join(root, 'data', 'regions.json'));
   const catalogPath = path.join(root, 'data', 'catalog.json');
   const catalog = readJson(catalogPath);
-  const categories = Array.isArray(site.categories) ? site.categories : [];
+  const serviceCategories = Array.isArray(site.serviceCategories) ? site.serviceCategories : [];
+  const goodsCategories = Array.isArray(site.goodsCategories) ? site.goodsCategories : [];
+  const allCategories = [...serviceCategories, ...goodsCategories];
 
-  const catOpts = buildCategoryOptions(categories);
+  const catOpts = buildCategoryOptions(allCategories);
 
   tpl = replaceBetween(tpl, M_CAT_OPTS_START, M_CAT_OPTS_END, catOpts);
 
@@ -278,7 +290,8 @@ function run() {
     );
   }
 
-  for (const cat of categories) {
+  // Обработка категорий услуг
+  for (const cat of serviceCategories) {
     const catSlug = cat.slug;
     const relPath = `c/${catSlug}/index.html`;
     const fp = path.join(root, ...relPath.split('/'));
@@ -302,7 +315,42 @@ function run() {
       chtml,
       M_CATEGORY_INTRO_START,
       M_CATEGORY_INTRO_END,
-      buildCategoryIntroInner(catLabel, introLead)
+      buildCategoryIntroInner(catLabel, introLead, false)
+    );
+    chtml = applyCategoryEmptyCatalogHost(chtml);
+    chtml = setPageCategoryAttr(chtml, catSlug);
+    chtml = versionStaticAssets(chtml, STYLES_VERSION);
+    fs.writeFileSync(fp, chtml.replace(/\r\n/g, '\n'), 'utf8');
+    const n = catalog.filter((i) => i.categorySlug === catSlug).length;
+    console.log(`${relPath}: пустой host каталога (в БД ~${n} записей)`);
+  }
+
+  // Обработка категорий товаров
+  for (const cat of goodsCategories) {
+    const catSlug = cat.slug;
+    const relPath = `goods/${catSlug}/index.html`;
+    const fp = path.join(root, ...relPath.split('/'));
+    if (!fs.existsSync(fp)) {
+      console.warn(
+        `${relPath}: нет файла страницы категории — шаблон goods/*/index.html с маркерами ${M_CATEGORY_INTRO_START}, ${M_CATEGORY_CARDS_START}`
+      );
+      continue;
+    }
+    let chtml = fs.readFileSync(fp, 'utf8').replace(/^\uFEFF/, '');
+    const catLabel = typeof cat.label === 'string' ? cat.label.trim() : catSlug;
+    const pageTitle = `${catLabel} — Товары — katalog-uslug.pro`;
+    chtml = chtml.replace(
+      /<title>[^<]*<\/title>/i,
+      `<title>${escapeHtml(pageTitle)}</title>`
+    );
+    chtml = ensureCategoryIntroMarkers(chtml, relPath);
+    const introLead =
+      typeof cat.introLead === 'string' ? cat.introLead : '';
+    chtml = replaceBetween(
+      chtml,
+      M_CATEGORY_INTRO_START,
+      M_CATEGORY_INTRO_END,
+      buildCategoryIntroInner(catLabel, introLead, true)
     );
     chtml = applyCategoryEmptyCatalogHost(chtml);
     chtml = setPageCategoryAttr(chtml, catSlug);

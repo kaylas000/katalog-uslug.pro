@@ -14,7 +14,7 @@ END $$;
 
 -- 2. Создаем новую категорию для товаров (если еще не существует)
 INSERT INTO categories (slug, label, is_public, is_goods_category)
-VALUES ('materials-goods', 'Материалы и комплектующие (Товары)', true, true)
+VALUES ('materials', 'Материалы и комплектующие', true, true)
 ON CONFLICT (slug) DO UPDATE
 SET label = EXCLUDED.label,
     is_public = EXCLUDED.is_public,

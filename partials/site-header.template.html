@@ -16,7 +16,13 @@
         <div class="nav-item has-submenu">
           <button class="nav-link nav-submenu-toggle" aria-expanded="false">Услуги</button>
           <div class="submenu">
-{{CATEGORIES_DESKTOP}}
+{{SERVICE_CATEGORIES_DESKTOP}}
+          </div>
+        </div>
+        <div class="nav-item has-submenu">
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Товары</button>
+          <div class="submenu">
+{{GOODS_CATEGORIES_DESKTOP}}
           </div>
         </div>
 {{DESKTOP_NAV_AFTER}}
@@ -40,7 +46,9 @@
       </button>
       <a href="/">Главная</a>
       <div class="mobile-menu-label">Услуги</div>
-{{CATEGORIES_MOBILE}}
+{{SERVICE_CATEGORIES_MOBILE}}
+      <div class="mobile-menu-label">Товары</div>
+{{GOODS_CATEGORIES_MOBILE}}
 {{MOBILE_NAV_AFTER}}
       <div class="mobile-menu-label">Аккаунт</div>
       <a href="{{ACCOUNT_HREF}}">Войти</a>

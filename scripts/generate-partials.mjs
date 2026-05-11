@@ -26,17 +26,30 @@ function categoryHref(category) {
   return category.href || `/c/${category.slug}/`;
 }
 
+function goodsCategoryHref(category) {
+  return category.href || `/goods/${category.slug}/`;
+}
+
 function main() {
   const site = loadSite();
-  const cats = site.categories || [];
-  const footerCatsList = site.footerCategories || cats;
+  const serviceCats = site.serviceCategories || [];
+  const goodsCats = site.goodsCategories || [];
+  const footerCatsList = site.footerCategories || [...serviceCats, ...goodsCats];
 
-  const catDesktop = cats
+  const serviceCatDesktop = serviceCats
     .map((c) => `            <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
-  const catMobile = cats
+  const serviceCatMobile = serviceCats
     .map((c) => `      <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
+  
+  const goodsCatDesktop = goodsCats
+    .map((c) => `            <a href="${escAttr(goodsCategoryHref(c))}">${escAttr(c.label)}</a>`)
+    .join('\n');
+  const goodsCatMobile = goodsCats
+    .map((c) => `      <a href="${escAttr(goodsCategoryHref(c))}">${escAttr(c.label)}</a>`)
+    .join('\n');
+    
   const footerCats = footerCatsList
     .map((c) => `          <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
@@ -64,8 +77,10 @@ function main() {
 
   const headerTpl = normalizeEOL(fs.readFileSync(path.join(root, 'partials', 'site-header.template.html'), 'utf8'));
   let header = headerTpl
-    .replace('{{CATEGORIES_DESKTOP}}', catDesktop)
-    .replace('{{CATEGORIES_MOBILE}}', catMobile)
+    .replace('{{SERVICE_CATEGORIES_DESKTOP}}', serviceCatDesktop)
+    .replace('{{SERVICE_CATEGORIES_MOBILE}}', serviceCatMobile)
+    .replace('{{GOODS_CATEGORIES_DESKTOP}}', goodsCatDesktop)
+    .replace('{{GOODS_CATEGORIES_MOBILE}}', goodsCatMobile)
     .replace('{{DESKTOP_NAV_AFTER}}', desktopAfter)
     .replace('{{MOBILE_NAV_AFTER}}', mobileAfter)
     .replace(/\{\{ADD_HREF\}\}/g, escAttr(add.href))

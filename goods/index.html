@@ -33,7 +33,12 @@
             <a href="/c/care/">Патронаж и сиделки</a>
           </div>
         </div>
-        <a href="/goods/">Товары</a>
+        <div class="nav-item has-submenu">
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">Товары</button>
+          <div class="submenu">
+            <a href="/goods/materials/">Материалы и комплектующие</a>
+          </div>
+        </div>
         <a href="/promotion/">Продвижение</a>
         <a href="/contacts/">Контакты</a>
         <a href="/blog/">Статьи</a>
@@ -60,7 +65,8 @@
       <a href="/c/metalworking/">Металлообработка</a>
       <a href="/c/autoservice/">Автосервис</a>
       <a href="/c/care/">Патронаж и сиделки</a>
-      <a href="/goods/">Товары</a>
+      <div class="mobile-menu-label">Товары</div>
+      <a href="/goods/materials/">Материалы и комплектующие</a>
       <a href="/contacts/">Контакты</a>
       <a href="/promotion/">Продвижение</a>
       <a href="/blog/">Статьи и новости</a>
@@ -71,29 +77,19 @@
     </div>
   </div>
 
-  <section class="section" style="padding-top:80px;padding-bottom:80px;">
-    <div class="container">
-      <div class="section-header">
-        <h1 class="section-title">Товары</h1>
-        <p class="section-sub">Каталог товаров и материалов для бизнеса</p>
-      </div>
-      
-      <div class="grid cards-2 gap-24">
-        <a class="card" href="/goods/materials/">
-          <div class="card-body">
-            <h3 class="card-title">Материалы и комплектующие</h3>
-            <p class="card-text">Поставщики шпона, фанеры, пиломатериалов, фанерованного МДФ и смежной продукции из древесины для производителей мебели и дверей.</p>
-          </div>
-        </a>
-        <div class="card card-disabled">
-          <div class="card-body">
-            <h3 class="card-title">Скоро</h3>
-            <p class="card-text">Новые категории товаров появятся в ближайшее время.</p>
-          </div>
-        </div>
-      </div>
+<!-- katalog:page-main -->
+<section class="section" style="padding-top:80px;padding-bottom:80px;">
+  <div class="container">
+    <div class="section-header">
+      <h1 class="section-title">Товары</h1>
+      <p class="section-sub">Категории товаров для бизнеса: материалы, комплектующие и сопутствующие продукты.</p>
     </div>
-  </section>
+    <div class="grid cards-2 gap-24">
+    <a class="card" href="/goods/materials/"><div class="card-body"><h3 class="card-title">Материалы и комплектующие</h3><p class="card-text">Поставщики шпона, фанеры, пиломатериалов, фанерованного МДФ и смежной продукции из древесины</p></div></a>
+  </div>
+  </div>
+</section>
+<!-- katalog:page-main-end -->
 
   <!-- Footer ({{...}} из config/site.json через scripts/generate-partials.mjs) -->
   <footer class="site-footer">

@@ -2,10 +2,17 @@
   "$comment": "Отсюда собираются шапка и подвал (npm run build:partials). Новая категория — блок в categories и статическая страница c/<slug>/index.html с маркерами katalog:category-cards (npm run build:data подставляет карточки из scripts/lib/catalog-card.mjs + data/catalog.json). Меню — desktopNavAfterCategories / mobileNavAfterCategories.",
   "accountBasePath": "/account/",
   "catalogApiBaseUrl": "https://katalog-uslug-api.kaylas000.workers.dev",
-  "categories": [
+  "serviceCategories": [
     { "slug": "metalworking", "label": "Металлообработка" },
     { "slug": "autoservice", "label": "Автосервис" },
     { "slug": "care", "label": "Патронаж и сиделки" }
+  ],
+  "goodsCategories": [
+    { 
+      "slug": "materials", 
+      "label": "Материалы и комплектующие",
+      "introLead": "Поставщики шпона, фанеры, пиломатериалов, фанерованного МДФ и смежной продукции из древесины для производителей мебели и дверей. Контакты и краткие сведения о компаниях — в карточках ниже."
+    }
   ],
   "footerCategories": [
     { "slug": "metalworking", "label": "Металлообработка", "href": "/c/metalworking/" },
@@ -14,13 +21,11 @@
     { "slug": "materials", "label": "Материалы и комплектующие", "href": "/goods/materials/" }
   ],
   "desktopNavAfterCategories": [
-    { "href": "/goods/", "label": "Товары" },
     { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/contacts/", "label": "Контакты" },
     { "href": "/blog/", "label": "Статьи" }
   ],
   "mobileNavAfterCategories": [
-    { "href": "/goods/", "label": "Товары" },
     { "href": "/contacts/", "label": "Контакты" },
     { "href": "/promotion/", "label": "Продвижение" },
     { "href": "/blog/", "label": "Статьи и новости" },
