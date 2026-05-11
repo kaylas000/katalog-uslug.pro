@@ -3,3 +3,8 @@
 /c/sportwear / 301
 /c/sportwear/ / 301
 /org/* /org/index.html 200
+/analytics /goods/ 301
+/analytics/ /goods/ 301
+/c/wood-materials/ /goods/materials/ 301
+/org/durapan/ /goods/materials/penrod/ 301
+/org/durapan /goods/materials/penrod/ 301

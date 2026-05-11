@@ -22,22 +22,23 @@ function loadSite() {
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
-function categoryHref(slug) {
-  return `/c/${slug}/`;
+function categoryHref(category) {
+  return category.href || `/c/${category.slug}/`;
 }
 
 function main() {
   const site = loadSite();
   const cats = site.categories || [];
+  const footerCatsList = site.footerCategories || cats;
 
   const catDesktop = cats
-    .map((c) => `            <a href="${escAttr(categoryHref(c.slug))}">${escAttr(c.label)}</a>`)
+    .map((c) => `            <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
   const catMobile = cats
-    .map((c) => `      <a href="${escAttr(categoryHref(c.slug))}">${escAttr(c.label)}</a>`)
+    .map((c) => `      <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
-  const footerCats = cats
-    .map((c) => `          <a href="${escAttr(categoryHref(c.slug))}">${escAttr(c.label)}</a>`)
+  const footerCats = footerCatsList
+    .map((c) => `          <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
 
   const desktopAfter = (site.desktopNavAfterCategories || [])

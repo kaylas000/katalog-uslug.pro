@@ -1,0 +1,16 @@
+﻿{
+  "mcpServers": {
+    "filesystem": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/c", "\"C:\\Program Files\\nodejs\\npx.cmd\"", "-y", "@modelcontextprotocol/server-filesystem", "C:\\\\Users\\\\Admin\\\\Downloads\\\\ddsi\\\\katalog-uslug.pro"]
+    },
+    "memory": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/c", "\"C:\\Program Files\\nodejs\\npx.cmd\"", "-y", "@modelcontextprotocol/server-memory"]
+    },
+    "sequential-thinking": {
+      "command": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/c", "\"C:\\Program Files\\nodejs\\npx.cmd\"", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+    }
+  }
+}
