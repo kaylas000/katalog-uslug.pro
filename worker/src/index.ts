@@ -23,7 +23,7 @@ const CATALOG_SQL = `
     r.label AS "regionLabel",
     CAST(o.rating AS double precision) AS rating,
     o.reviews,
-    '/org/' || o.id || '/' AS url
+    COALESCE(o.custom_url, '/org/' || o.id || '/') AS url
   FROM organizations o
   JOIN categories c ON c.id = o.category_id
   JOIN regions r ON r.id = o.region_id

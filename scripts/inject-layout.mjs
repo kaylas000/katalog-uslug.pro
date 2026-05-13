@@ -87,7 +87,7 @@ function isRedirectStub(html) {
   return /http-equiv\s*=\s*["']refresh["']/i.test(html) && /url\s*=/i.test(html);
 }
 
-/** Корень, `c/slug/`, `org/slug/`, `r/slug/`, остальные одноуровневые `slug/index.html` */
+/** Корень, c/, org/, r/, рекурсивно goods/, прочие одноуровневые slug/index.html */
 function listLayoutHtmlFiles() {
   const out = [];
   function add(fp) {
@@ -124,10 +124,21 @@ function listLayoutHtmlFiles() {
       add(path.join(rRoot, ent.name, 'index.html'));
     }
   }
+  const goodsRoot = path.join(root, 'goods');
+  if (fs.existsSync(goodsRoot)) {
+    function walkGoods(absDir) {
+      for (const ent of fs.readdirSync(absDir, { withFileTypes: true })) {
+        const p = path.join(absDir, ent.name);
+        if (ent.isDirectory()) walkGoods(p);
+        else if (ent.isFile() && ent.name === 'index.html') add(p);
+      }
+    }
+    walkGoods(goodsRoot);
+  }
   for (const ent of fs.readdirSync(root, { withFileTypes: true })) {
     if (!ent.isDirectory()) continue;
     if (ent.name.startsWith('.') || LAYOUT_SKIP_DIRS.has(ent.name)) continue;
-    if (ent.name === 'c' || ent.name === 'org' || ent.name === 'r') continue;
+    if (ent.name === 'c' || ent.name === 'org' || ent.name === 'r' || ent.name === 'goods') continue;
     add(path.join(root, ent.name, 'index.html'));
   }
   return out.sort((a, b) => path.relative(root, a).localeCompare(path.relative(root, b), 'ru'));

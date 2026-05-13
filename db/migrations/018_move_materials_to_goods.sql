@@ -20,10 +20,10 @@ SET label = EXCLUDED.label,
     is_public = EXCLUDED.is_public,
     is_goods_category = EXCLUDED.is_goods_category;
 
--- 3. Обновляем организации из категории wood-materials на новую категорию
+-- 3. Переводим организации со старой категории услуг на категорию товаров «materials»
 UPDATE organizations o
 SET category_id = (
-  SELECT id FROM categories WHERE slug = 'materials-goods'
+  SELECT id FROM categories WHERE slug = 'materials' LIMIT 1
 )
 WHERE o.category_id = (
   SELECT id FROM categories WHERE slug = 'wood-materials'
