@@ -45,6 +45,7 @@ export async function getOrgPublicResponse(
            o.listing_text AS "listingText",
            c.slug AS "categorySlug",
            c.label AS "categoryLabel",
+           COALESCE(c.is_goods_category, false) AS "categoryIsGoods",
            r.slug AS "regionSlug",
            r.label AS "regionLabel",
            CAST(o.rating AS double precision) AS rating,
@@ -131,6 +132,7 @@ export async function getOrgPublicResponse(
         category: {
           slug: row.categorySlug,
           label: row.categoryLabel,
+          isGoods: Boolean(row.categoryIsGoods),
         },
         region: {
           slug: row.regionSlug,

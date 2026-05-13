@@ -295,6 +295,68 @@
       .join('')}</div>`;
   }
 
+  function categoryIsGoods(cat) {
+    return Boolean(cat && (cat.isGoods === true || cat.isGoodsCategory === true));
+  }
+
+  /** Хвост карточки для товарных организаций: полный текст — только Penrod (durapan), для остальных — нейтрально. */
+  function goodsOrgArticleSupplement(payload) {
+    const slug = typeof payload.slug === 'string' ? payload.slug.trim() : '';
+    const revN = typeof payload.reviews === 'number' ? payload.reviews : 0;
+    const revPhrase = reviewsRu(revN);
+    if (slug !== 'durapan') {
+      return `<div class="content-block mt-32"><div class="content-block-heading"><h2>Отзывы</h2><a href="/contacts/" class="btn btn-sm btn-outline">Оставить отзыв</a></div><p class="section-sub mb-0">Публичные отзывы с платформы появятся здесь после публикации модераторами.</p></div>
+<div class="content-block mt-32">
+<h2>Подтверждённый рейтинг токенами</h2>
+<p>Рейтинг компании построен на реальных токенах за выполненные заказы. Каждый токен = один завершённый проект с подтверждением от заказчика.</p>
+<div class="token-bar mt-16">
+<span class="token"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> токены</span>
+<span class="token-desc">· ${esc(revPhrase)}</span>
+</div>
+</div>`;
+    }
+    return `<div class="content-block mt-32">
+<h2>Преимущества и условия</h2>
+<ul>
+<li>Прямые поставки от ведущих лесозаготовительных предприятий</li>
+<li>Строгий контроль влажности и качества каждой партии</li>
+<li>Собственные складские площади для хранения в оптимальных условиях</li>
+<li>Оперативная отгрузка и доставка по всей России</li>
+<li>Гибкая система скидок для постоянных партнеров</li>
+</ul>
+</div>
+<div class="content-block mt-32">
+<div class="content-block-heading">
+<h2>Отзывы</h2>
+<a href="/contacts/" class="btn btn-sm btn-outline">Оставить отзыв</a>
+</div>
+<div class="reviews-stack">
+<div class="review">
+<div class="review-header">
+<span class="review-author">Мебельная фабрика «Стиль»</span>
+<span class="review-stars">★★★★★</span>
+</div>
+<p class="review-text">Сотрудничаем с Penrod уже второй год. Качество шпона всегда на высоте, без сюрпризов. Радует профессиональный подход к упаковке и логистике.</p>
+</div>
+<div class="review">
+<div class="review-header">
+<span class="review-author">ИП Васильев</span>
+<span class="review-stars">★★★★★</span>
+</div>
+<p class="review-text">Отличный выбор фанеры и МДФ. Всегда можно получить грамотную консультацию. Рекомендую как надёжного поставщика.</p>
+</div>
+</div>
+</div>
+<div class="content-block mt-32">
+<h2>Подтверждённый рейтинг токенами</h2>
+<p>Рейтинг компании построен на реальных токенах за выполненные заказы. Каждый токен = один завершённый проект с подтверждением от заказчика.</p>
+<div class="token-bar mt-16">
+<span class="token"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 200+ токенов</span>
+<span class="token-desc">· ${esc(revPhrase)} · Верификация ИНН пройдена</span>
+</div>
+</div>`;
+  }
+
   function articleBlocks(payload) {
     if (
       typeof payload.legacy?.articleHtml === 'string' &&
@@ -302,6 +364,8 @@
     ) {
       return payload.legacy.articleHtml;
     }
+    const cat = payload.category || {};
+    const isGoods = categoryIsGoods(cat);
     const md =
       typeof payload.profile?.descriptionMd === 'string'
         ? payload.profile.descriptionMd.trim()
@@ -324,9 +388,10 @@
     const addrHtml = addr ? `<p class="catalog-card-text mt-24">${withBreaks(addr)}</p>` : '';
 
     const srv = Array.isArray(payload.services) ? payload.services : [];
+    const listHeading = isGoods ? 'Ассортимент товаров' : 'Услуги';
     let servicesUl = '';
     if (srv.length > 0) {
-      servicesUl = `<div class="content-block mt-32"><h2>Услуги из каталога</h2><ul>${srv
+      servicesUl = `<div class="content-block mt-32"><h2>${esc(listHeading)}</h2><ul>${srv
         .map((s) => {
           const t = typeof s.title === 'string' ? s.title : '';
           const d = typeof s.description === 'string' ? s.description : '';
@@ -336,10 +401,17 @@
         .join('')}</ul></div>`;
     }
 
+    const tailGoods = isGoods ? goodsOrgArticleSupplement(payload) : '';
+    const tailReviews =
+      isGoods
+        ? ''
+        : `<div class="content-block mt-32"><div class="content-block-heading"><h2>Отзывы</h2><a href="/contacts/" class="btn btn-sm btn-outline">Оставить отзыв</a></div><p class="section-sub mb-0">Публичные отзывы с платформы появятся здесь после публикации модераторами.</p></div>`;
+
     return `<div class="org-article">
 <div class="content-block"><h2>О компании</h2>${paras}${addrHtml}</div>
 ${servicesUl}
-<div class="content-block mt-32"><div class="content-block-heading"><h2>Отзывы</h2><a href="/contacts/" class="btn btn-sm btn-outline">Оставить отзыв</a></div><p class="section-sub mb-0">Публичные отзывы с платформы появятся здесь после публикации модераторами.</p></div>
+${tailGoods}
+${tailReviews}
 </div>`;
   }
 
@@ -358,10 +430,17 @@ ${servicesUl}
       typeof payload.slug === 'string' ? payload.slug : orgSlugFromPath();
     const cat = payload.category || {};
     const reg = payload.region || {};
-    const catHref =
-      typeof cat.slug === 'string' && cat.slug
-        ? `/c/${encodeURIComponent(cat.slug)}/`
-        : '/';
+    const isGoods = categoryIsGoods(cat);
+    const catSlug = typeof cat.slug === 'string' ? cat.slug.trim() : '';
+    let breadcrumbsInner = '';
+    if (isGoods) {
+      const mid = esc(cat.label || 'Товары');
+      breadcrumbsInner = `<a href="/">Главная</a><span>/</span><a href="/goods/">Товары</a><span>/</span><a href="/goods/materials/">${mid}</a><span>/</span><span>${titleEsc}</span>`;
+    } else {
+      const catHref = catSlug ? `/c/${encodeURIComponent(catSlug)}/` : '/';
+      const mid = esc(cat.label || 'Категория');
+      breadcrumbsInner = `<a href="/">Главная</a><span>/</span><a href="${esc(catHref)}">${mid}</a><span>/</span><span>${titleEsc}</span>`;
+    }
     document.title = `${typeof payload.title === 'string' ? payload.title : slugSafe} — katalog-uslug.pro`;
 
     const ratingDec =
@@ -396,7 +475,7 @@ ${servicesUl}
 <section class="org-header">
 <div class="container">
 <nav class="breadcrumbs">
-<a href="/">Главная</a><span>/</span><a href="${esc(catHref)}">${esc(cat.label || 'Категория')}</a><span>/</span><span>${titleEsc}</span>
+${breadcrumbsInner}
 </nav>
 <h1 class="org-title">${titleEsc}</h1>
 <div class="org-meta">
