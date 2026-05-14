@@ -22,22 +22,38 @@
   ],
   "desktopNavAfterCategories": [
     { "href": "/promotion/", "label": "Продвижение" },
-    { "href": "/contacts/", "label": "Контакты" },
+    {
+      "slug": "jobs",
+      "label": "Вакансии",
+      "submenu": [
+        { "href": "/jobs/", "label": "Вакансии" },
+        { "href": "/jobs/add/", "label": "Разместить вакансию" }
+      ]
+    },
     { "href": "/blog/", "label": "Статьи" }
   ],
   "mobileNavAfterCategories": [
-    { "href": "/contacts/", "label": "Контакты" },
     { "href": "/promotion/", "label": "Продвижение" },
+    {
+      "slug": "jobs",
+      "label": "Вакансии",
+      "submenu": [
+        { "href": "/jobs/", "label": "Вакансии" },
+        { "href": "/jobs/add/", "label": "Разместить вакансию" }
+      ]
+    },
     { "href": "/blog/", "label": "Статьи и новости" },
     { "href": "/add/", "label": "Добавить организацию" }
   ],
-  "addPrimaryCta": { "href": "/add/", "label": "Добавить организацию" },
   "footerTools": [
     { "href": "/goods/", "label": "Товары" },
+    { "href": "/jobs/", "label": "Вакансии" },
     { "href": "/add/", "label": "Добавить организацию" },
     { "href": "/promotion/", "label": "Продвижение" },
-    { "href": "/blog/", "label": "Статьи и новости" }
+    { "href": "/blog/", "label": "Статьи и новости" },
+    { "href": "/contacts/", "label": "Контакты" }
   ],
+  "addPrimaryCta": { "href": "/add/", "label": "Добавить организацию" },
   "footerLegal": [
     { "href": "/privacy/", "label": "Конфиденциальность" },
     { "href": "/terms/", "label": "Условия использования" }

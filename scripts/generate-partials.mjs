@@ -54,12 +54,36 @@ function main() {
     .map((c) => `          <a href="${escAttr(categoryHref(c))}">${escAttr(c.label)}</a>`)
     .join('\n');
 
+  function navItemHtml(item) {
+    if (item.submenu) {
+      const items = item.submenu
+        .map((sub) => `            <a href="${escAttr(sub.href)}">${escAttr(sub.label)}</a>`)
+        .join('\n');
+      return `        <div class="nav-item has-submenu">
+          <button class="nav-link nav-submenu-toggle" aria-expanded="false">${escAttr(item.label)}</button>
+          <div class="submenu">
+${items}
+          </div>
+        </div>`;
+    }
+    return `        <a href="${escAttr(item.href)}">${escAttr(item.label)}</a>`;
+  }
+
+  function mobileNavItemHtml(item) {
+    if (item.submenu) {
+      return item.submenu
+        .map((sub) => `      <a href="${escAttr(sub.href)}">${escAttr(sub.label)}</a>`)
+        .join('\n');
+    }
+    return `      <a href="${escAttr(item.href)}">${escAttr(item.label)}</a>`;
+  }
+
   const desktopAfter = (site.desktopNavAfterCategories || [])
-    .map((l) => `        <a href="${escAttr(l.href)}">${escAttr(l.label)}</a>`)
+    .map(navItemHtml)
     .join('\n');
 
   const mobileAfter = (site.mobileNavAfterCategories || [])
-    .map((l) => `      <a href="${escAttr(l.href)}">${escAttr(l.label)}</a>`)
+    .map(mobileNavItemHtml)
     .join('\n');
 
   const add = site.addPrimaryCta || { href: '/add/', label: 'Добавить организацию' };
